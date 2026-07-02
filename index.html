@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>RightForMe</title>
+    <link rel="stylesheet" href="src/styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <section class="intro">
+        <p class="eyebrow">RightForMe v0.1</p>
+        <h1>Find the difference between a bad fit and a healthy stretch.</h1>
+        <p class="lede">Paste a job description and your background to get a practical fit and stretch read before you decide whether to apply.</p>
+      </section>
+
+      <section class="workspace" aria-label="Job fit analyzer">
+        <form class="input-panel" id="analysis-form">
+          <label for="job-description">
+            Job description
+            <span>Paste the role, responsibilities, and requirements.</span>
+          </label>
+          <textarea id="job-description" required placeholder="Paste the job description here..."></textarea>
+
+          <label for="candidate-background">
+            Your background
+            <span>Resume text, project notes, skills, or experience. Optional, but better with it.</span>
+          </label>
+          <textarea id="candidate-background" placeholder="Paste your resume or notes here..."></textarea>
+
+          <button type="submit">Analyze role</button>
+        </form>
+
+        <section class="results-panel" aria-live="polite">
+          <div class="empty-state" id="empty-state">
+            <h2>Ready when you are.</h2>
+            <p>Your analysis will show fit, stretch, evidence, gaps, and a recommended next move.</p>
+          </div>
+
+          <div class="results hidden" id="results">
+            <div class="score-grid">
+              <article>
+                <span>Fit Score</span>
+                <strong id="fit-score">0</strong>
+              </article>
+              <article>
+                <span>Stretch Score</span>
+                <strong id="stretch-score">0</strong>
+              </article>
+              <article>
+                <span>Recommendation</span>
+                <strong id="recommendation">-</strong>
+              </article>
+            </div>
+
+            <div class="section-block">
+              <h2>Role Read</h2>
+              <p id="role-summary"></p>
+            </div>
+
+            <div class="section-block">
+              <h2>Evidence to Emphasize</h2>
+              <ul id="evidence-list"></ul>
+            </div>
+
+            <div class="section-block">
+              <h2>Likely Stretch Areas</h2>
+              <ul id="stretch-list"></ul>
+            </div>
+
+            <div class="section-block">
+              <h2>Application Strategy</h2>
+              <p id="strategy"></p>
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script src="src/app.js"></script>
+  </body>
+</html>
