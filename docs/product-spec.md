@@ -14,8 +14,22 @@ A job seeker who wants to apply intentionally, not mass apply.
 
 ## Core Objects
 
-### Master Profile
-The source of truth for a person's career history, skills, tools, accomplishments, education, and certifications.
+### Career Vault
+
+The single source of truth for a person's professional life.
+
+The Career Vault contains:
+
+- Personal information
+- Work history
+- Skills
+- Tools & technologies
+- Accomplishments
+- Projects
+- Stories
+- Metrics
+- Education
+- Certifications
 
 ### Job Posting
 The role description the user wants to evaluate or apply to.
