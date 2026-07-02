@@ -9,9 +9,94 @@
   <body>
     <main class="shell">
       <section class="intro">
-        <p class="eyebrow">RightForMe v0.1</p>
-        <h1>Find the difference between a bad fit and a healthy stretch.</h1>
-        <p class="lede">Paste a job description and your background to get a practical fit and stretch read before you decide whether to apply.</p>
+        <p class="eyebrow">RightForMe v0.2</p>
+        <h1>Build your Career Vault once. Generate everything else later.</h1>
+        <p class="lede">Start by capturing your career history, skills, tools, and accomplishments in one reusable place.</p>
+      </section>
+
+      <section class="vault-panel" aria-label="Career Vault Editor">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">Career Vault</p>
+            <h2>Profile</h2>
+          </div>
+          <div class="button-row">
+            <button type="button" id="save-vault">Save Vault</button>
+            <button type="button" id="export-vault" class="secondary-button">Export JSON</button>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <label>
+            Name
+            <input id="vault-name" type="text" placeholder="Mike Ertz">
+          </label>
+          <label>
+            Location
+            <input id="vault-location" type="text" placeholder="Port Washington, WI">
+          </label>
+          <label>
+            Email
+            <input id="vault-email" type="email" placeholder="name@email.com">
+          </label>
+          <label>
+            Phone
+            <input id="vault-phone" type="text" placeholder="262.416.4360">
+          </label>
+        </div>
+
+        <div class="section-block">
+          <h2>Work History</h2>
+          <div class="form-grid">
+            <label>
+              Company
+              <input id="role-company" type="text" placeholder="Renaissance Learning">
+            </label>
+            <label>
+              Title
+              <input id="role-title" type="text" placeholder="Enterprise Agile Coach">
+            </label>
+            <label>
+              Start Date
+              <input id="role-start" type="text" placeholder="2025-06">
+            </label>
+            <label>
+              End Date
+              <input id="role-end" type="text" placeholder="2026-07">
+            </label>
+          </div>
+          <label>
+            Summary
+            <textarea id="role-summary-input" placeholder="Briefly describe the role..."></textarea>
+          </label>
+          <button type="button" id="add-role">Add Role</button>
+          <ul id="roles-list"></ul>
+        </div>
+
+        <div class="three-column">
+          <div class="section-block">
+            <h2>Skills</h2>
+            <input id="skill-input" type="text" placeholder="Change Management">
+            <button type="button" id="add-skill">Add Skill</button>
+            <ul id="skills-list"></ul>
+          </div>
+
+          <div class="section-block">
+            <h2>Tools</h2>
+            <input id="tool-input" type="text" placeholder="Jira">
+            <button type="button" id="add-tool">Add Tool</button>
+            <ul id="tools-list"></ul>
+          </div>
+
+          <div class="section-block">
+            <h2>Accomplishments</h2>
+            <input id="accomplishment-input" type="text" placeholder="Led value stream transformation across 17 teams">
+            <button type="button" id="add-accomplishment">Add Accomplishment</button>
+            <ul id="accomplishments-list"></ul>
+          </div>
+        </div>
+
+        <p id="vault-status" class="status-message"></p>
       </section>
 
       <section class="workspace" aria-label="Job fit analyzer">

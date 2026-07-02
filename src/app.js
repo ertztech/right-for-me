@@ -1,3 +1,52 @@
+const VAULT_STORAGE_KEY = "rightforme-career-vault";
+
+const defaultVault = {
+  person: {
+    name: "",
+    location: "",
+    email: "",
+    phone: "",
+  },
+  roles: [],
+  skills: [],
+  tools: [],
+  accomplishments: [],
+};
+
+let careerVault = loadVault();
+
+const vaultFields = {
+  name: document.querySelector("#vault-name"),
+  location: document.querySelector("#vault-location"),
+  email: document.querySelector("#vault-email"),
+  phone: document.querySelector("#vault-phone"),
+};
+
+const roleFields = {
+  company: document.querySelector("#role-company"),
+  title: document.querySelector("#role-title"),
+  start: document.querySelector("#role-start"),
+  end: document.querySelector("#role-end"),
+  summary: document.querySelector("#role-summary-input"),
+};
+
+const saveVaultButton = document.querySelector("#save-vault");
+const exportVaultButton = document.querySelector("#export-vault");
+const addRoleButton = document.querySelector("#add-role");
+const addSkillButton = document.querySelector("#add-skill");
+const addToolButton = document.querySelector("#add-tool");
+const addAccomplishmentButton = document.querySelector("#add-accomplishment");
+
+const skillInput = document.querySelector("#skill-input");
+const toolInput = document.querySelector("#tool-input");
+const accomplishmentInput = document.querySelector("#accomplishment-input");
+
+const rolesList = document.querySelector("#roles-list");
+const skillsList = document.querySelector("#skills-list");
+const toolsList = document.querySelector("#tools-list");
+const accomplishmentsList = document.querySelector("#accomplishments-list");
+const vaultStatus = document.querySelector("#vault-status");
+
 const form = document.querySelector("#analysis-form");
 const jobInput = document.querySelector("#job-description");
 const backgroundInput = document.querySelector("#candidate-background");
@@ -56,6 +105,171 @@ const senioritySignals = [
   "7+ years",
   "10+ years",
 ];
+
+function loadVault() {
+  const saved = localStorage.getItem(VAULT_STORAGE_KEY);
+
+  if (!saved) {
+    return structuredClone(defaultVault);
+  }
+
+  try {
+    return {
+      ...structuredClone(defaultVault),
+      ...JSON.parse(saved),
+    };
+  } catch {
+    return structuredClone(defaultVault);
+  }
+}
+
+function saveVault() {
+  careerVault.person = {
+    name: vaultFields.name.value.trim(),
+    location: vaultFields.location.value.trim(),
+    email: vaultFields.email.value.trim(),
+    phone: vaultFields.phone.value.trim(),
+  };
+
+  localStorage.setItem(VAULT_STORAGE_KEY, JSON.stringify(careerVault, null, 2));
+  setStatus("Career Vault saved.");
+}
+
+function populateVaultForm() {
+  vaultFields.name.value = careerVault.person.name || "";
+  vaultFields.location.value = careerVault.person.location || "";
+  vaultFields.email.value = careerVault.person.email || "";
+  vaultFields.phone.value = careerVault.person.phone || "";
+
+  renderVaultLists();
+}
+
+function addRole() {
+  const role = {
+    company: roleFields.company.value.trim(),
+    title: roleFields.title.value.trim(),
+    start: roleFields.start.value.trim(),
+    end: roleFields.end.value.trim(),
+    summary: roleFields.summary.value.trim(),
+  };
+
+  if (!role.company && !role.title) {
+    setStatus("Add at least a company or title before saving a role.");
+    return;
+  }
+
+  careerVault.roles.push(role);
+
+  roleFields.company.value = "";
+  roleFields.title.value = "";
+  roleFields.start.value = "";
+  roleFields.end.value = "";
+  roleFields.summary.value = "";
+
+  saveVault();
+  renderVaultLists();
+}
+
+function addListItem(type, input) {
+  const value = input.value.trim();
+
+  if (!value) {
+    setStatus(`Enter a ${type.slice(0, -1)} before adding it.`);
+    return;
+  }
+
+  careerVault[type].push(value);
+  input.value = "";
+
+  saveVault();
+  renderVaultLists();
+}
+
+function removeListItem(type, index) {
+  careerVault[type].splice(index, 1);
+  saveVault();
+  renderVaultLists();
+}
+
+function renderVaultLists() {
+  renderRoles();
+  renderSimpleList(skillsList, "skills", careerVault.skills);
+  renderSimpleList(toolsList, "tools", careerVault.tools);
+  renderSimpleList(accomplishmentsList, "accomplishments", careerVault.accomplishments);
+}
+
+function renderRoles() {
+  rolesList.innerHTML = "";
+
+  careerVault.roles.forEach((role, index) => {
+    const li = document.createElement("li");
+    li.className = "vault-list-item";
+
+    const content = document.createElement("span");
+    const dates = [role.start, role.end].filter(Boolean).join(" - ");
+    content.textContent = `${role.title || "Untitled Role"} at ${role.company || "Unknown Company"}${dates ? ` (${dates})` : ""}`;
+
+    const removeButton = document.createElement("button");
+    removeButton.type = "button";
+    removeButton.className = "small-button";
+    removeButton.textContent = "Remove";
+    removeButton.addEventListener("click", () => removeListItem("roles", index));
+
+    li.appendChild(content);
+    li.appendChild(removeButton);
+    rolesList.appendChild(li);
+  });
+}
+
+function renderSimpleList(node, type, items) {
+  node.innerHTML = "";
+
+  items.forEach((item, index) => {
+    const li = document.createElement("li");
+    li.className = "vault-list-item";
+
+    const content = document.createElement("span");
+    content.textContent = item;
+
+    const removeButton = document.createElement("button");
+    removeButton.type = "button";
+    removeButton.className = "small-button";
+    removeButton.textContent = "Remove";
+    removeButton.addEventListener("click", () => removeListItem(type, index));
+
+    li.appendChild(content);
+    li.appendChild(removeButton);
+    node.appendChild(li);
+  });
+}
+
+function exportVault() {
+  saveVault();
+
+  const blob = new Blob([JSON.stringify(careerVault, null, 2)], {
+    type: "application/json",
+  });
+
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = "career-vault.json";
+  link.click();
+
+  URL.revokeObjectURL(url);
+  setStatus("Career Vault exported.");
+}
+
+function setStatus(message) {
+  vaultStatus.textContent = message;
+
+  window.setTimeout(() => {
+    if (vaultStatus.textContent === message) {
+      vaultStatus.textContent = "";
+    }
+  }, 3000);
+}
 
 function normalize(text) {
   return text.toLowerCase().replace(/\s+/g, " ").trim();
@@ -135,6 +349,13 @@ function analyze(jobText, backgroundText) {
   };
 }
 
+saveVaultButton.addEventListener("click", saveVault);
+exportVaultButton.addEventListener("click", exportVault);
+addRoleButton.addEventListener("click", addRole);
+addSkillButton.addEventListener("click", () => addListItem("skills", skillInput));
+addToolButton.addEventListener("click", () => addListItem("tools", toolInput));
+addAccomplishmentButton.addEventListener("click", () => addListItem("accomplishments", accomplishmentInput));
+
 form.addEventListener("submit", (event) => {
   event.preventDefault();
   const analysis = analyze(jobInput.value, backgroundInput.value);
@@ -150,3 +371,5 @@ form.addEventListener("submit", (event) => {
   emptyState.classList.add("hidden");
   results.classList.remove("hidden");
 });
+
+populateVaultForm();
