@@ -59,6 +59,19 @@ The default board uses these lists:
 
 The goal is to make every feature start as product intent before it becomes a GitHub issue.
 
+## Relationship To Board Builder
+
+This repo currently includes a small Trello board builder so RightForMe can move quickly without another dependency.
+
+Longer term, the dedicated board-builder repo can become the reusable home for:
+
+- Trello API client code
+- JSON template interpretation
+- Board/list/card creation
+- Tests and reusable project templates
+
+When that happens, RightForMe should keep the product-specific template and docs, while the shared implementation lives in board-builder.
+
 ## Card Rule
 
 Every buildable Trello card should include:
@@ -70,4 +83,3 @@ Every buildable Trello card should include:
 - MVP relevance
 - Learning-in-public note
 - GitHub issue link once created
-
