@@ -39,6 +39,8 @@ From the repo root, run:
 python tools\trello\board_builder.py templates\rightforme_board.json
 ```
 
+On some Windows machines, Python may fail certificate verification even when Trello is reachable. The builder will retry through `curl.exe --ssl-no-revoke` when that local certificate issue occurs.
+
 To preview what would be created without calling Trello:
 
 ```powershell
