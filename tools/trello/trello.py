@@ -4,7 +4,7 @@ import json
 import ssl
 import subprocess
 from urllib import parse, request
-from urllib.error import URLError
+from urllib.error import HTTPError, URLError
 
 
 class TrelloClient:
@@ -16,11 +16,12 @@ class TrelloClient:
     def create_board(self, name: str, description: str = "") -> dict:
         return self._request(
             "POST",
-            "/boards/",
+            "/boards",
             {
                 "name": name,
                 "desc": description,
                 "defaultLists": "false",
+                "prefs_permissionLevel": "private",
             },
         )
 
@@ -60,6 +61,11 @@ class TrelloClient:
             with request.urlopen(req, timeout=30) as response:
                 body = response.read().decode("utf-8")
                 return json.loads(body)
+
+        except HTTPError as error:
+            body = error.read().decode("utf-8", errors="replace")
+            raise RuntimeError(_friendly_trello_error(error.code, body)) from error
+
         except URLError as error:
             if not _is_certificate_error(error):
                 raise
@@ -75,6 +81,32 @@ class TrelloClient:
             raise RuntimeError(result.stderr.strip() or "Trello request failed through curl.")
 
         return json.loads(result.stdout)
+
+
+def _friendly_trello_error(status_code: int, body: str) -> str:
+    normalized = body.lower()
+
+    if status_code == 401:
+        return (
+            "Trello authentication failed.\n\n"
+            "Check your TRELLO_API_KEY and TRELLO_TOKEN in .env.\n"
+            "Generate fresh credentials at https://trello.com/app-key."
+        )
+
+    if status_code == 400 and "workspaces are full" in normalized:
+        return (
+            "Trello could not create a new board because your workspace is full.\n\n"
+            "Close or delete an old board, or set TRELLO_BOARD_ID in .env "
+            "to inject into an existing board."
+        )
+
+    if status_code == 404:
+        return (
+            "Trello could not find the requested board, list, or card.\n\n"
+            "If you are using TRELLO_BOARD_ID, verify the ID in .env."
+        )
+
+    return f"Trello API error {status_code}: {body}"
 
 
 def _is_certificate_error(error: URLError) -> bool:
