@@ -65,6 +65,10 @@ See [docs/ROADMAP.md](docs/ROADMAP.md).
 
 See [AGENTS.md](AGENTS.md) for the RightForMe delivery workflow: Trello for product intent, GitHub Issues for engineering work, feature branches for each change, and learning-in-public notes after each merge.
 
+## Trello Product Board
+
+See [docs/TRELLO_SETUP.md](docs/TRELLO_SETUP.md) to create the Trello product board from the included template.
+
 ## Architecture
 
 The first prototype is intentionally simple:

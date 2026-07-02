@@ -42,6 +42,8 @@ The Developer owns:
 
 Trello is the source of product intent.
 
+Use [docs/TRELLO_SETUP.md](docs/TRELLO_SETUP.md) to create or update the RightForMe product board.
+
 Recommended lists:
 
 - Ideas
