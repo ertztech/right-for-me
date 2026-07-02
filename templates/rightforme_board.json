@@ -1,0 +1,57 @@
+{
+  "name": "RightForMe Product Board",
+  "description": "Product planning board for RightForMe. Trello captures product intent; GitHub tracks engineering execution.",
+  "lists": [
+    {
+      "name": "Ideas",
+      "cards": [
+        {
+          "name": "Capture build-in-public post ideas",
+          "description": "## User Problem\nWe need a visible learning trail that explains what is being built and why.\n\n## Target User\nMike and future followers of the project.\n\n## Proposed Outcome\nMaintain a list of short post ideas tied to shipped features and lessons learned.\n\n## Acceptance Criteria\n- [ ] Each shipped feature has a post idea\n- [ ] Notes explain the product decision\n- [ ] Notes explain the learning moment\n\n## MVP Relevance\nSupports the public learning journey.\n\n## Learning in Public Note\nThe product story is part of the product."
+        }
+      ]
+    },
+    {
+      "name": "Backlog",
+      "cards": [
+        {
+          "name": "Improve analyzer output quality",
+          "description": "## User Problem\nThe first analyzer works, but the output still feels like a prototype and relies too much on keyword overlap.\n\n## Target User\nA job seeker considering a role outside their comfort zone.\n\n## Proposed Outcome\nMake the analysis clearer, more honest, and more useful for deciding whether to apply.\n\n## Acceptance Criteria\n- [ ] Output includes a clearer role summary\n- [ ] Output separates fit evidence from stretch areas\n- [ ] Recommendation language is specific and honest\n- [ ] Strategy explains how to position adjacent experience\n\n## MVP Relevance\nThis is core to v0.1.\n\n## Learning in Public Note\nShow how product language changes when the goal is healthy stretch, not blind confidence."
+        },
+        {
+          "name": "Add sample job descriptions for testing",
+          "description": "## User Problem\nWe need repeatable examples to test whether analyzer changes improve quality.\n\n## Target User\nThe builder and future contributors.\n\n## Proposed Outcome\nCreate a small set of realistic sample roles and candidate backgrounds.\n\n## Acceptance Criteria\n- [ ] At least three job samples exist\n- [ ] At least three background samples exist\n- [ ] Samples cover obvious fit, healthy stretch, and save-for-later scenarios\n\n## MVP Relevance\nImproves testing and product judgment.\n\n## Learning in Public Note\nTesting product judgment requires realistic examples."
+        }
+      ]
+    },
+    {
+      "name": "Ready",
+      "cards": []
+    },
+    {
+      "name": "Doing",
+      "cards": []
+    },
+    {
+      "name": "Review",
+      "cards": []
+    },
+    {
+      "name": "Shipped",
+      "cards": [
+        {
+          "name": "Initial MVP prototype",
+          "description": "## User Problem\nWe needed a small working product spine to prove the concept.\n\n## Proposed Outcome\nA static v0.1 analyzer that accepts a job description and optional background, then returns fit, stretch, evidence, gaps, and strategy.\n\n## GitHub\nInitial commit is on main.\n\n## Learning in Public Note\nThe first build proves the product direction: distinguish bad fit from healthy stretch."
+        },
+        {
+          "name": "Delivery workflow playbook",
+          "description": "## User Problem\nThe project needs a repeatable professional workflow.\n\n## Proposed Outcome\nAGENTS.md defines Trello, GitHub Issues, branching, PRs, testing, and learning-in-public steps.\n\n## GitHub\nMerged through PR #2.\n\n## Learning in Public Note\nThe process is part of the portfolio."
+        }
+      ]
+    },
+    {
+      "name": "Lessons Learned",
+      "cards": []
+    }
+  ]
+}
