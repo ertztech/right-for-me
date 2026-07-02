@@ -61,6 +61,10 @@ Those may come later, but the first product must stay focused.
 
 See [docs/ROADMAP.md](docs/ROADMAP.md).
 
+## Delivery Workflow
+
+See [AGENTS.md](AGENTS.md) for the RightForMe delivery workflow: Trello for product intent, GitHub Issues for engineering work, feature branches for each change, and learning-in-public notes after each merge.
+
 ## Architecture
 
 The first prototype is intentionally simple:
