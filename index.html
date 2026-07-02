@@ -99,6 +99,27 @@
         <p id="vault-status" class="status-message"></p>
       </section>
 
+      <section class="vault-panel">
+  <div class="panel-header">
+    <div>
+      <p class="eyebrow">Resume Generator</p>
+      <h2>Preview</h2>
+    </div>
+
+    <div class="button-row">
+      <button type="button" id="generate-resume">
+        Generate Resume
+      </button>
+    </div>
+  </div>
+
+  <textarea
+    id="resume-preview"
+    readonly
+    placeholder="Your generated resume will appear here..."
+  ></textarea>
+</section>
+
       <section class="workspace" aria-label="Job fit analyzer">
         <form class="input-panel" id="analysis-form">
           <label for="job-description">
@@ -161,7 +182,12 @@
         </section>
       </section>
     </main>
-
+    <script src="src/careerVault/storage.js"></script>
+    <script src="src/careerVault/view.js"></script>
+    <script src="src/careerVault/controller.js"></script>
+    <script src="src/careerVault/vault.js"></script>
+    <script src="src/resume/builder.js"></script>
+    <script src="src/resume/markdown.js"></script>
     <script src="src/app.js"></script>
   </body>
 </html>

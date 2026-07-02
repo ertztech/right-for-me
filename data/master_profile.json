@@ -1,14 +1,28 @@
 {
   "person": {
-    "name": "Mike Ertz",
-    "location": "Port Washington, WI",
-    "email": "ertz.mike@gmail.com",
-    "phone": "262.416.4360"
+    "name": "Mike Ertz"
   },
-  "roles": [],
-  "skills": [],
-  "tools": [],
-  "accomplishments": [],
-  "certifications": [],
-  "education": []
+
+  "roles": [
+    {
+      "company": "Renaissance",
+      "title": "Enterprise Agile Coach",
+      "start": "2025-06",
+      "end": "2026-07",
+
+      "summary": "",
+
+      "skills": [],
+
+      "tools": [],
+
+      "accomplishments": [],
+
+      "projects": []
+    }
+  ],
+
+  "education": [],
+
+  "certifications": []
 }
