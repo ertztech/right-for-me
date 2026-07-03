@@ -1,4 +1,5 @@
 RightForMeCareerVault.initializeCareerVault();
+RightForMeJobsAppliedController.initializeJobsAppliedController();
 RightForMeResumeController.initializeResumeController();
 RightForMeTailoringController.initializeTailoringController();
 RightForMeCoverLetterController.initializeCoverLetterController();
