@@ -92,6 +92,8 @@ The first lightweight Jobs Applied app pages are available in `index.html`: Dash
 
 Jobs Applied pages use hash routes, starting at `#/jobs/dashboard`. Use the Jobs Applied navigation to move between Dashboard, Add Job, Job Detail, Fit Analysis, Resume Builder, Cover Letter Builder, Application Packet, Tracker, and Settings without leaving `index.html`.
 
+AI output structure and prompt templates have been added for future fit analysis, tailored resume, and cover letter drafts. Live AI generation is not wired yet; there are no API calls, API keys, or provider credentials in this version.
+
 Run the current Python tests with:
 
 ```bash
