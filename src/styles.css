@@ -106,11 +106,6 @@ h2 {
   font-size: 0.86rem;
 }
 
-.active-nav {
-  color: #fff;
-  background: var(--green);
-}
-
 .compact-header {
   align-items: center;
   border-bottom: 0;
@@ -220,6 +215,24 @@ button:hover {
   background: #275d49;
 }
 
+.nav-link-button {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  padding: 0 16px;
+  color: #fff;
+  background: var(--green);
+  font: inherit;
+  font-weight: 850;
+  text-decoration: none;
+}
+
+.nav-link-button:hover {
+  background: #275d49;
+}
+
 .secondary-button {
   color: var(--green);
   background: rgba(47, 111, 87, 0.12);
@@ -227,6 +240,11 @@ button:hover {
 
 .secondary-button:hover {
   background: rgba(47, 111, 87, 0.2);
+}
+
+.secondary-button.active-nav {
+  color: #fff;
+  background: var(--green);
 }
 
 .small-button {

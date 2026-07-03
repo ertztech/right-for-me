@@ -14,20 +14,16 @@ const JOB_STATUSES = [
 let selectedJobId = "";
 
 function initializeJobsAppliedController() {
-  const pageLinks = document.querySelectorAll("[data-jobs-page-link]");
   const addJobForm = document.querySelector("#add-job-form");
-
-  pageLinks.forEach((link) => {
-    link.addEventListener("click", () => showJobsPage(link.dataset.jobsPageLink));
-  });
 
   addJobForm.addEventListener("submit", (event) => {
     event.preventDefault();
     saveJobFromForm(addJobForm);
   });
 
-  renderJobsAppliedViews();
-  showJobsPage("dashboard");
+  window.addEventListener("hashchange", handleJobsRouteChange);
+  ensureJobsRoute();
+  handleJobsRouteChange();
 }
 
 function saveJobFromForm(form) {
@@ -57,11 +53,19 @@ function saveJobFromForm(form) {
     selectedJobId = record.id;
     form.reset();
     setJobsStatus("Job saved.");
-    renderJobsAppliedViews();
-    showJobsPage("detail");
+    navigateToJobsRoute("detail", record.id);
   } catch (error) {
     setJobsStatus(error.message || "Job could not be saved.");
   }
+}
+
+function handleJobsRouteChange() {
+  const route = currentJobsRoute();
+  const jobs = RightForMeJobsAppliedStorage.getJobApplications();
+  selectedJobId = route.jobId || selectedJobId || jobs[0]?.id || "";
+
+  renderJobsAppliedViews(jobs);
+  showJobsPage(route.page);
 }
 
 function showJobsPage(pageName) {
@@ -69,15 +73,14 @@ function showJobsPage(pageName) {
     page.classList.toggle("hidden", page.dataset.jobsPage !== pageName);
   });
 
-  document.querySelectorAll("[data-jobs-page-link]").forEach((link) => {
-    link.classList.toggle("active-nav", link.dataset.jobsPageLink === pageName);
+  document.querySelectorAll("[data-jobs-route-link]").forEach((link) => {
+    link.classList.toggle("active-nav", link.dataset.jobsRouteLink === pageName);
   });
+
+  updateSelectedJobLinks();
 }
 
-function renderJobsAppliedViews() {
-  const jobs = RightForMeJobsAppliedStorage.getJobApplications();
-  selectedJobId = selectedJobId || jobs[0]?.id || "";
-
+function renderJobsAppliedViews(jobs) {
   renderDashboard(jobs);
   renderJobDetail(currentJob(jobs));
   renderFitAnalysis(currentJob(jobs));
@@ -119,6 +122,8 @@ function renderJobDetail(job) {
       <p>${escapeHtml(job.notes || "No notes yet.")}</p>
     </div>
   `;
+
+  updateSelectedJobLinks();
 }
 
 function renderFitAnalysis(job) {
@@ -232,7 +237,7 @@ function jobCard(job, includeDates = false) {
         <p>${escapeHtml(job.company)} | ${escapeHtml(job.status)}</p>
         ${dates}
       </div>
-      <button type="button" class="small-button" data-select-job="${escapeAttribute(job.id)}">Open</button>
+      <a class="small-button nav-link-button" href="#/jobs/detail/${escapeAttribute(job.id)}" data-select-job="${escapeAttribute(job.id)}">Open</a>
     </article>
   `;
 }
@@ -244,8 +249,7 @@ document.addEventListener("click", (event) => {
   }
 
   selectedJobId = button.dataset.selectJob;
-  renderJobsAppliedViews();
-  showJobsPage("detail");
+  navigateToJobsRoute("detail", selectedJobId);
 });
 
 function currentJob(jobs) {
@@ -274,6 +278,56 @@ function cleanValue(value) {
 
 function setJobsStatus(message) {
   document.querySelector("#jobs-applied-status").textContent = message;
+}
+
+function ensureJobsRoute() {
+  if (!currentJobsRoute().page) {
+    navigateToJobsRoute("dashboard");
+  }
+}
+
+function currentJobsRoute() {
+  const [, root, page, jobId] = window.location.hash.split("/");
+
+  if (root !== "jobs") {
+    return { page: "", jobId: "" };
+  }
+
+  return {
+    page: knownJobsPage(page) ? page : "dashboard",
+    jobId: jobId || "",
+  };
+}
+
+function knownJobsPage(page) {
+  return [
+    "dashboard",
+    "add",
+    "detail",
+    "fit",
+    "resume",
+    "cover-letter",
+    "packet",
+    "tracker",
+    "settings",
+  ].includes(page);
+}
+
+function navigateToJobsRoute(page, jobId = "") {
+  window.location.hash = `#/jobs/${page}${jobId ? `/${encodeURIComponent(jobId)}` : ""}`;
+}
+
+function updateSelectedJobLinks() {
+  document.querySelectorAll("[data-selected-job-route]").forEach((link) => {
+    const page = link.dataset.selectedJobRoute;
+    link.href = `#/jobs/${page}${selectedJobId ? `/${encodeURIComponent(selectedJobId)}` : ""}`;
+  });
+
+  document.querySelectorAll("[data-jobs-route-link]").forEach((link) => {
+    if (["detail", "fit", "resume", "cover-letter", "packet"].includes(link.dataset.jobsRouteLink)) {
+      link.href = `#/jobs/${link.dataset.jobsRouteLink}${selectedJobId ? `/${encodeURIComponent(selectedJobId)}` : ""}`;
+    }
+  });
 }
 
 function detailRow(label, value, allowHtml = false) {
