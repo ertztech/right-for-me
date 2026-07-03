@@ -22,15 +22,15 @@
           </div>
 
           <div class="jobs-nav" aria-label="Jobs Applied pages">
-            <button type="button" class="secondary-button" data-jobs-page-link="dashboard">Dashboard</button>
-            <button type="button" class="secondary-button" data-jobs-page-link="add">Add Job</button>
-            <button type="button" class="secondary-button" data-jobs-page-link="detail">Job Detail</button>
-            <button type="button" class="secondary-button" data-jobs-page-link="fit">Fit Analysis</button>
-            <button type="button" class="secondary-button" data-jobs-page-link="resume">Resume Builder</button>
-            <button type="button" class="secondary-button" data-jobs-page-link="cover-letter">Cover Letter Builder</button>
-            <button type="button" class="secondary-button" data-jobs-page-link="packet">Application Packet</button>
-            <button type="button" class="secondary-button" data-jobs-page-link="tracker">Tracker</button>
-            <button type="button" class="secondary-button" data-jobs-page-link="settings">Settings</button>
+            <a class="secondary-button nav-link-button" href="#/jobs/dashboard" data-jobs-route-link="dashboard">Dashboard</a>
+            <a class="secondary-button nav-link-button" href="#/jobs/add" data-jobs-route-link="add">Add Job</a>
+            <a class="secondary-button nav-link-button" href="#/jobs/detail" data-jobs-route-link="detail">Job Detail</a>
+            <a class="secondary-button nav-link-button" href="#/jobs/fit" data-jobs-route-link="fit">Fit Analysis</a>
+            <a class="secondary-button nav-link-button" href="#/jobs/resume" data-jobs-route-link="resume">Resume Builder</a>
+            <a class="secondary-button nav-link-button" href="#/jobs/cover-letter" data-jobs-route-link="cover-letter">Cover Letter Builder</a>
+            <a class="secondary-button nav-link-button" href="#/jobs/packet" data-jobs-route-link="packet">Application Packet</a>
+            <a class="secondary-button nav-link-button" href="#/jobs/tracker" data-jobs-route-link="tracker">Tracker</a>
+            <a class="secondary-button nav-link-button" href="#/jobs/settings" data-jobs-route-link="settings">Settings</a>
           </div>
         </div>
 
@@ -40,7 +40,7 @@
               <h2>Dashboard</h2>
               <p class="support-copy">Saved jobs, grouped status, and the next action.</p>
             </div>
-            <button type="button" data-jobs-page-link="add">Add New Job</button>
+            <a class="nav-link-button" href="#/jobs/add">Add New Job</a>
           </div>
 
           <div class="score-grid" id="jobs-status-summary"></div>
@@ -113,7 +113,19 @@
 
         <section data-jobs-page="detail" class="hidden">
           <div class="section-block first-section">
-            <h2>Job Detail</h2>
+            <div class="panel-header compact-header">
+              <div>
+                <h2>Job Detail</h2>
+                <p class="support-copy">Open the next workflow step for this saved job.</p>
+              </div>
+              <div class="button-row">
+                <a class="secondary-button nav-link-button" href="#/jobs/fit" data-selected-job-route="fit">Fit Analysis</a>
+                <a class="secondary-button nav-link-button" href="#/jobs/resume" data-selected-job-route="resume">Resume Builder</a>
+                <a class="secondary-button nav-link-button" href="#/jobs/cover-letter" data-selected-job-route="cover-letter">Cover Letter Builder</a>
+                <a class="secondary-button nav-link-button" href="#/jobs/packet" data-selected-job-route="packet">Application Packet</a>
+                <a class="secondary-button nav-link-button" href="#/jobs/tracker">Tracking</a>
+              </div>
+            </div>
             <div id="job-detail-content"></div>
           </div>
         </section>

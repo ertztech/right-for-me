@@ -90,6 +90,8 @@ Job application records for the Jobs Applied pipeline are stored in `data/job-ap
 
 The first lightweight Jobs Applied app pages are available in `index.html`: Dashboard, Add Job, Job Detail, Fit Analysis, Resume Builder, Cover Letter Builder, Application Packet, Application Tracker, and Settings. The browser UI stores saved jobs in local storage for now, using the same fields documented in `docs/jobs-applied-data-model.md`.
 
+Jobs Applied pages use hash routes, starting at `#/jobs/dashboard`. Use the Jobs Applied navigation to move between Dashboard, Add Job, Job Detail, Fit Analysis, Resume Builder, Cover Letter Builder, Application Packet, Tracker, and Settings without leaving `index.html`.
+
 Run the current Python tests with:
 
 ```bash
