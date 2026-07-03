@@ -1,0 +1,84 @@
+from __future__ import annotations
+
+import json
+import unittest
+from pathlib import Path
+
+from tools.jobs_applied.storage import (
+    JobApplicationValidationError,
+    add_job_application,
+    read_job_applications,
+    update_job_application,
+)
+
+
+class JobsAppliedStorageTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.storage_path = Path(__file__).with_name("_job-applications-test.json")
+        self.storage_path.write_text("[]", encoding="utf-8")
+
+    def tearDown(self) -> None:
+        if self.storage_path.exists():
+            self.storage_path.unlink()
+
+    def test_reading_records(self) -> None:
+        self.storage_path.write_text(
+            json.dumps([sample_record()]),
+            encoding="utf-8",
+        )
+
+        records = read_job_applications(self.storage_path)
+
+        self.assertEqual(len(records), 1)
+        self.assertEqual(records[0]["company"], "Example Company")
+
+    def test_adding_record(self) -> None:
+        records = add_job_application(sample_record(), self.storage_path)
+
+        self.assertEqual(len(records), 1)
+        self.assertEqual(read_job_applications(self.storage_path)[0]["id"], "job_2026_0001")
+
+    def test_updating_record(self) -> None:
+        add_job_application(sample_record(), self.storage_path)
+
+        updated = update_job_application(
+            "job_2026_0001",
+            {"status": "Applied", "dateApplied": "2026-07-03"},
+            self.storage_path,
+        )
+
+        self.assertEqual(updated["status"], "Applied")
+        self.assertEqual(read_job_applications(self.storage_path)[0]["dateApplied"], "2026-07-03")
+
+    def test_rejecting_record_missing_required_fields(self) -> None:
+        record = sample_record()
+        record["company"] = ""
+
+        with self.assertRaises(JobApplicationValidationError):
+            add_job_application(record, self.storage_path)
+
+
+def sample_record() -> dict:
+    return {
+        "id": "job_2026_0001",
+        "company": "Example Company",
+        "roleTitle": "Operations Transformation Lead",
+        "jobUrl": "https://example.com/jobs/123",
+        "location": "Remote",
+        "salaryRange": "$100,000 - $125,000",
+        "workArrangement": "Remote",
+        "status": "Reviewing",
+        "fitScore": 78,
+        "fitRecommendation": "Apply",
+        "dateFound": "2026-07-03",
+        "dateApplied": "",
+        "followUpDate": "",
+        "resumeVersionPath": "outputs/example-company-resume.md",
+        "coverLetterPath": "outputs/example-company-cover-letter.md",
+        "notes": "Strong match on transformation, metrics, and stakeholder communication.",
+        "sourcePostingText": "Full pasted job description text...",
+    }
+
+
+if __name__ == "__main__":
+    unittest.main()
