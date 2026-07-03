@@ -68,6 +68,12 @@ Future automation ideas:
 
 Near-term implementation should stay local, simple, and rule-based until the workflow proves useful.
 
+## UX and Usability Revamp
+
+RightForMe will move toward a guided workflow for job seekers. Job records, fit analysis, tailored resume output, cover letter output, application packet notes, and tracking should connect into one experience instead of living as separate tools.
+
+Future UI work should follow [UX and Usability Plan](ux-usability-plan.md). The revamp should make the next action obvious, reduce duplicate typing, preserve honest fit decisions, and help users move quickly from saved posting to application follow-up.
+
 ## Not Yet
 
 These ideas may matter later, but they are intentionally out of scope for now:
