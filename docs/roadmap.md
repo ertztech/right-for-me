@@ -1,10 +1,12 @@
-# RightForMe Roadmap
+# NextMove Roadmap
 
 ## Vision
 
-RightForMe helps people capture their professional story once and use it everywhere.
+NextMove helps people capture their professional story once and use it everywhere.
 
 The product is not just a resume generator. The deeper goal is to help someone understand, organize, and communicate the value they can bring to the right opportunity, especially when that opportunity feels slightly outside their comfort zone.
+
+NextMove is evolving toward an AI-powered Career Operating System: a guided place to evaluate jobs, build application materials, track next actions, prepare for interviews, and make better long-term career decisions.
 
 ## Product Pillars
 
@@ -41,6 +43,26 @@ The product is not just a resume generator. The deeper goal is to help someone u
 
 - AI-assisted recommendations
 - Portfolio and website outputs
+
+## Product Evolution
+
+The product direction is intentionally expanding:
+
+Resume Tool
+
+↓
+
+Application Assistant
+
+↓
+
+Career Operating System
+
+↓
+
+AI Career Coach
+
+The near-term product still needs focused, useful workflows. The long-term direction is a calm career operating system that helps users make decisions, take action, and prepare for what comes next.
 
 ## Jobs Applied Pipeline
 

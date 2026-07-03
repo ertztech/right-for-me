@@ -1,18 +1,18 @@
-# RightForMe
+# NextMove
 
-RightForMe helps job seekers evaluate stretch opportunities and build applications that make their potential visible.
+NextMove is an AI-powered Career Operating System that helps professionals evaluate opportunities, position their experience, create application materials, track follow-up, and prepare for interviews.
 
 Repository: `right-for-me`
 
-The product is built around one practical question:
+The product is evolving from RightForMe toward the working name NextMove. It is built around one practical question:
 
 > Is this opportunity right for me, and how do I show I am right for it?
 
-Most job search tools focus on producing documents. RightForMe starts earlier. It helps people decide whether a role is worth pursuing, understand where they already fit, identify where the role would stretch them, and communicate their evidence with clarity.
+Most job search tools focus on producing documents. NextMove starts earlier and continues later. It helps people decide whether a role is worth pursuing, understand where they already fit, identify where the role would stretch them, communicate their evidence with clarity, and keep track of what to do next.
 
 ## Mission
 
-Help people discover, communicate, and demonstrate the value they can bring to the right organizations.
+Help professionals confidently navigate career decisions from discovering opportunities through interviews and long-term career growth.
 
 ## Product Principles
 
@@ -60,6 +60,8 @@ Those may come later, but the first product must stay focused.
 ## Roadmap
 
 See [docs/roadmap.md](docs/roadmap.md). The roadmap now includes a Jobs Applied pipeline for tracking saved postings, fit decisions, tailored application materials, statuses, and follow-up actions.
+
+See [docs/product-identity.md](docs/product-identity.md) for the NextMove identity direction and [docs/release-plan.md](docs/release-plan.md) for release milestones.
 
 UX planning has also started. See [docs/ux-usability-plan.md](docs/ux-usability-plan.md) for the proposed guided workflow, screen list, information architecture, and usability principles for the job application pipeline.
 
