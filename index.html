@@ -130,6 +130,34 @@
   <p id="resume-status" class="status-message"></p>
 </section>
 
+      <section class="vault-panel">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">Cover Letter Generator</p>
+            <h2>Preview</h2>
+          </div>
+
+          <div class="button-row">
+            <button type="button" id="generate-cover-letter">
+              Generate Cover Letter
+            </button>
+            <button type="button" id="copy-cover-letter" class="secondary-button">
+              Copy Cover Letter
+            </button>
+            <button type="button" id="download-cover-letter" class="secondary-button">
+              Download Cover Letter
+            </button>
+          </div>
+        </div>
+
+        <textarea
+          id="cover-letter-preview"
+          readonly
+          placeholder="Your generated cover letter will appear here..."
+        ></textarea>
+        <p id="cover-letter-status" class="status-message"></p>
+      </section>
+
       <section class="workspace" aria-label="Job fit analyzer">
         <form class="input-panel" id="analysis-form">
           <label for="job-description">
@@ -203,6 +231,9 @@
     <script src="src/tailoring/matcher.js"></script>
     <script src="src/tailoring/tailoredResume.js"></script>
     <script src="src/tailoring/controller.js"></script>
+    <script src="src/coverLetter/builder.js"></script>
+    <script src="src/coverLetter/renderer.js"></script>
+    <script src="src/coverLetter/controller.js"></script>
     <script src="src/app.js"></script>
   </body>
 </html>
