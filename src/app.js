@@ -12,9 +12,6 @@ const evidenceList = document.querySelector("#evidence-list");
 const stretchList = document.querySelector("#stretch-list");
 const strategy = document.querySelector("#strategy");
 
-const generateResumeButton = document.querySelector("#generate-resume");
-const resumePreview = document.querySelector("#resume-preview");
-
 const skillSignals = [
   "javascript",
   "typescript",
@@ -161,19 +158,6 @@ function initializeAnalyzer() {
   });
 }
 
-function initializeResumeGenerator() {
-  generateResumeButton.addEventListener("click", () => {
-    RightForMeCareerVault.saveVault();
-
-    const resume = RightForMeResumeBuilder.buildResume(
-      RightForMeCareerVault.getVault()
-    );
-
-    resumePreview.value =
-      RightForMeResumeMarkdown.renderResumeMarkdown(resume);
-  });
-}
-
 RightForMeCareerVault.initializeCareerVault();
-initializeResumeGenerator();
+RightForMeResumeController.initializeResumeController();
 initializeAnalyzer();
