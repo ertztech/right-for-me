@@ -46,6 +46,9 @@ function saveJobFromForm(form) {
     coverLetterPath: "",
     notes: cleanValue(formData.get("notes")),
     sourcePostingText: cleanValue(formData.get("sourcePostingText")),
+    fitAnalysis: null,
+    resumeDraft: null,
+    coverLetterDraft: null,
   };
 
   try {
@@ -133,29 +136,51 @@ function renderFitAnalysis(job) {
     return;
   }
 
+  const fitAnalysis = job.fitAnalysis || {};
+
   node.innerHTML = `
     <div class="score-grid">
-      <article><span>Fit Score</span><strong>${escapeHtml(formatValue(job.fitScore))}</strong></article>
-      <article><span>Recommendation</span><strong>${escapeHtml(formatValue(job.fitRecommendation))}</strong></article>
+      <article><span>Fit Score</span><strong>${escapeHtml(formatValue(fitAnalysis.fitScore || job.fitScore))}</strong></article>
+      <article><span>Recommendation</span><strong>${escapeHtml(formatValue(fitAnalysis.recommendation || job.fitRecommendation))}</strong></article>
       <article><span>Status</span><strong>${escapeHtml(job.status)}</strong></article>
     </div>
-    ${placeholderBlock("Strengths", "Saved strengths will appear here when fit analysis is connected to job records.")}
-    ${placeholderBlock("Concerns", "Concerns and tradeoffs will appear here.")}
-    ${placeholderBlock("Gaps", "Gaps to prepare for will appear here.")}
-    ${placeholderBlock("Suggested Positioning", "Apply, Maybe, or Skip positioning will appear here.")}
+    ${placeholderBlock("Strengths", listOrPlaceholder(fitAnalysis.strengths, "AI-generated strengths will appear here after fit analysis is wired."))}
+    ${placeholderBlock("Gaps", listOrPlaceholder(fitAnalysis.gaps, "AI-generated gaps will appear here."))}
+    ${placeholderBlock("Concerns", listOrPlaceholder(fitAnalysis.concerns, "AI-generated concerns and tradeoffs will appear here."))}
+    ${placeholderBlock("Suggested Positioning", fitAnalysis.suggestedPositioning || "Apply, Maybe, or Skip positioning will appear here.")}
+    ${aiMetadataBlock(fitAnalysis)}
   `;
 }
 
 function renderResumeBuilder(job) {
-  document.querySelector("#jobs-resume-placeholder").innerHTML = job
-    ? placeholderBlock("Tailored Resume", job.resumeVersionPath || "Tailored resume content or saved path will appear here.")
-    : emptyMessage("Save a job before reviewing tailored resume output.");
+  if (!job) {
+    document.querySelector("#jobs-resume-placeholder").innerHTML = emptyMessage("Save a job before reviewing tailored resume output.");
+    return;
+  }
+
+  const resumeDraft = job.resumeDraft || {};
+  document.querySelector("#jobs-resume-placeholder").innerHTML = `
+    ${placeholderBlock("Tailored Summary", resumeDraft.tailoredSummary || "AI-generated tailored summary will appear here.")}
+    ${placeholderBlock("Tailored Skills", listOrPlaceholder(resumeDraft.tailoredSkills, "AI-generated tailored skills will appear here."))}
+    ${placeholderBlock("Tailored Experience Bullets", listOrPlaceholder(resumeDraft.tailoredExperienceBullets, "AI-generated experience bullets will appear here."))}
+    ${placeholderBlock("Markdown Preview", resumeDraft.markdownPreview || job.resumeVersionPath || "Markdown resume preview placeholder.")}
+    ${aiMetadataBlock(resumeDraft)}
+  `;
 }
 
 function renderCoverLetterBuilder(job) {
-  document.querySelector("#jobs-cover-letter-placeholder").innerHTML = job
-    ? placeholderBlock("Cover Letter", job.coverLetterPath || "Cover letter content or saved path will appear here.")
-    : emptyMessage("Save a job before reviewing cover letter output.");
+  if (!job) {
+    document.querySelector("#jobs-cover-letter-placeholder").innerHTML = emptyMessage("Save a job before reviewing cover letter output.");
+    return;
+  }
+
+  const coverLetterDraft = job.coverLetterDraft || {};
+  document.querySelector("#jobs-cover-letter-placeholder").innerHTML = `
+    ${placeholderBlock("Draft Cover Letter", coverLetterDraft.draftText || job.coverLetterPath || "AI-generated draft cover letter will appear here.")}
+    ${placeholderBlock("Tone Note", coverLetterDraft.toneNote || "Tone target: warm, friendly, confident, and human.")}
+    ${placeholderBlock("User Approval Status", coverLetterDraft.userApproved ? "Approved by user." : "Not approved yet.")}
+    ${aiMetadataBlock(coverLetterDraft)}
+  `;
 }
 
 function renderApplicationPacket(job) {
@@ -337,6 +362,21 @@ function detailRow(label, value, allowHtml = false) {
 
 function placeholderBlock(title, text) {
   return `<div class="placeholder-block"><h3>${escapeHtml(title)}</h3><p>${escapeHtml(text)}</p></div>`;
+}
+
+function listOrPlaceholder(items, placeholder) {
+  if (!Array.isArray(items) || !items.length) {
+    return placeholder;
+  }
+
+  return items.join("; ");
+}
+
+function aiMetadataBlock(output = {}) {
+  return placeholderBlock(
+    "AI Output Metadata",
+    `Generated at: ${formatValue(output.generatedAt)} | Prompt version: ${formatValue(output.promptVersion)} | Model: ${formatValue(output.modelName)} | User approved: ${output.userApproved ? "Yes" : "No"}`
+  );
 }
 
 function emptyMessage(message) {

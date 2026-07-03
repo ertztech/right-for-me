@@ -22,7 +22,10 @@ This document proposes a small job application record for the future Jobs Applie
   "resumeVersionPath": "outputs/example-company-resume.md",
   "coverLetterPath": "outputs/example-company-cover-letter.md",
   "notes": "Strong match on transformation, metrics, and stakeholder communication.",
-  "sourcePostingText": "Full pasted job description text..."
+  "sourcePostingText": "Full pasted job description text...",
+  "fitAnalysis": null,
+  "resumeDraft": null,
+  "coverLetterDraft": null
 }
 ```
 
@@ -45,6 +48,11 @@ This document proposes a small job application record for the future Jobs Applie
 - `coverLetterPath`: Path to the tailored cover letter Markdown output.
 - `notes`: User notes, decision notes, interview prep, or follow-up context.
 - `sourcePostingText`: Original pasted job posting text.
+- `fitAnalysis`: Optional future AI-generated fit analysis draft.
+- `resumeDraft`: Optional future AI-generated tailored resume draft.
+- `coverLetterDraft`: Optional future AI-generated cover letter draft.
+
+See [AI Outputs Data Model](ai-outputs-data-model.md) for the structure of draft AI outputs.
 
 ## Recommended Statuses
 
