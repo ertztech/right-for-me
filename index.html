@@ -3,29 +3,39 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>RightForMe</title>
+    <title>NextMove</title>
     <link rel="stylesheet" href="src/styles.css">
   </head>
   <body>
     <main class="shell">
       <section class="intro">
-        <p class="eyebrow">RightForMe v0.2</p>
-        <h1>Build your Career Vault once. Generate everything else later.</h1>
-        <p class="lede">Start by capturing your career history, skills, tools, and accomplishments in one reusable place.</p>
+        <p class="eyebrow">NextMove v0.2</p>
+        <h1>Your guided career operating system.</h1>
+        <p class="lede">Evaluate opportunities, organize your evidence, build application materials, and keep your next move clear.</p>
       </section>
+
+      <nav class="primary-flow-nav" aria-label="Primary workflow">
+        <a href="#/jobs/dashboard">Dashboard</a>
+        <a href="#career-vault">Career Vault</a>
+        <a href="#/jobs/add">Job Intake</a>
+        <a href="#/jobs/fit">Fit Review</a>
+        <a href="#/jobs/packet">Application Packet</a>
+        <a href="#/jobs/tracker">Tracker</a>
+        <a href="#/jobs/settings">Settings</a>
+      </nav>
 
       <section class="vault-panel" aria-label="Jobs Applied Workflow">
         <div class="panel-header">
           <div>
-            <p class="eyebrow">Jobs Applied</p>
-            <h2>Application Pipeline</h2>
+            <p class="eyebrow">NextMove Workspace</p>
+            <h2>Guided Application Pipeline</h2>
           </div>
 
           <div class="jobs-nav" aria-label="Jobs Applied pages">
             <a class="secondary-button nav-link-button" href="#/jobs/dashboard" data-jobs-route-link="dashboard">Dashboard</a>
-            <a class="secondary-button nav-link-button" href="#/jobs/add" data-jobs-route-link="add">Add Job</a>
+            <a class="secondary-button nav-link-button" href="#/jobs/add" data-jobs-route-link="add">Job Intake</a>
             <a class="secondary-button nav-link-button" href="#/jobs/detail" data-jobs-route-link="detail">Job Detail</a>
-            <a class="secondary-button nav-link-button" href="#/jobs/fit" data-jobs-route-link="fit">Fit Analysis</a>
+            <a class="secondary-button nav-link-button" href="#/jobs/fit" data-jobs-route-link="fit">Fit Review</a>
             <a class="secondary-button nav-link-button" href="#/jobs/resume" data-jobs-route-link="resume">Resume Builder</a>
             <a class="secondary-button nav-link-button" href="#/jobs/cover-letter" data-jobs-route-link="cover-letter">Cover Letter Builder</a>
             <a class="secondary-button nav-link-button" href="#/jobs/packet" data-jobs-route-link="packet">Application Packet</a>
@@ -38,9 +48,9 @@
           <div class="panel-header compact-header">
             <div>
               <h2>Dashboard</h2>
-              <p class="support-copy">Saved jobs, grouped status, and the next action.</p>
+              <p class="support-copy">A calm view of saved opportunities, status, and the next useful action.</p>
             </div>
-            <a class="nav-link-button" href="#/jobs/add">Add New Job</a>
+            <a class="nav-link-button" href="#/jobs/add">Start Job Intake</a>
           </div>
 
           <div class="score-grid" id="jobs-status-summary"></div>
@@ -60,7 +70,7 @@
 
         <section data-jobs-page="add" class="hidden">
           <div class="section-block first-section">
-            <h2>Add Job</h2>
+            <h2>Job Intake</h2>
             <form id="add-job-form" class="input-panel flat-panel">
               <div class="form-grid">
                 <label>
@@ -106,7 +116,7 @@
                 <textarea name="sourcePostingText" placeholder="Paste the job posting here..."></textarea>
               </label>
 
-              <button type="submit">Save Job</button>
+              <button type="submit">Save Opportunity</button>
             </form>
           </div>
         </section>
@@ -116,14 +126,14 @@
             <div class="panel-header compact-header">
               <div>
                 <h2>Job Detail</h2>
-                <p class="support-copy">Open the next workflow step for this saved job.</p>
+                <p class="support-copy">Review the opportunity and choose the next step with confidence.</p>
               </div>
               <div class="button-row">
-                <a class="secondary-button nav-link-button" href="#/jobs/fit" data-selected-job-route="fit">Fit Analysis</a>
+                <a class="secondary-button nav-link-button" href="#/jobs/fit" data-selected-job-route="fit">Fit Review</a>
                 <a class="secondary-button nav-link-button" href="#/jobs/resume" data-selected-job-route="resume">Resume Builder</a>
                 <a class="secondary-button nav-link-button" href="#/jobs/cover-letter" data-selected-job-route="cover-letter">Cover Letter Builder</a>
                 <a class="secondary-button nav-link-button" href="#/jobs/packet" data-selected-job-route="packet">Application Packet</a>
-                <a class="secondary-button nav-link-button" href="#/jobs/tracker">Tracking</a>
+                <a class="secondary-button nav-link-button" href="#/jobs/tracker">Tracker</a>
               </div>
             </div>
             <div id="job-detail-content"></div>
@@ -132,7 +142,7 @@
 
         <section data-jobs-page="fit" class="hidden">
           <div class="section-block first-section">
-            <h2>Fit Analysis</h2>
+            <h2>Fit Review</h2>
             <div id="fit-analysis-placeholder"></div>
           </div>
         </section>
@@ -168,14 +178,14 @@
         <section data-jobs-page="settings" class="hidden">
           <div class="section-block first-section">
             <h2>Settings</h2>
-            <p class="empty-copy">Future preferences for storage, exports, reminders, and workflow defaults will live here.</p>
+            <p class="empty-copy">Future preferences for storage, exports, reminders, and workflow defaults will live here. For now, keep moving through one clear next action.</p>
           </div>
         </section>
 
         <p id="jobs-applied-status" class="status-message"></p>
       </section>
 
-      <section class="vault-panel" aria-label="Career Vault Editor">
+      <section class="vault-panel" id="career-vault" aria-label="Career Vault Editor">
         <div class="panel-header">
           <div>
             <p class="eyebrow">Career Vault</p>
@@ -263,7 +273,7 @@
       <section class="vault-panel">
   <div class="panel-header">
     <div>
-      <p class="eyebrow">Resume Generator</p>
+      <p class="eyebrow">Resume Builder</p>
       <h2>Preview</h2>
     </div>
 
@@ -294,7 +304,7 @@
       <section class="vault-panel">
         <div class="panel-header">
           <div>
-            <p class="eyebrow">Cover Letter Generator</p>
+            <p class="eyebrow">Cover Letter Builder</p>
             <h2>Preview</h2>
           </div>
 
@@ -367,7 +377,7 @@
         <section class="results-panel" aria-live="polite">
           <div class="empty-state" id="empty-state">
             <h2>Ready when you are.</h2>
-            <p>Your analysis will show fit, stretch, evidence, gaps, and a recommended next move.</p>
+            <p>Paste a role when you are ready. NextMove will help you review fit, evidence, gaps, and the next best action.</p>
           </div>
 
           <div class="results hidden" id="results">

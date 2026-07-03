@@ -63,6 +63,8 @@ See [docs/roadmap.md](docs/roadmap.md). The roadmap now includes a Jobs Applied 
 
 See [docs/product-identity.md](docs/product-identity.md) for the NextMove identity direction and [docs/release-plan.md](docs/release-plan.md) for release milestones.
 
+The app has a light NextMove UI brand pass: visible copy now frames the product as a guided career operating system, with calmer navigation labels and restrained styling. Code identifiers and storage keys still use the earlier RightForMe naming to avoid disruptive churn.
+
 UX planning has also started. See [docs/ux-usability-plan.md](docs/ux-usability-plan.md) for the proposed guided workflow, screen list, information architecture, and usability principles for the job application pipeline.
 
 ## Delivery Workflow
