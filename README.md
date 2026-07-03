@@ -61,6 +61,8 @@ Those may come later, but the first product must stay focused.
 
 See [docs/roadmap.md](docs/roadmap.md). The roadmap now includes a Jobs Applied pipeline for tracking saved postings, fit decisions, tailored application materials, statuses, and follow-up actions.
 
+UX planning has also started. See [docs/ux-usability-plan.md](docs/ux-usability-plan.md) for the proposed guided workflow, screen list, information architecture, and usability principles for the job application pipeline.
+
 ## Delivery Workflow
 
 See [AGENTS.md](AGENTS.md) for the RightForMe delivery workflow: Trello for product intent, GitHub Issues for engineering work, feature branches for each change, and learning-in-public notes after each merge.
