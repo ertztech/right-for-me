@@ -1,45 +1,54 @@
 function renderResumeMarkdown(resume) {
   const lines = [];
+  const person = resume.person || {};
 
-  lines.push(`# ${resume.person.name || "Your Name"}`);
+  lines.push(`# ${person.name || "Your Name"}`);
 
-  const contact = [
-    resume.person.location,
-    resume.person.email,
-    resume.person.phone,
-  ].filter(Boolean);
+  const contact = compactList([
+    person.location,
+    person.email,
+    person.phone,
+  ]);
 
   if (contact.length) {
     lines.push(contact.join(" | "));
   }
 
-  lines.push("");
-  lines.push("## Professional Summary");
-  lines.push(resume.summary || "Professional summary will be generated from the Career Vault.");
+  addSection(lines, "Professional Summary", [
+    resume.summary || "Professional summary will be generated from the Career Vault.",
+  ]);
 
-  if (resume.skills.length) {
+  const skills = compactList(resume.skills);
+  const tools = compactList(resume.tools);
+  if (skills.length || tools.length) {
     lines.push("");
-    lines.push("## Skills");
-    lines.push(resume.skills.map((skill) => `- ${skill}`).join("\n"));
+    lines.push("## Skills & Tools");
+
+    if (skills.length) {
+      lines.push("");
+      lines.push("### Core Skills");
+      addBullets(lines, skills);
+    }
+
+    if (tools.length) {
+      lines.push("");
+      lines.push("### Tools & Platforms");
+      addBullets(lines, tools);
+    }
   }
 
-  if (resume.tools.length) {
-    lines.push("");
-    lines.push("## Tools");
-    lines.push(resume.tools.map((tool) => `- ${tool}`).join("\n"));
-  }
-
-  if (resume.experience.length) {
+  const experience = resume.experience || [];
+  if (experience.length) {
     lines.push("");
     lines.push("## Professional Experience");
 
-    resume.experience.forEach((role) => {
+    experience.forEach((role) => {
       lines.push("");
-      lines.push(`### ${role.title || "Role"} | ${role.company || "Company"}`);
+      lines.push(`### ${formatRoleHeading(role)}`);
 
-      const dates = [role.start, role.end].filter(Boolean).join(" - ");
+      const dates = compactList([role.start, role.end]).join(" - ");
       if (dates) {
-        lines.push(dates);
+        lines.push(`_${dates}_`);
       }
 
       if (role.summary) {
@@ -49,13 +58,41 @@ function renderResumeMarkdown(resume) {
     });
   }
 
-  if (resume.accomplishments.length) {
+  const accomplishments = compactList(resume.accomplishments);
+  if (accomplishments.length) {
     lines.push("");
     lines.push("## Selected Accomplishments");
-    lines.push(resume.accomplishments.map((item) => `- ${item}`).join("\n"));
+    addBullets(lines, accomplishments);
   }
 
   return lines.join("\n");
+}
+
+function addSection(lines, heading, contentLines) {
+  const content = compactList(contentLines);
+  if (!content.length) {
+    return;
+  }
+
+  lines.push("");
+  lines.push(`## ${heading}`);
+  content.forEach((line) => lines.push(line));
+}
+
+function addBullets(lines, items) {
+  compactList(items).forEach((item) => lines.push(`- ${item}`));
+}
+
+function compactList(items = []) {
+  return items
+    .map((item) => String(item || "").trim())
+    .filter(Boolean);
+}
+
+function formatRoleHeading(role = {}) {
+  const title = role.title || "Role";
+  const company = role.company || "Company";
+  return `${title} | ${company}`;
 }
 
 window.RightForMeResumeMarkdown = {
