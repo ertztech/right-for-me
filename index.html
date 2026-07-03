@@ -14,6 +14,155 @@
         <p class="lede">Start by capturing your career history, skills, tools, and accomplishments in one reusable place.</p>
       </section>
 
+      <section class="vault-panel" aria-label="Jobs Applied Workflow">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">Jobs Applied</p>
+            <h2>Application Pipeline</h2>
+          </div>
+
+          <div class="jobs-nav" aria-label="Jobs Applied pages">
+            <button type="button" class="secondary-button" data-jobs-page-link="dashboard">Dashboard</button>
+            <button type="button" class="secondary-button" data-jobs-page-link="add">Add Job</button>
+            <button type="button" class="secondary-button" data-jobs-page-link="detail">Job Detail</button>
+            <button type="button" class="secondary-button" data-jobs-page-link="fit">Fit Analysis</button>
+            <button type="button" class="secondary-button" data-jobs-page-link="resume">Resume Builder</button>
+            <button type="button" class="secondary-button" data-jobs-page-link="cover-letter">Cover Letter Builder</button>
+            <button type="button" class="secondary-button" data-jobs-page-link="packet">Application Packet</button>
+            <button type="button" class="secondary-button" data-jobs-page-link="tracker">Tracker</button>
+            <button type="button" class="secondary-button" data-jobs-page-link="settings">Settings</button>
+          </div>
+        </div>
+
+        <section data-jobs-page="dashboard">
+          <div class="panel-header compact-header">
+            <div>
+              <h2>Dashboard</h2>
+              <p class="support-copy">Saved jobs, grouped status, and the next action.</p>
+            </div>
+            <button type="button" data-jobs-page-link="add">Add New Job</button>
+          </div>
+
+          <div class="score-grid" id="jobs-status-summary"></div>
+
+          <div class="two-column">
+            <div class="section-block">
+              <h2>Recent Jobs</h2>
+              <div id="recent-jobs-list" class="job-card-list"></div>
+            </div>
+
+            <div class="section-block">
+              <h2>Next Actions</h2>
+              <ul id="jobs-next-actions"></ul>
+            </div>
+          </div>
+        </section>
+
+        <section data-jobs-page="add" class="hidden">
+          <div class="section-block first-section">
+            <h2>Add Job</h2>
+            <form id="add-job-form" class="input-panel flat-panel">
+              <div class="form-grid">
+                <label>
+                  Company
+                  <input name="company" type="text" required placeholder="Example Company">
+                </label>
+                <label>
+                  Role Title
+                  <input name="roleTitle" type="text" required placeholder="Operations Transformation Lead">
+                </label>
+                <label>
+                  Job URL
+                  <input name="jobUrl" type="url" placeholder="https://example.com/jobs/123">
+                </label>
+                <label>
+                  Location
+                  <input name="location" type="text" placeholder="Remote">
+                </label>
+                <label>
+                  Salary Range
+                  <input name="salaryRange" type="text" placeholder="$100,000 - $125,000">
+                </label>
+                <label>
+                  Work Arrangement
+                  <input name="workArrangement" type="text" placeholder="Remote, hybrid, onsite">
+                </label>
+                <label>
+                  Status
+                  <select name="status">
+                    <option value="Found">Found</option>
+                    <option value="Reviewing">Reviewing</option>
+                  </select>
+                </label>
+              </div>
+
+              <label>
+                Notes
+                <textarea name="notes" placeholder="Decision notes, salary notes, or questions to revisit..."></textarea>
+              </label>
+
+              <label>
+                Source Posting Text
+                <textarea name="sourcePostingText" placeholder="Paste the job posting here..."></textarea>
+              </label>
+
+              <button type="submit">Save Job</button>
+            </form>
+          </div>
+        </section>
+
+        <section data-jobs-page="detail" class="hidden">
+          <div class="section-block first-section">
+            <h2>Job Detail</h2>
+            <div id="job-detail-content"></div>
+          </div>
+        </section>
+
+        <section data-jobs-page="fit" class="hidden">
+          <div class="section-block first-section">
+            <h2>Fit Analysis</h2>
+            <div id="fit-analysis-placeholder"></div>
+          </div>
+        </section>
+
+        <section data-jobs-page="resume" class="hidden">
+          <div class="section-block first-section">
+            <h2>Resume Builder</h2>
+            <div id="jobs-resume-placeholder"></div>
+          </div>
+        </section>
+
+        <section data-jobs-page="cover-letter" class="hidden">
+          <div class="section-block first-section">
+            <h2>Cover Letter Builder</h2>
+            <div id="jobs-cover-letter-placeholder"></div>
+          </div>
+        </section>
+
+        <section data-jobs-page="packet" class="hidden">
+          <div class="section-block first-section">
+            <h2>Application Packet</h2>
+            <div id="jobs-packet-placeholder"></div>
+          </div>
+        </section>
+
+        <section data-jobs-page="tracker" class="hidden">
+          <div class="section-block first-section">
+            <h2>Application Tracker</h2>
+            <div id="application-tracker-list"></div>
+          </div>
+        </section>
+
+        <section data-jobs-page="settings" class="hidden">
+          <div class="section-block first-section">
+            <h2>Settings</h2>
+            <p class="empty-copy">Future preferences for storage, exports, reminders, and workflow defaults will live here.</p>
+          </div>
+        </section>
+
+        <p id="jobs-applied-status" class="status-message"></p>
+      </section>
+
       <section class="vault-panel" aria-label="Career Vault Editor">
         <div class="panel-header">
           <div>
@@ -252,6 +401,8 @@
     <script src="src/careerVault/view.js"></script>
     <script src="src/careerVault/controller.js"></script>
     <script src="src/careerVault/vault.js"></script>
+    <script src="src/jobsApplied/storage.js"></script>
+    <script src="src/jobsApplied/controller.js"></script>
     <script src="src/resume/builder.js"></script>
     <script src="src/resume/markdown.js"></script>
     <script src="src/resume/controller.js"></script>
