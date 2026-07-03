@@ -110,6 +110,12 @@
       <button type="button" id="generate-resume">
         Generate Resume
       </button>
+      <button type="button" id="copy-resume" class="secondary-button">
+        Copy Resume
+      </button>
+      <button type="button" id="download-resume" class="secondary-button">
+        Download Markdown
+      </button>
     </div>
   </div>
 
@@ -118,6 +124,7 @@
     readonly
     placeholder="Your generated resume will appear here..."
   ></textarea>
+  <p id="resume-status" class="status-message"></p>
 </section>
 
       <section class="workspace" aria-label="Job fit analyzer">
@@ -188,6 +195,7 @@
     <script src="src/careerVault/vault.js"></script>
     <script src="src/resume/builder.js"></script>
     <script src="src/resume/markdown.js"></script>
+    <script src="src/resume/controller.js"></script>
     <script src="src/app.js"></script>
   </body>
 </html>
