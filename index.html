@@ -158,6 +158,34 @@
         <p id="cover-letter-status" class="status-message"></p>
       </section>
 
+      <section class="vault-panel">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">Application Packet</p>
+            <h2>Notes</h2>
+          </div>
+
+          <div class="button-row">
+            <button type="button" id="generate-application-packet">
+              Generate Application Packet
+            </button>
+            <button type="button" id="copy-application-notes" class="secondary-button">
+              Copy Notes
+            </button>
+            <button type="button" id="download-application-notes" class="secondary-button">
+              Download Notes
+            </button>
+          </div>
+        </div>
+
+        <textarea
+          id="application-notes-preview"
+          readonly
+          placeholder="Application notes will appear here..."
+        ></textarea>
+        <p id="application-packet-status" class="status-message"></p>
+      </section>
+
       <section class="workspace" aria-label="Job fit analyzer">
         <form class="input-panel" id="analysis-form">
           <label for="job-description">
@@ -234,6 +262,9 @@
     <script src="src/coverLetter/builder.js"></script>
     <script src="src/coverLetter/renderer.js"></script>
     <script src="src/coverLetter/controller.js"></script>
+    <script src="src/applicationPacket/builder.js"></script>
+    <script src="src/applicationPacket/renderer.js"></script>
+    <script src="src/applicationPacket/controller.js"></script>
     <script src="src/app.js"></script>
   </body>
 </html>
