@@ -84,6 +84,14 @@ This keeps the MVP easy to run, easy to understand, and easy to replace later wi
 
 Open `index.html` in a browser to run the prototype.
 
+Job application records for the Jobs Applied pipeline are stored in `data/job-applications.json`. The first storage helper lives in `tools/jobs_applied/storage.py` and supports reading, adding, updating, and validating records before a UI is added.
+
+Run the current Python tests with:
+
+```bash
+python -m unittest discover -s tests
+```
+
 ## Contributing
 
 This project is being built in public as a learning journey and product experiment. Contributions, ideas, and thoughtful critique are welcome once the public repository is live.

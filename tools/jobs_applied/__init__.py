@@ -1,0 +1,1 @@
+"""Jobs Applied storage helpers."""
