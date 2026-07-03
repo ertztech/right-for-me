@@ -14,6 +14,7 @@ The product is not just a resume generator. The deeper goal is to help someone u
 - Job Analyzer: helps compare a role against the person's experience and direction.
 - Tailoring Engine: adapts outputs for a specific job without inventing facts.
 - Professional Outputs: resumes, cover letters, LinkedIn copy, interview notes, and portfolio material.
+- Jobs Applied Pipeline: tracks job postings, fit decisions, application materials, statuses, and follow-up actions.
 
 ## Near-Term Phases
 
@@ -40,6 +41,32 @@ The product is not just a resume generator. The deeper goal is to help someone u
 
 - AI-assisted recommendations
 - Portfolio and website outputs
+
+## Jobs Applied Pipeline
+
+The Jobs Applied Pipeline is the planned workflow for turning a job posting into a tracked application. This branch only documents the direction and backlog structure; it does not build the UI or storage layer yet.
+
+Intended workflow:
+
+1. User adds or pastes a job posting.
+2. App analyzes fit against the Career Vault.
+3. App recommends Apply, Maybe, or Skip.
+4. App generates tailored resume content from existing Career Vault data.
+5. App generates tailored cover letter content from existing Career Vault data.
+6. User marks the job as Applied.
+7. App tracks follow-up dates, status, notes, and interview prep.
+
+The pipeline should keep Career Vault as the source of truth. It may select, prioritize, and organize existing evidence, but it should not invent experience.
+
+Future automation ideas:
+
+- Suggest follow-up dates after an application is marked Applied.
+- Surface stale applications that need a next action.
+- Generate interview prep notes from saved job requirements and Career Vault evidence.
+- Remind the user to update status after interviews, rejections, offers, or closed postings.
+- Export an application packet when a job moves from Reviewing to Apply.
+
+Near-term implementation should stay local, simple, and rule-based until the workflow proves useful.
 
 ## Not Yet
 
