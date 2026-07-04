@@ -103,6 +103,15 @@ function initializeJobsAppliedController() {
     extractJobIntelligenceForForm(button);
   });
 
+  document.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-prefill-fit-review]");
+    if (!button) {
+      return;
+    }
+
+    prefillFitReviewForForm(button);
+  });
+
   document.addEventListener("change", (event) => {
     const control = event.target.closest("[data-tracker-status]");
     if (!control) {
@@ -282,6 +291,74 @@ function saveFitReviewUpdates(form) {
     setJobsStatus("Fit Review saved. NextMove updated the job detail and dashboard.");
   } catch (error) {
     setJobsStatus(error.message || "Fit Review could not be saved.");
+  }
+}
+
+function prefillFitReviewForForm(button) {
+  const form = button.closest("[data-fit-review-form]");
+  if (!form) {
+    return;
+  }
+
+  const jobId = form.dataset.fitReviewForm;
+  const job = findJobById(jobId);
+  if (!job) {
+    setJobsStatus("Save an opportunity before prefilling Fit Review.");
+    return;
+  }
+
+  const existing = fitReviewValuesFromForm(form);
+  const prefill = RightForMeFitReviewPrefill.generateFitReviewPrefill(job);
+  const updates = RightForMeFitReviewPrefill.mergeFitReviewPrefill(existing, prefill);
+
+  if (!Object.keys(updates).length) {
+    setJobsStatus("No blank Fit Review fields were filled. Existing edits were preserved.");
+    return;
+  }
+
+  applyFitReviewValuesToForm(form, updates);
+  savePrefilledFitReview(form, prefill.promptVersion, prefill.modelName);
+}
+
+function savePrefilledFitReview(form, promptVersion, modelName) {
+  const values = fitReviewValuesFromForm(form);
+  const score = cleanValue(values.fitScore);
+  const recommendation = cleanValue(values.recommendation);
+  const validationError = validateFitReviewInput(score, recommendation);
+
+  if (validationError) {
+    setJobsStatus(validationError);
+    return;
+  }
+
+  const jobId = form.dataset.fitReviewForm;
+  const job = findJobById(jobId);
+  const existingFitAnalysis = job?.fitAnalysis || {};
+  const fitAnalysis = {
+    ...existingFitAnalysis,
+    fitScore: Number(score),
+    recommendation,
+    strengths: values.strengths,
+    gaps: values.gaps,
+    concerns: values.concerns,
+    suggestedPositioning: values.suggestedPositioning,
+    generatedAt: existingFitAnalysis.generatedAt || "",
+    promptVersion: existingFitAnalysis.promptVersion || promptVersion,
+    modelName: existingFitAnalysis.modelName || modelName,
+    userApproved: values.userApproved,
+  };
+
+  try {
+    RightForMeJobsAppliedStorage.updateJobApplication(jobId, {
+      fitScore: fitAnalysis.fitScore,
+      fitRecommendation: fitAnalysis.recommendation,
+      fitAnalysis,
+    });
+    selectedJobId = jobId;
+    refreshJobsAppliedViews();
+    setJobsStatus("Fit Review prefilled from Job Intelligence. Review before relying on it.");
+  } catch (error) {
+    setJobsStatus(error.message || "Fit Review could not be prefilled.");
   }
 }
 
@@ -554,7 +631,11 @@ function renderFitAnalysis(job) {
           <input name="userApproved" type="checkbox"${fitAnalysis.userApproved ? " checked" : ""}>
           User approved
         </label>
-        <button type="submit">Save Fit Review</button>
+        <p class="helper-copy">This local prefill is a first-pass recommendation based on Job Intelligence. Review and edit it before relying on it.</p>
+        <div class="button-row">
+          <button type="button" class="secondary-button" data-prefill-fit-review>Prefill from Job Intelligence</button>
+          <button type="submit">Save Fit Review</button>
+        </div>
       </form>
     </div>
   `;
@@ -866,7 +947,7 @@ function recommendedNextAction(jobs) {
       "Application packet",
       `Complete the packet for ${incompleteApplyPacketJob.roleTitle}.`,
       "This role has an Apply recommendation and still needs a saved resume draft or cover letter draft.",
-      "Open packet",
+      "Open Application Studio",
       incompleteApplyPacketJob,
       "studio"
     );
@@ -889,7 +970,7 @@ function recommendedNextAction(jobs) {
       "Application packet",
       `Build the packet for ${applyRecommendationJob.roleTitle}.`,
       "This role has an Apply recommendation. Pull the tailored resume, cover letter, and notes together.",
-      "Open packet",
+      "Open Application Studio",
       applyRecommendationJob,
       "studio"
     );
@@ -1229,14 +1310,54 @@ function statusOptions(selectedStatus) {
 }
 
 function fitRecommendationOptions(selectedRecommendation) {
-  return FIT_RECOMMENDATIONS.map((recommendation) => {
+  const options = FIT_RECOMMENDATIONS.map((recommendation) => {
     const selected = recommendation === selectedRecommendation ? " selected" : "";
     return `<option value="${escapeAttribute(recommendation)}"${selected}>${escapeHtml(recommendation)}</option>`;
   }).join("");
+
+  return `<option value="">Choose recommendation</option>${options}`;
 }
 
 function isValidJobStatus(status) {
   return JOB_STATUSES.includes(status);
+}
+
+function fitReviewValuesFromForm(form) {
+  return {
+    fitScore: cleanValue(form.elements.fitScore?.value),
+    recommendation: cleanValue(form.elements.fitRecommendation?.value),
+    strengths: linesFromText(form.elements.strengths?.value),
+    gaps: linesFromText(form.elements.gaps?.value),
+    concerns: linesFromText(form.elements.concerns?.value),
+    suggestedPositioning: cleanValue(form.elements.suggestedPositioning?.value),
+    userApproved: Boolean(form.elements.userApproved?.checked),
+  };
+}
+
+function applyFitReviewValuesToForm(form, values) {
+  const fieldMap = {
+    fitScore: "fitScore",
+    recommendation: "fitRecommendation",
+    strengths: "strengths",
+    gaps: "gaps",
+    concerns: "concerns",
+    suggestedPositioning: "suggestedPositioning",
+    userApproved: "userApproved",
+  };
+
+  Object.entries(values).forEach(([field, value]) => {
+    const control = form.elements[fieldMap[field]];
+    if (!control) {
+      return;
+    }
+
+    if (field === "userApproved") {
+      control.checked = Boolean(value);
+      return;
+    }
+
+    control.value = Array.isArray(value) ? value.join("\n") : value;
+  });
 }
 
 function jobIntelligenceValuesFromForm(form) {
@@ -1294,7 +1415,7 @@ function setJobsStatus(message) {
 }
 
 function ensureJobsRoute() {
-  if (!currentJobsRoute().page) {
+  if (!window.location.hash) {
     navigateToJobsRoute("dashboard");
   }
 }

@@ -107,7 +107,7 @@ NextMove is organizing the app around six primary experience areas:
 5. Profile / Story Bank: professional evidence and reusable career stories.
 6. Settings: preferences and future configuration.
 
-Job Intelligence v1 adds optional structured posting fields to job records, including responsibilities, required skills, preferred skills, technologies/tools, leadership expectations, certifications, and years of experience. These fields are manually editable now, with local rule-based extraction available as a first-pass helper from pasted posting text. Future AI extraction can improve quality and context, but the app should continue to support manual editing and should not require live AI calls.
+Job Intelligence v1 adds optional structured posting fields to job records, including responsibilities, required skills, preferred skills, technologies/tools, leadership expectations, certifications, and years of experience. These fields are manually editable now, with local rule-based extraction available as a first-pass helper from pasted posting text. Job Intelligence can also generate a local first-pass Fit Review with score, Apply/Maybe/Skip recommendation, strengths, gaps, concerns, and suggested positioning. Future AI extraction can improve quality and context, but the app should continue to support manual editing and should not require live AI calls.
 
 ## Not Yet
 
