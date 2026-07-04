@@ -1,17 +1,23 @@
 let careerVault = RightForMeCareerVaultStorage.loadVault();
+let careerVaultControllerApi = null;
 
 function getVault() {
   return careerVault;
 }
 
 function saveVault() {
+  careerVaultControllerApi?.syncFromForm();
+  writeVault();
+}
+
+function writeVault() {
   RightForMeCareerVaultStorage.saveVault(careerVault);
 }
 
 function initializeCareerVault() {
-  RightForMeCareerVaultController.initializeCareerVaultController({
+  careerVaultControllerApi = RightForMeCareerVaultController.initializeCareerVaultController({
     getVault,
-    saveVault,
+    saveVault: writeVault,
   });
 }
 

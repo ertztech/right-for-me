@@ -46,6 +46,10 @@ function initializeCareerVaultController(vaultStore) {
     };
   }
 
+  function syncFromForm() {
+    updatePersonFromForm();
+  }
+
   function addRole() {
     const vault = vaultStore.getVault();
 
@@ -125,6 +129,10 @@ function initializeCareerVaultController(vaultStore) {
   document.querySelector("#add-accomplishment").addEventListener("click", () => addSimpleItem("accomplishments", "#accomplishment-input"));
 
   render();
+
+  return {
+    syncFromForm,
+  };
 }
 
 window.RightForMeCareerVaultController = {
