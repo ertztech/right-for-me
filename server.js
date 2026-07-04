@@ -24,8 +24,8 @@ const server = http.createServer(async (req, res) => {
   try {
     const requestUrl = new URL(req.url, `http://${req.headers.host || "localhost"}`);
 
-    if (req.method === "POST" && requestUrl.pathname === "/api/analyze-job") {
-      await handleAnalyzeJob(req, res);
+    if (req.method === "POST" && requestUrl.pathname === "/api/review-opportunity") {
+      await handleReviewOpportunity(req, res);
       return;
     }
 
@@ -44,7 +44,7 @@ server.listen(port, () => {
   console.log(`NextMove server running at http://localhost:${port}`);
 });
 
-async function handleAnalyzeJob(req, res) {
+async function handleReviewOpportunity(req, res) {
   if (!process.env.OPENAI_API_KEY) {
     sendJson(res, 500, {
       error: "OPENAI_API_KEY is not set. Copy .env.example to .env and add your OpenAI API key.",
@@ -53,14 +53,14 @@ async function handleAnalyzeJob(req, res) {
   }
 
   const body = await readJsonBody(req);
-  const jobRecord = body.jobRecord || {};
+  const jobRecord = body.job || {};
 
   if (!String(jobRecord.sourcePostingText || "").trim()) {
     sendJson(res, 400, { error: "sourcePostingText is required before AI analysis." });
     return;
   }
 
-  const analysis = await analyzeJobWithAI(jobRecord, body.userProfile || {}, {
+  const analysis = await analyzeJobWithAI(jobRecord, body.profile || {}, {
     apiKey: process.env.OPENAI_API_KEY,
     model: process.env.OPENAI_MODEL || "gpt-5.5",
   });
