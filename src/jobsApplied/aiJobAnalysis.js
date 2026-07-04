@@ -1,31 +1,25 @@
 (function attachAIJobAnalysis(root) {
   const FIT_RECOMMENDATIONS = ["Apply", "Maybe", "Skip"];
-  const ARRAY_FIELDS = [
+  const JOB_ARRAY_FIELDS = [
     "responsibilities",
     "requiredSkills",
     "preferredSkills",
     "technologies",
     "leadershipExpectations",
     "certifications",
-    "strengths",
-    "gaps",
-    "concerns",
   ];
 
   function buildJobAnalysisPrompt(jobRecord = {}, userProfile = {}) {
     return [
-      "You are NextMove, a calm, honest career coach.",
+      "You are NextMove, a calm, honest, practical AI career coach.",
       "Analyze the job posting and return valid JSON only.",
-      "Be practical. Do not exaggerate the user's fit or invent experience.",
-      "If information is missing, use empty strings or empty arrays.",
-      "Recommendation must be one of: Apply, Maybe, Skip.",
-      "fitScore must be an integer from 0 to 100.",
+      "Do not exaggerate the user's fit or invent experience.",
+      "If information is missing, return empty strings or empty arrays.",
+      "fitScore must be a number from 0 to 100.",
+      "fitRecommendation must be one of: Apply, Maybe, Skip.",
       "",
-      "Return JSON with exactly these top-level fields:",
-      "company, roleTitle, location, salaryRange, workArrangement, responsibilities, requiredSkills, preferredSkills, technologies, leadershipExpectations, certifications, yearsExperience, fitScore, fitRecommendation, strengths, gaps, concerns, suggestedPositioning, resumeDraft, coverLetterDraft.",
-      "",
-      "resumeDraft fields: tailoredSummary, tailoredSkills, tailoredExperienceBullets, markdownContent.",
-      "coverLetterDraft fields: coverLetterContent.",
+      "Return exactly this JSON shape:",
+      JSON.stringify(responseExample(), null, 2),
       "",
       "Use the job posting as the primary source for job details.",
       "Use the user profile only for fit, positioning, and draft application content.",
@@ -98,8 +92,20 @@
     return validateAIJobAnalysis(parsed);
   }
 
-  function validateAIJobAnalysis(analysis) {
-    const normalized = {
+  function validateAIJobAnalysis(analysis = {}) {
+    const fitAnalysis = normalizeFitAnalysis(analysis.fitAnalysis || analysis);
+
+    if (!Number.isFinite(fitAnalysis.fitScore) || fitAnalysis.fitScore < 0 || fitAnalysis.fitScore > 100) {
+      throw new Error("AI response fitScore must be 0-100.");
+    }
+
+    fitAnalysis.fitScore = Math.round(fitAnalysis.fitScore);
+
+    if (!FIT_RECOMMENDATIONS.includes(fitAnalysis.fitRecommendation)) {
+      throw new Error("AI response fitRecommendation must be Apply, Maybe, or Skip.");
+    }
+
+    return {
       company: stringValue(analysis.company),
       roleTitle: stringValue(analysis.roleTitle),
       location: stringValue(analysis.location),
@@ -112,34 +118,32 @@
       leadershipExpectations: arrayValue(analysis.leadershipExpectations),
       certifications: arrayValue(analysis.certifications),
       yearsExperience: stringValue(analysis.yearsExperience),
-      fitScore: Number(analysis.fitScore),
-      fitRecommendation: stringValue(analysis.fitRecommendation),
-      strengths: arrayValue(analysis.strengths),
-      gaps: arrayValue(analysis.gaps),
-      concerns: arrayValue(analysis.concerns),
-      suggestedPositioning: stringValue(analysis.suggestedPositioning),
+      fitAnalysis,
+      fitScore: fitAnalysis.fitScore,
+      fitRecommendation: fitAnalysis.fitRecommendation,
+      strengths: fitAnalysis.strengths,
+      gaps: fitAnalysis.gaps,
+      concerns: fitAnalysis.concerns,
+      suggestedPositioning: fitAnalysis.suggestedPositioning,
       resumeDraft: {
         tailoredSummary: stringValue(analysis.resumeDraft?.tailoredSummary),
         tailoredSkills: arrayValue(analysis.resumeDraft?.tailoredSkills),
         tailoredExperienceBullets: arrayValue(analysis.resumeDraft?.tailoredExperienceBullets),
         markdownContent: stringValue(analysis.resumeDraft?.markdownContent),
+        userApproved: booleanValue(analysis.resumeDraft?.userApproved),
       },
       coverLetterDraft: {
         coverLetterContent: stringValue(analysis.coverLetterDraft?.coverLetterContent),
+        userApproved: booleanValue(analysis.coverLetterDraft?.userApproved),
       },
+      interviewPrep: {
+        likelyQuestions: arrayValue(analysis.interviewPrep?.likelyQuestions),
+        storiesToPrepare: arrayValue(analysis.interviewPrep?.storiesToPrepare),
+        riskAreas: arrayValue(analysis.interviewPrep?.riskAreas),
+        salaryNotes: stringValue(analysis.interviewPrep?.salaryNotes),
+      },
+      nextAction: stringValue(analysis.nextAction),
     };
-
-    if (!Number.isFinite(normalized.fitScore) || normalized.fitScore < 0 || normalized.fitScore > 100) {
-      throw new Error("AI response fitScore must be 0-100.");
-    }
-
-    normalized.fitScore = Math.round(normalized.fitScore);
-
-    if (!FIT_RECOMMENDATIONS.includes(normalized.fitRecommendation)) {
-      throw new Error("AI response fitRecommendation must be Apply, Maybe, or Skip.");
-    }
-
-    return normalized;
   }
 
   function mergeAIJobAnalysis(existingJob = {}, analysis = {}) {
@@ -152,43 +156,25 @@
       "salaryRange",
       "workArrangement",
       "yearsExperience",
+      "nextAction",
     ].forEach((field) => {
       addIfBlank(merged, existingJob, field, analysis[field]);
     });
 
-    ARRAY_FIELDS.slice(0, 6).forEach((field) => {
+    JOB_ARRAY_FIELDS.forEach((field) => {
       addIfBlank(merged, existingJob, field, analysis[field]);
     });
 
-    const existingFit = {
-      ...(existingJob.fitAnalysis || {}),
-      fitScore: existingJob.fitAnalysis?.fitScore ?? existingJob.fitScore,
-      recommendation: existingJob.fitAnalysis?.recommendation ?? existingJob.fitRecommendation,
-    };
-    const fitUpdates = {};
-    addIfBlank(fitUpdates, existingFit, "fitScore", analysis.fitScore);
-    addIfBlank(fitUpdates, existingFit, "recommendation", analysis.fitRecommendation);
-    addIfBlank(fitUpdates, existingFit, "strengths", analysis.strengths);
-    addIfBlank(fitUpdates, existingFit, "gaps", analysis.gaps);
-    addIfBlank(fitUpdates, existingFit, "concerns", analysis.concerns);
-    addIfBlank(fitUpdates, existingFit, "suggestedPositioning", analysis.suggestedPositioning);
+    const fitAnalysis = mergeFitAnalysis(existingJob, analysis.fitAnalysis || analysis);
+    if (fitAnalysis) {
+      merged.fitAnalysis = fitAnalysis;
 
-    if (Object.keys(fitUpdates).length) {
-      merged.fitAnalysis = {
-        ...existingFit,
-        ...fitUpdates,
-        generatedAt: existingFit.generatedAt || new Date().toISOString(),
-        promptVersion: existingFit.promptVersion || "live-ai-job-analysis-v1",
-        modelName: existingFit.modelName || "openai",
-        userApproved: existingFit.userApproved || false,
-      };
-
-      if (isBlank(existingJob.fitScore) && !isBlank(merged.fitAnalysis.fitScore)) {
-        merged.fitScore = merged.fitAnalysis.fitScore;
+      if (isBlank(existingJob.fitScore) && !isBlank(fitAnalysis.fitScore)) {
+        merged.fitScore = fitAnalysis.fitScore;
       }
 
-      if (isBlank(existingJob.fitRecommendation) && !isBlank(merged.fitAnalysis.recommendation)) {
-        merged.fitRecommendation = merged.fitAnalysis.recommendation;
+      if (isBlank(existingJob.fitRecommendation) && !isBlank(fitAnalysis.fitRecommendation)) {
+        merged.fitRecommendation = fitAnalysis.fitRecommendation;
       }
     }
 
@@ -206,12 +192,58 @@
       merged.coverLetterDraft = coverLetterDraft;
     }
 
+    const interviewPrep = mergeDraft(existingJob.interviewPrep || {}, analysis.interviewPrep || {}, {
+      promptVersion: "interview-prep-live-ai-v1",
+    });
+    if (interviewPrep) {
+      merged.interviewPrep = interviewPrep;
+    }
+
     return merged;
+  }
+
+  function mergeFitAnalysis(existingJob, incomingFitAnalysis) {
+    const existingFit = {
+      ...(existingJob.fitAnalysis || {}),
+      fitScore: existingJob.fitAnalysis?.fitScore ?? existingJob.fitScore,
+      fitRecommendation: existingJob.fitAnalysis?.fitRecommendation ?? existingJob.fitRecommendation,
+      recommendation: existingJob.fitAnalysis?.recommendation ?? existingJob.fitRecommendation,
+    };
+    const updates = {};
+
+    addIfBlank(updates, existingFit, "fitScore", incomingFitAnalysis.fitScore);
+    addIfBlank(updates, existingFit, "fitRecommendation", incomingFitAnalysis.fitRecommendation);
+    addIfBlank(updates, existingFit, "strengths", incomingFitAnalysis.strengths);
+    addIfBlank(updates, existingFit, "gaps", incomingFitAnalysis.gaps);
+    addIfBlank(updates, existingFit, "concerns", incomingFitAnalysis.concerns);
+    addIfBlank(updates, existingFit, "suggestedPositioning", incomingFitAnalysis.suggestedPositioning);
+
+    if (!Object.keys(updates).length) {
+      return null;
+    }
+
+    const mergedFit = {
+      ...existingFit,
+      ...updates,
+      generatedAt: existingFit.generatedAt || new Date().toISOString(),
+      promptVersion: existingFit.promptVersion || "opportunity-review-live-ai-v1",
+      modelName: existingFit.modelName || "openai",
+      userApproved: existingFit.userApproved || booleanValue(incomingFitAnalysis.userApproved),
+    };
+
+    mergedFit.recommendation = mergedFit.recommendation || mergedFit.fitRecommendation;
+    mergedFit.fitRecommendation = mergedFit.fitRecommendation || mergedFit.recommendation;
+
+    return mergedFit;
   }
 
   function mergeDraft(existingDraft, incomingDraft, defaults) {
     const updates = {};
     Object.keys(incomingDraft).forEach((field) => {
+      if (field === "userApproved") {
+        return;
+      }
+
       addIfBlank(updates, existingDraft, field, incomingDraft[field]);
     });
 
@@ -225,7 +257,7 @@
       generatedAt: existingDraft.generatedAt || new Date().toISOString(),
       promptVersion: existingDraft.promptVersion || defaults.promptVersion,
       modelName: existingDraft.modelName || "openai",
-      userApproved: existingDraft.userApproved || false,
+      userApproved: existingDraft.userApproved || booleanValue(incomingDraft.userApproved),
     };
 
     if (mergedDraft.markdownContent && !mergedDraft.markdownPreview) {
@@ -253,10 +285,22 @@
       .join("");
   }
 
+  function normalizeFitAnalysis(fitAnalysis = {}) {
+    return {
+      fitScore: Number(fitAnalysis.fitScore),
+      fitRecommendation: stringValue(fitAnalysis.fitRecommendation || fitAnalysis.recommendation),
+      strengths: arrayValue(fitAnalysis.strengths),
+      gaps: arrayValue(fitAnalysis.gaps),
+      concerns: arrayValue(fitAnalysis.concerns),
+      suggestedPositioning: stringValue(fitAnalysis.suggestedPositioning),
+      userApproved: booleanValue(fitAnalysis.userApproved),
+    };
+  }
+
   function responseJsonSchema() {
     return {
       type: "json_schema",
-      name: "nextmove_job_analysis",
+      name: "nextmove_opportunity_review",
       strict: true,
       schema: {
         type: "object",
@@ -274,14 +318,11 @@
           "leadershipExpectations",
           "certifications",
           "yearsExperience",
-          "fitScore",
-          "fitRecommendation",
-          "strengths",
-          "gaps",
-          "concerns",
-          "suggestedPositioning",
+          "fitAnalysis",
           "resumeDraft",
           "coverLetterDraft",
+          "interviewPrep",
+          "nextAction",
         ],
         properties: {
           company: { type: "string" },
@@ -296,32 +337,114 @@
           leadershipExpectations: arraySchema(),
           certifications: arraySchema(),
           yearsExperience: { type: "string" },
-          fitScore: { type: "integer", minimum: 0, maximum: 100 },
-          fitRecommendation: { type: "string", enum: FIT_RECOMMENDATIONS },
-          strengths: arraySchema(),
-          gaps: arraySchema(),
-          concerns: arraySchema(),
-          suggestedPositioning: { type: "string" },
-          resumeDraft: {
-            type: "object",
-            additionalProperties: false,
-            required: ["tailoredSummary", "tailoredSkills", "tailoredExperienceBullets", "markdownContent"],
-            properties: {
-              tailoredSummary: { type: "string" },
-              tailoredSkills: arraySchema(),
-              tailoredExperienceBullets: arraySchema(),
-              markdownContent: { type: "string" },
-            },
-          },
-          coverLetterDraft: {
-            type: "object",
-            additionalProperties: false,
-            required: ["coverLetterContent"],
-            properties: {
-              coverLetterContent: { type: "string" },
-            },
-          },
+          fitAnalysis: fitAnalysisSchema(),
+          resumeDraft: resumeDraftSchema(),
+          coverLetterDraft: coverLetterDraftSchema(),
+          interviewPrep: interviewPrepSchema(),
+          nextAction: { type: "string" },
         },
+      },
+    };
+  }
+
+  function responseExample() {
+    return {
+      company: "",
+      roleTitle: "",
+      location: "",
+      salaryRange: "",
+      workArrangement: "",
+      responsibilities: [],
+      requiredSkills: [],
+      preferredSkills: [],
+      technologies: [],
+      leadershipExpectations: [],
+      certifications: [],
+      yearsExperience: "",
+      fitAnalysis: {
+        fitScore: 0,
+        fitRecommendation: "Maybe",
+        strengths: [],
+        gaps: [],
+        concerns: [],
+        suggestedPositioning: "",
+        userApproved: false,
+      },
+      resumeDraft: {
+        tailoredSummary: "",
+        tailoredSkills: [],
+        tailoredExperienceBullets: [],
+        markdownContent: "",
+        userApproved: false,
+      },
+      coverLetterDraft: {
+        coverLetterContent: "",
+        userApproved: false,
+      },
+      interviewPrep: {
+        likelyQuestions: [],
+        storiesToPrepare: [],
+        riskAreas: [],
+        salaryNotes: "",
+      },
+      nextAction: "",
+    };
+  }
+
+  function fitAnalysisSchema() {
+    return {
+      type: "object",
+      additionalProperties: false,
+      required: ["fitScore", "fitRecommendation", "strengths", "gaps", "concerns", "suggestedPositioning", "userApproved"],
+      properties: {
+        fitScore: { type: "integer", minimum: 0, maximum: 100 },
+        fitRecommendation: { type: "string", enum: FIT_RECOMMENDATIONS },
+        strengths: arraySchema(),
+        gaps: arraySchema(),
+        concerns: arraySchema(),
+        suggestedPositioning: { type: "string" },
+        userApproved: { type: "boolean" },
+      },
+    };
+  }
+
+  function resumeDraftSchema() {
+    return {
+      type: "object",
+      additionalProperties: false,
+      required: ["tailoredSummary", "tailoredSkills", "tailoredExperienceBullets", "markdownContent", "userApproved"],
+      properties: {
+        tailoredSummary: { type: "string" },
+        tailoredSkills: arraySchema(),
+        tailoredExperienceBullets: arraySchema(),
+        markdownContent: { type: "string" },
+        userApproved: { type: "boolean" },
+      },
+    };
+  }
+
+  function coverLetterDraftSchema() {
+    return {
+      type: "object",
+      additionalProperties: false,
+      required: ["coverLetterContent", "userApproved"],
+      properties: {
+        coverLetterContent: { type: "string" },
+        userApproved: { type: "boolean" },
+      },
+    };
+  }
+
+  function interviewPrepSchema() {
+    return {
+      type: "object",
+      additionalProperties: false,
+      required: ["likelyQuestions", "storiesToPrepare", "riskAreas", "salaryNotes"],
+      properties: {
+        likelyQuestions: arraySchema(),
+        storiesToPrepare: arraySchema(),
+        riskAreas: arraySchema(),
+        salaryNotes: { type: "string" },
       },
     };
   }
@@ -332,6 +455,10 @@
 
   function arrayValue(value) {
     return Array.isArray(value) ? value.map(stringValue).filter(Boolean) : [];
+  }
+
+  function booleanValue(value) {
+    return value === true;
   }
 
   function stringValue(value) {

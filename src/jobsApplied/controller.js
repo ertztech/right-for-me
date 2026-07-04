@@ -104,12 +104,12 @@ function initializeJobsAppliedController() {
   });
 
   document.addEventListener("click", (event) => {
-    const button = event.target.closest("[data-analyze-job-ai]");
+    const button = event.target.closest("[data-review-opportunity]");
     if (!button) {
       return;
     }
 
-    analyzeJobWithAIForForm(button);
+    reviewOpportunityWithAIForForm(button);
   });
 
   document.addEventListener("click", (event) => {
@@ -236,7 +236,7 @@ function extractJobIntelligenceForForm(button) {
   );
 }
 
-async function analyzeJobWithAIForForm(button) {
+async function reviewOpportunityWithAIForForm(button) {
   const form = button.closest("[data-job-intelligence-form]");
   if (!form) {
     return;
@@ -245,13 +245,13 @@ async function analyzeJobWithAIForForm(button) {
   const jobId = form.dataset.jobIntelligenceForm;
   const sourcePostingText = cleanValue(form.elements.sourcePostingText?.value);
   if (!sourcePostingText) {
-    setJobsStatus("Paste the source posting text before running AI analysis.");
+    setJobsStatus("Paste the source posting text before reviewing this opportunity.");
     return;
   }
 
   const savedJob = findJobById(jobId);
   if (!savedJob) {
-    setJobsStatus("Save the opportunity before running AI analysis.");
+    setJobsStatus("Save the opportunity before reviewing it.");
     return;
   }
 
@@ -262,22 +262,22 @@ async function analyzeJobWithAIForForm(button) {
   const originalText = button.textContent;
 
   button.disabled = true;
-  button.textContent = "Analyzing...";
-  setJobsStatus("NextMove is analyzing the posting with AI. This may take a moment.");
+  button.textContent = "Reviewing...";
+  setJobsStatus("Reviewing opportunity...");
 
   try {
-    const response = await fetch("/api/analyze-job", {
+    const response = await fetch("/api/review-opportunity", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        jobRecord,
-        userProfile: readCareerVaultProfile(),
+        job: jobRecord,
+        profile: readCareerVaultProfile(),
       }),
     });
     const payload = await response.json().catch(() => ({}));
 
     if (!response.ok) {
-      throw new Error(payload.error || "AI analysis could not be completed.");
+      throw new Error(payload.error || "Opportunity review could not be completed.");
     }
 
     const analysis = RightForMeAIJobAnalysis.validateAIJobAnalysis(payload.analysis || {});
@@ -285,16 +285,19 @@ async function analyzeJobWithAIForForm(button) {
     const updates = RightForMeAIJobAnalysis.mergeAIJobAnalysis(savedJob, analysis);
 
     if (!Object.keys(updates).length) {
-      setJobsStatus("AI analysis returned valid data, but no blank fields needed updates.");
+      setJobsStatus("Opportunity review returned valid data, but no blank fields needed updates.");
       return;
     }
 
     RightForMeJobsAppliedStorage.updateJobApplication(jobId, updates);
     selectedJobId = jobId;
     refreshJobsAppliedViews();
-    setJobsStatus("AI analysis saved. Opportunity Review, Fit Review, and Application Studio were refreshed.");
+    setJobsStatus("Opportunity review saved.");
   } catch (error) {
-    setJobsStatus(error.message || "AI analysis could not be completed.");
+    const message = error instanceof TypeError
+      ? "Opportunity review could not reach the local backend. Run node server.js and open the app from http://localhost:4173."
+      : error.message || "Opportunity review could not be completed.";
+    setJobsStatus(message);
   } finally {
     button.disabled = false;
     button.textContent = originalText;
@@ -1209,10 +1212,10 @@ function jobIntelligenceForm(job) {
         Source Posting Text
         <textarea name="sourcePostingText" rows="8">${escapeHtml(job.sourcePostingText || "")}</textarea>
       </label>
-      <p class="helper-copy">Use rule-based extraction for a fast local pass, or Analyze with AI when OPENAI_API_KEY is configured. Both can be edited before you rely on them.</p>
+      <p class="helper-copy">Use rule-based extraction for a fast local fallback, or Review Opportunity when OPENAI_API_KEY is configured. Both can be edited before you rely on them.</p>
       <div class="button-row">
         <button type="button" class="secondary-button" data-extract-job-intelligence>Extract from posting</button>
-        <button type="button" class="secondary-button" data-analyze-job-ai>Analyze with AI</button>
+        <button type="button" class="secondary-button" data-review-opportunity>Review Opportunity</button>
         <button type="submit">Save Opportunity Intelligence</button>
       </div>
     </form>
