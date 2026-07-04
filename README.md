@@ -96,7 +96,11 @@ The first lightweight Jobs Applied app pages are available in `index.html`. The 
 
 Jobs Applied pages use hash routes, starting at `#/jobs/dashboard`. Opportunity Review includes job intake, manually editable Job Intelligence fields, and Fit Review context. Application Studio groups resume drafts, cover letter drafts, and packet notes. Job Intelligence has local rule-based extraction from pasted posting text, can generate a local first-pass Fit Review, and now includes an optional live AI-powered Review Opportunity pass.
 
-AI output structure and prompt templates have been added for fit analysis, tailored resume, cover letter drafts, and interview prep. Live AI opportunity review is available through a small local Node server, and it requires an OpenAI API key.
+Application Studio now includes a Resume Generation MVP. Generate Resume creates a deterministic local resume draft from the selected opportunity, Job Intelligence, Fit Review, Profile / Story Bank, background notes, and existing application information. The draft is saved on the selected job record in browser localStorage, so it remains available after refreshing the browser.
+
+AI output structure and prompt templates have been added for fit analysis, tailored resume, cover letter drafts, and interview prep. Live AI opportunity review is available through a small local Node server, and it requires an OpenAI API key. Resume generation currently falls back to deterministic local generation; future AI improvements can add a backend-only resume endpoint without exposing API keys to frontend code.
+
+The app also includes a small reusable action feedback helper. Important actions can show idle, working, success, and failure states; buttons disable while work is running and restore after completion. This keeps clicks visible without adding a notification library.
 
 ### Live AI setup
 
@@ -135,7 +139,22 @@ Run the current JavaScript helper tests with:
 node tests/jobIntelligenceExtractor.test.js
 node tests/fitReviewPrefill.test.js
 node tests/aiJobAnalysis.test.js
+node tests/resumeGenerator.test.js
+node tests/resumeGenerateButton.test.js
+node tests/actionFeedback.test.js
 ```
+
+### Manual testing
+
+1. Start the local server with `node server.js`.
+2. Open `http://localhost:4173`.
+3. Add or select a saved opportunity in Opportunity Review.
+4. Paste a job posting and click `Review Opportunity`; confirm the button shows a working state and a success or useful error message.
+5. Open Application Studio and click `Generate Resume`; confirm the resume draft appears and the status says it was saved.
+6. Refresh the browser and reopen the same job; confirm the resume draft is still present.
+7. Try an error case, such as clicking `Review Opportunity` without running the local server or without `OPENAI_API_KEY`; confirm the error is readable and not silent.
+
+Current limitations: resume generation is deterministic local logic, not a live AI resume call yet. It prioritizes existing Profile / Story Bank and job-record evidence and does not invent experience.
 
 ## Contributing
 

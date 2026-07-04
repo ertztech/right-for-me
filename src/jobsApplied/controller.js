@@ -113,6 +113,15 @@ function initializeJobsAppliedController() {
   });
 
   document.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-generate-resume-draft]");
+    if (!button) {
+      return;
+    }
+
+    generateResumeDraftForJob(button);
+  });
+
+  document.addEventListener("click", (event) => {
     const button = event.target.closest("[data-prefill-fit-review]");
     if (!button) {
       return;
@@ -200,7 +209,7 @@ function saveJobIntelligenceUpdates(form) {
   };
 
   if (!updates.company || !updates.roleTitle) {
-    setJobsStatus("Company and role title are required before saving Opportunity Intelligence.");
+    setJobsStatus("Company and role title are required before saving Opportunity Intelligence.", "failure");
     return;
   }
 
@@ -215,7 +224,7 @@ function extractJobIntelligenceForForm(button) {
 
   const sourceText = cleanValue(form.elements.sourcePostingText?.value);
   if (!sourceText) {
-    setJobsStatus("Paste the source posting text before extracting Job Intelligence.");
+    setJobsStatus("Paste the source posting text before extracting Job Intelligence.", "failure");
     return;
   }
 
@@ -224,7 +233,7 @@ function extractJobIntelligenceForForm(button) {
   const updates = RightForMeJobIntelligenceExtractor.mergeExtractedJobIntelligence(existing, extracted);
 
   if (!Object.keys(updates).length) {
-    setJobsStatus("No blank Job Intelligence fields were filled. Existing edits were preserved.");
+    setJobsStatus("No blank Job Intelligence fields were filled. Existing edits were preserved.", "idle");
     return;
   }
 
@@ -245,13 +254,13 @@ async function reviewOpportunityWithAIForForm(button) {
   const jobId = form.dataset.jobIntelligenceForm;
   const sourcePostingText = cleanValue(form.elements.sourcePostingText?.value);
   if (!sourcePostingText) {
-    setJobsStatus("Paste the source posting text before reviewing this opportunity.");
+    setJobsStatus("Paste the source posting text before reviewing this opportunity.", "failure");
     return;
   }
 
   const savedJob = findJobById(jobId);
   if (!savedJob) {
-    setJobsStatus("Save the opportunity before reviewing it.");
+    setJobsStatus("Save the opportunity before reviewing it.", "failure");
     return;
   }
 
@@ -259,13 +268,13 @@ async function reviewOpportunityWithAIForForm(button) {
     ...savedJob,
     ...jobIntelligenceValuesFromForm(form),
   };
-  const originalText = button.textContent;
+  const feedback = createJobsActionFeedback(button, {
+    workingText: "Reviewing...",
+    successText: "Opportunity review saved.",
+    failureText: "Opportunity review could not be completed.",
+  });
 
-  button.disabled = true;
-  button.textContent = "Reviewing...";
-  setJobsStatus("Reviewing opportunity...");
-
-  try {
+  await feedback.run(async () => {
     const response = await fetch("/api/review-opportunity", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -285,23 +294,86 @@ async function reviewOpportunityWithAIForForm(button) {
     const updates = RightForMeAIJobAnalysis.mergeAIJobAnalysis(savedJob, analysis);
 
     if (!Object.keys(updates).length) {
-      setJobsStatus("Opportunity review returned valid data, but no blank fields needed updates.");
-      return;
+      return { message: "Opportunity review returned valid data, but no blank fields needed updates." };
     }
 
     RightForMeJobsAppliedStorage.updateJobApplication(jobId, updates);
     selectedJobId = jobId;
     refreshJobsAppliedViews();
-    setJobsStatus("Opportunity review saved.");
-  } catch (error) {
-    const message = error instanceof TypeError
-      ? "Opportunity review could not reach the local backend. Run node server.js and open the app from http://localhost:4173."
-      : error.message || "Opportunity review could not be completed.";
-    setJobsStatus(message);
-  } finally {
-    button.disabled = false;
-    button.textContent = originalText;
+    return { message: "Opportunity review saved." };
+  }).then((result) => {
+    if (result?.error instanceof TypeError) {
+      setJobsStatus(
+        "Opportunity review could not reach the local backend. Run node server.js and open the app from http://localhost:4173.",
+        "failure"
+      );
+    }
+  });
+}
+
+async function generateResumeDraftForJob(button) {
+  const jobId = button.dataset.generateResumeDraft || selectedJobId;
+  const feedback = createJobsActionFeedback(button, {
+    workingText: "Generating...",
+    successText: "Resume generated and saved.",
+    failureText: "Resume could not be generated.",
+  });
+
+  return feedback.run(async () => {
+    const result = generateResumeForJob(jobId);
+    return {
+      ...result,
+      message: "Resume generated and saved.",
+    };
+  });
+}
+
+function generateResumeForJob(jobId = selectedJobId) {
+  const job = findJobById(jobId);
+  if (!job) {
+    throw new Error("Select or save an opportunity before generating a resume.");
   }
+
+  RightForMeCareerVault.saveVault();
+
+  const resumeDraft = NextMoveResumeGenerator.generateResumeDraft({
+    job,
+    careerVault: RightForMeCareerVault.getVault(),
+    backgroundNotes: document.querySelector("#candidate-background")?.value || "",
+  });
+  const updatedJob = RightForMeJobsAppliedStorage.updateJobApplication(job.id, {
+    resumeDraft: {
+      ...(job.resumeDraft || {}),
+      ...resumeDraft,
+      userApproved: job.resumeDraft?.userApproved || false,
+    },
+  });
+  const resumePreview = document.querySelector("#resume-preview");
+
+  if (resumePreview) {
+    resumePreview.value = resumeDraft.markdownContent;
+  }
+
+  selectedJobId = job.id;
+  refreshJobsAppliedViews();
+
+  return {
+    job: updatedJob,
+    markdown: resumeDraft.markdownContent,
+    resumeDraft,
+  };
+}
+
+function selectedJob() {
+  return selectedJobId ? findJobById(selectedJobId) : null;
+}
+
+function createJobsActionFeedback(button, messages) {
+  return NextMoveActionFeedback.createActionFeedback({
+    button,
+    statusNode: document.querySelector("#jobs-applied-status"),
+    ...messages,
+  });
 }
 
 function saveJobDetailUpdates(form) {
@@ -315,7 +387,7 @@ function saveJobDetailUpdates(form) {
   };
 
   if (!isValidJobStatus(updates.status)) {
-    setJobsStatus("Choose a valid job status before saving.");
+    setJobsStatus("Choose a valid job status before saving.", "failure");
     return;
   }
 
@@ -323,9 +395,9 @@ function saveJobDetailUpdates(form) {
     RightForMeJobsAppliedStorage.updateJobApplication(jobId, updates);
     selectedJobId = jobId;
     refreshJobsAppliedViews();
-    setJobsStatus("Job details saved. Your dashboard is up to date.");
+    setJobsStatus("Job details saved. Your dashboard is up to date.", "success");
   } catch (error) {
-    setJobsStatus(error.message || "Job details could not be saved.");
+    setJobsStatus(error.message || "Job details could not be saved.", "failure");
   }
 }
 
@@ -337,7 +409,7 @@ function saveFitReviewUpdates(form) {
   const validationError = validateFitReviewInput(score, recommendation);
 
   if (validationError) {
-    setJobsStatus(validationError);
+    setJobsStatus(validationError, "failure");
     return;
   }
 
@@ -365,9 +437,9 @@ function saveFitReviewUpdates(form) {
     });
     selectedJobId = jobId;
     refreshJobsAppliedViews();
-    setJobsStatus("Fit Review saved. NextMove updated the job detail and dashboard.");
+    setJobsStatus("Fit Review saved. NextMove updated the job detail and dashboard.", "success");
   } catch (error) {
-    setJobsStatus(error.message || "Fit Review could not be saved.");
+    setJobsStatus(error.message || "Fit Review could not be saved.", "failure");
   }
 }
 
@@ -380,7 +452,7 @@ function prefillFitReviewForForm(button) {
   const jobId = form.dataset.fitReviewForm;
   const job = findJobById(jobId);
   if (!job) {
-    setJobsStatus("Save an opportunity before prefilling Fit Review.");
+    setJobsStatus("Save an opportunity before prefilling Fit Review.", "failure");
     return;
   }
 
@@ -389,7 +461,7 @@ function prefillFitReviewForForm(button) {
   const updates = RightForMeFitReviewPrefill.mergeFitReviewPrefill(existing, prefill);
 
   if (!Object.keys(updates).length) {
-    setJobsStatus("No blank Fit Review fields were filled. Existing edits were preserved.");
+    setJobsStatus("No blank Fit Review fields were filled. Existing edits were preserved.", "idle");
     return;
   }
 
@@ -404,7 +476,7 @@ function savePrefilledFitReview(form, promptVersion, modelName) {
   const validationError = validateFitReviewInput(score, recommendation);
 
   if (validationError) {
-    setJobsStatus(validationError);
+    setJobsStatus(validationError, "failure");
     return;
   }
 
@@ -433,9 +505,9 @@ function savePrefilledFitReview(form, promptVersion, modelName) {
     });
     selectedJobId = jobId;
     refreshJobsAppliedViews();
-    setJobsStatus("Fit Review prefilled from Job Intelligence. Review before relying on it.");
+    setJobsStatus("Fit Review prefilled from Job Intelligence. Review before relying on it.", "success");
   } catch (error) {
-    setJobsStatus(error.message || "Fit Review could not be prefilled.");
+    setJobsStatus(error.message || "Fit Review could not be prefilled.", "failure");
   }
 }
 
@@ -496,9 +568,9 @@ function saveJobDraft(jobId, updates, successMessage) {
     RightForMeJobsAppliedStorage.updateJobApplication(jobId, updates);
     selectedJobId = jobId;
     refreshJobsAppliedViews();
-    setJobsStatus(successMessage);
+    setJobsStatus(successMessage, "success");
   } catch (error) {
-    setJobsStatus(error.message || "Changes could not be saved.");
+    setJobsStatus(error.message || "Changes could not be saved.", "failure");
   }
 }
 
@@ -507,7 +579,7 @@ function saveTrackerStatus(control) {
   const status = cleanValue(control.value);
 
   if (!isValidJobStatus(status)) {
-    setJobsStatus("Choose a valid job status before saving.");
+    setJobsStatus("Choose a valid job status before saving.", "failure");
     refreshJobsAppliedViews();
     return;
   }
@@ -516,9 +588,9 @@ function saveTrackerStatus(control) {
     RightForMeJobsAppliedStorage.updateJobApplication(jobId, { status });
     selectedJobId = jobId;
     refreshJobsAppliedViews();
-    setJobsStatus("Status updated. NextMove refreshed your dashboard and tracker.");
+    setJobsStatus("Status updated. NextMove refreshed your dashboard and tracker.", "success");
   } catch (error) {
-    setJobsStatus(error.message || "Status could not be updated.");
+    setJobsStatus(error.message || "Status could not be updated.", "failure");
     refreshJobsAppliedViews();
   }
 }
@@ -755,7 +827,10 @@ function renderResumeBuilder(job) {
           <input name="userApproved" type="checkbox"${resumeDraft.userApproved ? " checked" : ""}>
           User approved
         </label>
-        <button type="submit">Save Resume Draft</button>
+        <div class="button-row">
+          <button type="button" class="secondary-button" data-generate-resume-draft="${escapeAttribute(job.id)}">Generate Resume</button>
+          <button type="submit">Save Resume Draft</button>
+        </div>
       </form>
     </div>
   `;
@@ -1271,7 +1346,10 @@ function resumeDraftEditorBlock(job) {
         <input name="userApproved" type="checkbox"${resumeDraft.userApproved ? " checked" : ""}>
         User approved
       </label>
-      <button type="submit">Save Resume Draft</button>
+      <div class="button-row">
+        <button type="button" class="secondary-button" data-generate-resume-draft="${escapeAttribute(job.id)}">Generate Resume</button>
+        <button type="submit">Save Resume Draft</button>
+      </div>
     </form>
   `;
 }
@@ -1496,8 +1574,10 @@ function cleanValue(value) {
   return String(value || "").trim();
 }
 
-function setJobsStatus(message) {
-  document.querySelector("#jobs-applied-status").textContent = message;
+function setJobsStatus(message, state = "idle") {
+  const node = document.querySelector("#jobs-applied-status");
+  node.textContent = message;
+  node.dataset.actionState = state;
 }
 
 function ensureJobsRoute() {
@@ -1609,4 +1689,6 @@ function escapeAttribute(value) {
 
 window.RightForMeJobsAppliedController = {
   initializeJobsAppliedController,
+  generateResumeForSelectedJob: generateResumeForJob,
+  selectedJob,
 };
