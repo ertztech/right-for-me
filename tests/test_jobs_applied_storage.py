@@ -89,6 +89,70 @@ class JobsAppliedStorageTests(unittest.TestCase):
         self.assertEqual(saved["fitAnalysis"]["strengths"][0], "Strong transformation background")
         self.assertEqual(saved["company"], "Example Company")
 
+    def test_updating_resume_draft_persists(self) -> None:
+        add_job_application(sample_record(), self.storage_path)
+
+        update_job_application(
+            "job_2026_0001",
+            {
+                "resumeDraft": {
+                    "tailoredSummary": "Transformation leader focused on measurable operations results.",
+                    "tailoredSkills": ["Transformation", "Metrics"],
+                    "tailoredExperienceBullets": ["Improved cross-functional operating rhythm."],
+                    "markdownContent": "## Resume\nTransformation leader...",
+                    "markdownPreview": "## Resume\nTransformation leader...",
+                    "generatedAt": "",
+                    "promptVersion": "tailored-resume-v1",
+                    "modelName": "manual",
+                    "userApproved": True,
+                },
+            },
+            self.storage_path,
+        )
+
+        saved = read_job_applications(self.storage_path)[0]
+        self.assertEqual(saved["resumeDraft"]["modelName"], "manual")
+        self.assertTrue(saved["resumeDraft"]["userApproved"])
+        self.assertEqual(saved["resumeDraft"]["tailoredSkills"], ["Transformation", "Metrics"])
+        self.assertEqual(saved["company"], "Example Company")
+
+    def test_updating_cover_letter_draft_persists(self) -> None:
+        add_job_application(sample_record(), self.storage_path)
+
+        update_job_application(
+            "job_2026_0001",
+            {
+                "coverLetterDraft": {
+                    "coverLetterContent": "Dear Hiring Team...",
+                    "draftText": "Dear Hiring Team...",
+                    "toneNote": "Warm, friendly, confident, and human.",
+                    "generatedAt": "",
+                    "promptVersion": "cover-letter-v1",
+                    "modelName": "manual",
+                    "userApproved": False,
+                },
+            },
+            self.storage_path,
+        )
+
+        saved = read_job_applications(self.storage_path)[0]
+        self.assertEqual(saved["coverLetterDraft"]["coverLetterContent"], "Dear Hiring Team...")
+        self.assertEqual(saved["coverLetterDraft"]["modelName"], "manual")
+        self.assertEqual(saved["roleTitle"], "Operations Transformation Lead")
+
+    def test_updating_packet_notes_persists(self) -> None:
+        add_job_application(sample_record(), self.storage_path)
+
+        update_job_application(
+            "job_2026_0001",
+            {"notes": "Packet ready. Follow up next Friday."},
+            self.storage_path,
+        )
+
+        saved = read_job_applications(self.storage_path)[0]
+        self.assertEqual(saved["notes"], "Packet ready. Follow up next Friday.")
+        self.assertEqual(saved["fitRecommendation"], "Apply")
+
     def test_rejecting_record_missing_required_fields(self) -> None:
         record = sample_record()
         record["company"] = ""
