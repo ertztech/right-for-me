@@ -12,6 +12,7 @@ const JOB_APPLICATION_STATUSES = [
   "Offer",
   "Closed",
 ];
+const FIT_RECOMMENDATIONS = ["Apply", "Maybe", "Skip"];
 
 function getJobApplications() {
   const saved = localStorage.getItem(JOB_APPLICATIONS_STORAGE_KEY);
@@ -69,6 +70,24 @@ function validateJobApplication(record) {
 
   if (!JOB_APPLICATION_STATUSES.includes(record.status)) {
     throw new Error(`Invalid job status: ${record.status}`);
+  }
+
+  validateFitReview(record);
+}
+
+function validateFitReview(record) {
+  const score = record.fitAnalysis?.fitScore ?? record.fitScore;
+  const recommendation = record.fitAnalysis?.recommendation ?? record.fitRecommendation;
+
+  if (String(score || "").trim()) {
+    const numericScore = Number(score);
+    if (!Number.isFinite(numericScore) || numericScore < 0 || numericScore > 100) {
+      throw new Error("Fit score must be a number from 0 to 100.");
+    }
+  }
+
+  if (String(recommendation || "").trim() && !FIT_RECOMMENDATIONS.includes(recommendation)) {
+    throw new Error(`Invalid fit recommendation: ${recommendation}`);
   }
 }
 

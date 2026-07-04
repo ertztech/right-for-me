@@ -59,6 +59,36 @@ class JobsAppliedStorageTests(unittest.TestCase):
         self.assertEqual(saved["notes"], "Applied with tailored resume and cover letter.")
         self.assertEqual(saved["company"], "Example Company")
 
+    def test_updating_fit_review_persists(self) -> None:
+        add_job_application(sample_record(), self.storage_path)
+
+        updated = update_job_application(
+            "job_2026_0001",
+            {
+                "fitScore": 82,
+                "fitRecommendation": "Maybe",
+                "fitAnalysis": {
+                    "fitScore": 82,
+                    "recommendation": "Maybe",
+                    "strengths": ["Strong transformation background"],
+                    "gaps": ["Prepare budget ownership example"],
+                    "concerns": ["Domain depth may be tested"],
+                    "suggestedPositioning": "Lead with operational transformation outcomes.",
+                    "generatedAt": "",
+                    "promptVersion": "fit-analysis-v1",
+                    "modelName": "",
+                    "userApproved": True,
+                },
+            },
+            self.storage_path,
+        )
+
+        saved = read_job_applications(self.storage_path)[0]
+        self.assertEqual(updated["fitRecommendation"], "Maybe")
+        self.assertEqual(saved["fitAnalysis"]["recommendation"], "Maybe")
+        self.assertEqual(saved["fitAnalysis"]["strengths"][0], "Strong transformation background")
+        self.assertEqual(saved["company"], "Example Company")
+
     def test_rejecting_record_missing_required_fields(self) -> None:
         record = sample_record()
         record["company"] = ""
@@ -72,6 +102,23 @@ class JobsAppliedStorageTests(unittest.TestCase):
 
         with self.assertRaises(JobApplicationValidationError):
             add_job_application(record, self.storage_path)
+
+    def test_rejecting_invalid_fit_review(self) -> None:
+        add_job_application(sample_record(), self.storage_path)
+
+        with self.assertRaises(JobApplicationValidationError):
+            update_job_application(
+                "job_2026_0001",
+                {"fitScore": 125, "fitRecommendation": "Apply"},
+                self.storage_path,
+            )
+
+        with self.assertRaises(JobApplicationValidationError):
+            update_job_application(
+                "job_2026_0001",
+                {"fitScore": 85, "fitRecommendation": "Definitely"},
+                self.storage_path,
+            )
 
 
 def sample_record() -> dict:

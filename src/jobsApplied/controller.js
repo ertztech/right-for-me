@@ -22,6 +22,7 @@ const DASHBOARD_STATUSES = [
   "Offer",
   "Rejected",
 ];
+const FIT_RECOMMENDATIONS = ["Apply", "Maybe", "Skip"];
 
 let selectedJobId = "";
 
@@ -41,6 +42,16 @@ function initializeJobsAppliedController() {
 
     event.preventDefault();
     saveJobDetailUpdates(form);
+  });
+
+  document.addEventListener("submit", (event) => {
+    const form = event.target.closest("[data-fit-review-form]");
+    if (!form) {
+      return;
+    }
+
+    event.preventDefault();
+    saveFitReviewUpdates(form);
   });
 
   document.addEventListener("change", (event) => {
@@ -115,6 +126,48 @@ function saveJobDetailUpdates(form) {
     setJobsStatus("Job details saved. Your dashboard is up to date.");
   } catch (error) {
     setJobsStatus(error.message || "Job details could not be saved.");
+  }
+}
+
+function saveFitReviewUpdates(form) {
+  const formData = new FormData(form);
+  const jobId = form.dataset.fitReviewForm;
+  const score = cleanValue(formData.get("fitScore"));
+  const recommendation = cleanValue(formData.get("fitRecommendation"));
+  const validationError = validateFitReviewInput(score, recommendation);
+
+  if (validationError) {
+    setJobsStatus(validationError);
+    return;
+  }
+
+  const job = RightForMeJobsAppliedStorage.getJobApplications().find((record) => record.id === jobId);
+  const existingFitAnalysis = job?.fitAnalysis || {};
+  const fitAnalysis = {
+    ...existingFitAnalysis,
+    fitScore: Number(score),
+    recommendation,
+    strengths: linesFromText(formData.get("strengths")),
+    gaps: linesFromText(formData.get("gaps")),
+    concerns: linesFromText(formData.get("concerns")),
+    suggestedPositioning: cleanValue(formData.get("suggestedPositioning")),
+    generatedAt: existingFitAnalysis.generatedAt || "",
+    promptVersion: existingFitAnalysis.promptVersion || "fit-analysis-v1",
+    modelName: existingFitAnalysis.modelName || "",
+    userApproved: formData.get("userApproved") === "on",
+  };
+
+  try {
+    RightForMeJobsAppliedStorage.updateJobApplication(jobId, {
+      fitScore: fitAnalysis.fitScore,
+      fitRecommendation: fitAnalysis.recommendation,
+      fitAnalysis,
+    });
+    selectedJobId = jobId;
+    refreshJobsAppliedViews();
+    setJobsStatus("Fit Review saved. NextMove updated the job detail and dashboard.");
+  } catch (error) {
+    setJobsStatus(error.message || "Fit Review could not be saved.");
   }
 }
 
@@ -203,6 +256,7 @@ function renderJobDetail(job) {
       ${detailRow("Cover letter path", formatValue(job.coverLetterPath))}
       ${detailRow("URL", job.jobUrl ? `<a href="${escapeAttribute(job.jobUrl)}">${escapeHtml(job.jobUrl)}</a>` : "Not saved yet", true)}
     </dl>
+    ${fitReviewSummaryBlock(job)}
     <div class="section-block">
       <h2>Status Controls</h2>
       <form class="input-panel flat-panel job-update-form" data-job-detail-form="${escapeAttribute(job.id)}">
@@ -254,6 +308,44 @@ function renderFitAnalysis(job) {
     ${placeholderBlock("Concerns", listOrPlaceholder(fitAnalysis.concerns, "Concerns and tradeoffs will appear here."))}
     ${placeholderBlock("Suggested Positioning", fitAnalysis.suggestedPositioning || "NextMove will help frame an honest Apply, Maybe, or Skip recommendation here.")}
     ${aiMetadataBlock(fitAnalysis)}
+    <div class="section-block">
+      <h2>Edit Fit Review</h2>
+      <form class="input-panel flat-panel fit-review-form" data-fit-review-form="${escapeAttribute(job.id)}">
+        <div class="form-grid">
+          <label>
+            Fit Score
+            <input name="fitScore" type="number" min="0" max="100" step="1" value="${escapeAttribute(fitAnalysis.fitScore ?? job.fitScore ?? "")}" required>
+          </label>
+          <label>
+            Recommendation
+            <select name="fitRecommendation" required>
+              ${fitRecommendationOptions(fitAnalysis.recommendation || job.fitRecommendation)}
+            </select>
+          </label>
+        </div>
+        <label>
+          Strengths
+          <textarea name="strengths" rows="4" placeholder="One strength per line">${escapeHtml(textFromLines(fitAnalysis.strengths))}</textarea>
+        </label>
+        <label>
+          Gaps
+          <textarea name="gaps" rows="4" placeholder="One gap per line">${escapeHtml(textFromLines(fitAnalysis.gaps))}</textarea>
+        </label>
+        <label>
+          Concerns
+          <textarea name="concerns" rows="4" placeholder="One concern per line">${escapeHtml(textFromLines(fitAnalysis.concerns))}</textarea>
+        </label>
+        <label>
+          Suggested Positioning
+          <textarea name="suggestedPositioning" rows="4">${escapeHtml(fitAnalysis.suggestedPositioning || "")}</textarea>
+        </label>
+        <label class="checkbox-label">
+          <input name="userApproved" type="checkbox"${fitAnalysis.userApproved ? " checked" : ""}>
+          User approved
+        </label>
+        <button type="submit">Save Fit Review</button>
+      </form>
+    </div>
   `;
 }
 
@@ -455,19 +547,44 @@ function recommendedNextAction(jobs) {
     );
   }
 
-  const reviewingJob = jobs.find((job) => job.status === "Reviewing");
-  if (reviewingJob) {
+  const reviewingJobWithoutFit = jobs.find((job) => job.status === "Reviewing" && !hasFitAnalysis(job));
+  if (reviewingJobWithoutFit) {
     return actionForJob(
       "Fit review",
-      `Complete Fit Review for ${reviewingJob.roleTitle}.`,
-      `Review strengths, gaps, and positioning before deciding whether ${reviewingJob.company} is Apply, Maybe, or Skip.`,
+      `Complete Fit Review for ${reviewingJobWithoutFit.roleTitle}.`,
+      `Review strengths, gaps, and positioning before deciding whether ${reviewingJobWithoutFit.company} is Apply, Maybe, or Skip.`,
       "Open Fit Review",
-      reviewingJob,
+      reviewingJobWithoutFit,
       "fit"
     );
   }
 
-  const applyJob = jobs.find((job) => job.status === "Apply");
+  const activeFitJobs = jobs.filter((job) => !["Skip", "Rejected", "Closed"].includes(job.status));
+  const applyRecommendationJob = activeFitJobs.find((job) => fitRecommendationFor(job) === "Apply");
+  if (applyRecommendationJob) {
+    return actionForJob(
+      "Application packet",
+      `Build the packet for ${applyRecommendationJob.roleTitle}.`,
+      "This role has an Apply recommendation. Pull the tailored resume, cover letter, and notes together.",
+      "Open packet",
+      applyRecommendationJob,
+      "packet"
+    );
+  }
+
+  const maybeRecommendationJob = activeFitJobs.find((job) => fitRecommendationFor(job) === "Maybe");
+  if (maybeRecommendationJob) {
+    return actionForJob(
+      "User review",
+      `Review the Maybe decision for ${maybeRecommendationJob.roleTitle}.`,
+      "Check the gaps, concerns, and positioning before spending more application energy here.",
+      "Open Fit Review",
+      maybeRecommendationJob,
+      "fit"
+    );
+  }
+
+  const applyJob = jobs.find((job) => job.status === "Apply" && fitRecommendationFor(job) !== "Skip");
   if (applyJob) {
     return actionForJob(
       "Application packet",
@@ -525,6 +642,47 @@ function isDueOrPast(dateValue) {
   return date <= new Date().toISOString().slice(0, 10);
 }
 
+function fitReviewSummaryBlock(job) {
+  const fitAnalysis = job.fitAnalysis || {};
+  const strengths = Array.isArray(fitAnalysis.strengths) ? fitAnalysis.strengths : [];
+  const concerns = Array.isArray(fitAnalysis.concerns) ? fitAnalysis.concerns : [];
+  const signal = strengths[0] || concerns[0] || "No strengths or concerns saved yet.";
+
+  return `
+    <div class="section-block">
+      <h2>Fit Review Summary</h2>
+      <div class="score-grid">
+        <article><span>Score</span><strong>${escapeHtml(formatValue(fitAnalysis.fitScore ?? job.fitScore))}</strong></article>
+        <article><span>Recommendation</span><strong>${escapeHtml(formatValue(fitAnalysis.recommendation || job.fitRecommendation))}</strong></article>
+        <article><span>Approval</span><strong>${fitAnalysis.userApproved ? "Approved" : "Missing"}</strong></article>
+      </div>
+      <p>${escapeHtml(signal)}</p>
+    </div>
+  `;
+}
+
+function validateFitReviewInput(score, recommendation) {
+  const numericScore = Number(score);
+
+  if (!Number.isFinite(numericScore) || numericScore < 0 || numericScore > 100) {
+    return "Fit score must be a number from 0 to 100.";
+  }
+
+  if (!FIT_RECOMMENDATIONS.includes(recommendation)) {
+    return "Choose Apply, Maybe, or Skip for the fit recommendation.";
+  }
+
+  return "";
+}
+
+function hasFitAnalysis(job) {
+  return Boolean(job.fitAnalysis && String(job.fitAnalysis.recommendation || "").trim());
+}
+
+function fitRecommendationFor(job) {
+  return job.fitAnalysis?.recommendation || job.fitRecommendation || "";
+}
+
 function statusOptions(selectedStatus) {
   return JOB_STATUSES.map((status) => {
     const selected = status === selectedStatus ? " selected" : "";
@@ -532,8 +690,26 @@ function statusOptions(selectedStatus) {
   }).join("");
 }
 
+function fitRecommendationOptions(selectedRecommendation) {
+  return FIT_RECOMMENDATIONS.map((recommendation) => {
+    const selected = recommendation === selectedRecommendation ? " selected" : "";
+    return `<option value="${escapeAttribute(recommendation)}"${selected}>${escapeHtml(recommendation)}</option>`;
+  }).join("");
+}
+
 function isValidJobStatus(status) {
   return JOB_STATUSES.includes(status);
+}
+
+function linesFromText(value) {
+  return String(value || "")
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
+
+function textFromLines(items) {
+  return Array.isArray(items) ? items.join("\n") : "";
 }
 
 function createJobId() {
