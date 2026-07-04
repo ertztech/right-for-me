@@ -312,16 +312,25 @@ button:hover {
 
 .score-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(116px, 1fr));
   gap: 10px;
   margin-bottom: 18px;
 }
 
 .score-grid article {
-  min-height: 112px;
+  min-height: 108px;
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 14px;
+  background: #fbfbf8;
+}
+
+.score-grid .status-card {
+  border-color: #c8d7ce;
+  background: #f8faf6;
+}
+
+.score-grid .muted-card {
   background: #fbfbf8;
 }
 
@@ -339,6 +348,22 @@ button:hover {
   color: var(--ink);
   font-size: clamp(1.35rem, 3vw, 2.2rem);
   line-height: 1;
+}
+
+.score-grid p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.dashboard-action-panel {
+  border-top: 0;
+  margin-top: 0;
+  padding: 0;
+}
+
+.primary-dashboard-action {
+  min-width: max-content;
 }
 
 .section-block {
@@ -387,7 +412,8 @@ ul {
 }
 
 .job-card,
-.placeholder-block {
+.placeholder-block,
+.next-action-card {
   display: flex;
   gap: 12px;
   align-items: flex-start;
@@ -396,6 +422,31 @@ ul {
   border-radius: 8px;
   padding: 12px;
   background: #fbfbf8;
+}
+
+.next-action-card {
+  display: block;
+  border-color: #c8d7ce;
+  background: #f8faf6;
+}
+
+.next-action-card h3 {
+  margin: 0 0 8px;
+  font-size: 1.05rem;
+}
+
+.next-action-card p {
+  margin: 0 0 12px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.next-action-card .next-action-label {
+  margin-bottom: 8px;
+  color: var(--green);
+  font-size: 0.78rem;
+  font-weight: 850;
+  text-transform: uppercase;
 }
 
 .placeholder-block {

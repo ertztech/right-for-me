@@ -11,6 +11,18 @@ const JOB_STATUSES = [
   "Closed",
 ];
 
+const DASHBOARD_STATUSES = [
+  "Found",
+  "Reviewing",
+  "Apply",
+  "Maybe",
+  "Skip",
+  "Applied",
+  "Interviewing",
+  "Offer",
+  "Rejected",
+];
+
 let selectedJobId = "";
 
 function initializeJobsAppliedController() {
@@ -221,39 +233,50 @@ function renderTracker(jobs) {
 
 function renderStatusSummary(selector, jobs) {
   const node = document.querySelector(selector);
-  const statuses = JOB_STATUSES.filter((status) => jobs.some((job) => job.status === status));
+  const counts = countJobsByStatus(jobs);
 
-  node.innerHTML = statuses.length
-    ? statuses.map((status) => `<article><span>${status}</span><strong>${jobs.filter((job) => job.status === status).length}</strong></article>`).join("")
-    : `<article><span>No jobs yet</span><strong>0</strong></article>`;
+  node.innerHTML = DASHBOARD_STATUSES.map((status) => {
+    const count = counts[status] || 0;
+    const label = count === 1 ? "job" : "jobs";
+
+    return `
+      <article class="${count ? "status-card" : "status-card muted-card"}">
+        <span>${status}</span>
+        <strong>${count}</strong>
+        <p>${label}</p>
+      </article>
+    `;
+  }).join("");
 }
 
 function renderJobCards(selector, jobs) {
   const node = document.querySelector(selector);
   node.innerHTML = jobs.length
-    ? jobs.map((job) => jobCard(job)).join("")
-    : emptyMessage("No saved opportunities yet. Start with Job Intake when you have a role to review.");
+    ? jobs.map((job) => jobCard(job, false, true)).join("")
+    : emptyMessage("No saved opportunities yet. Paste one posting when you are ready, and NextMove will help you decide the next step.");
 }
 
 function renderNextActions(jobs) {
   const node = document.querySelector("#jobs-next-actions");
-  if (!jobs.length) {
-    node.innerHTML = "<li>Start with Job Intake. One saved opportunity is enough to begin.</li>";
-    return;
-  }
-
-  const actions = jobs
-    .filter((job) => ["Found", "Reviewing", "Apply", "Applied", "Interviewing"].includes(job.status))
-    .slice(0, 5)
-    .map((job) => `<li>${escapeHtml(nextActionFor(job))}</li>`);
-
-  node.innerHTML = actions.length ? actions.join("") : "<li>No active next actions right now.</li>";
+  const action = recommendedNextAction(jobs);
+  node.innerHTML = `
+    <article class="next-action-card">
+      <p class="next-action-label">${escapeHtml(action.label)}</p>
+      <h3>${escapeHtml(action.title)}</h3>
+      <p>${escapeHtml(action.detail)}</p>
+      <a class="small-button nav-link-button" href="${escapeAttribute(action.href)}">${escapeHtml(action.buttonText)}</a>
+    </article>
+  `;
 }
 
-function jobCard(job, includeDates = false) {
-  const dates = includeDates
-    ? `<p>Found: ${formatValue(job.dateFound)} | Applied: ${formatValue(job.dateApplied)} | Follow-up: ${formatValue(job.followUpDate)}</p>`
+function jobCard(job, includeDates = false, dashboardCard = false) {
+  const summary = dashboardCard
+    ? `<p>${escapeHtml(job.company)} | ${escapeHtml(job.status)} | Found: ${escapeHtml(formatValue(job.dateFound))}</p>`
     : `<p>${escapeHtml(formatValue(job.location))} | ${escapeHtml(formatValue(job.fitRecommendation))}</p>`;
+
+  const dates = includeDates
+    ? `<p>Found: ${escapeHtml(formatValue(job.dateFound))} | Applied: ${escapeHtml(formatValue(job.dateApplied))} | Follow-up: ${escapeHtml(formatValue(job.followUpDate))}</p>`
+    : summary;
 
   return `
     <article class="job-card">
@@ -285,12 +308,107 @@ function recentJobs(jobs) {
   return [...jobs].sort((a, b) => String(b.dateFound || "").localeCompare(String(a.dateFound || ""))).slice(0, 5);
 }
 
-function nextActionFor(job) {
-  if (job.status === "Found") return `Review ${job.roleTitle} at ${job.company}.`;
-  if (job.status === "Reviewing") return `Complete Fit Review for ${job.roleTitle}.`;
-  if (job.status === "Apply") return `Build the application packet for ${job.roleTitle}.`;
-  if (job.status === "Applied") return `Check follow-up date for ${job.roleTitle}.`;
-  return `Prepare for ${job.roleTitle}.`;
+function recommendedNextAction(jobs) {
+  if (!jobs.length) {
+    return {
+      label: "Start here",
+      title: "Add your first job posting.",
+      detail: "Paste a role you are considering so NextMove can help you review fit and organize the application work.",
+      buttonText: "Start Job Intake",
+      href: "#/jobs/add",
+    };
+  }
+
+  const interviewingJob = jobs.find((job) => job.status === "Interviewing");
+  if (interviewingJob) {
+    return actionForJob(
+      "Interview prep",
+      `Prepare for interviews with ${interviewingJob.company}.`,
+      `${interviewingJob.roleTitle} is in Interviewing. Gather notes, evidence, and likely questions before the next conversation.`,
+      "Open job detail",
+      interviewingJob
+    );
+  }
+
+  const dueFollowUpJob = jobs.find((job) => job.status === "Applied" && isDueOrPast(job.followUpDate));
+  if (dueFollowUpJob) {
+    return actionForJob(
+      "Follow-up due",
+      `Follow up on ${dueFollowUpJob.roleTitle}.`,
+      `${dueFollowUpJob.company} has a follow-up date due or past. A short, calm check-in keeps momentum visible.`,
+      "Open job detail",
+      dueFollowUpJob
+    );
+  }
+
+  const reviewingJob = jobs.find((job) => job.status === "Reviewing");
+  if (reviewingJob) {
+    return actionForJob(
+      "Fit review",
+      `Complete Fit Review for ${reviewingJob.roleTitle}.`,
+      `Review strengths, gaps, and positioning before deciding whether ${reviewingJob.company} is Apply, Maybe, or Skip.`,
+      "Open Fit Review",
+      reviewingJob,
+      "fit"
+    );
+  }
+
+  const applyJob = jobs.find((job) => job.status === "Apply");
+  if (applyJob) {
+    return actionForJob(
+      "Application packet",
+      `Build the packet for ${applyJob.roleTitle}.`,
+      "Pull the tailored resume, cover letter, and notes together before applying.",
+      "Open packet",
+      applyJob,
+      "packet"
+    );
+  }
+
+  const foundJob = jobs.find((job) => job.status === "Found");
+  if (foundJob) {
+    return actionForJob(
+      "Review saved job",
+      `Review ${foundJob.roleTitle} at ${foundJob.company}.`,
+      "Turn this saved opportunity into a clear Apply, Maybe, or Skip decision.",
+      "Open job detail",
+      foundJob
+    );
+  }
+
+  return {
+    label: "Steady state",
+    title: "Review saved jobs.",
+    detail: "No urgent follow-up is due. Open the tracker or add another posting when you are ready.",
+    buttonText: "Open Tracker",
+    href: "#/jobs/tracker",
+  };
+}
+
+function actionForJob(label, title, detail, buttonText, job, page = "detail") {
+  return {
+    label,
+    title,
+    detail,
+    buttonText,
+    href: `#/jobs/${page}/${encodeURIComponent(job.id)}`,
+  };
+}
+
+function countJobsByStatus(jobs) {
+  return jobs.reduce((counts, job) => {
+    counts[job.status] = (counts[job.status] || 0) + 1;
+    return counts;
+  }, {});
+}
+
+function isDueOrPast(dateValue) {
+  const date = String(dateValue || "").trim();
+  if (!date) {
+    return false;
+  }
+
+  return date <= new Date().toISOString().slice(0, 10);
 }
 
 function createJobId() {
