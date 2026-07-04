@@ -1,5 +1,17 @@
 const JOB_APPLICATIONS_STORAGE_KEY = "rightforme-job-applications";
 const JOB_APPLICATION_REQUIRED_FIELDS = ["id", "company", "roleTitle", "status"];
+const JOB_APPLICATION_STATUSES = [
+  "Found",
+  "Reviewing",
+  "Apply",
+  "Maybe",
+  "Skip",
+  "Applied",
+  "Interviewing",
+  "Rejected",
+  "Offer",
+  "Closed",
+];
 
 function getJobApplications() {
   const saved = localStorage.getItem(JOB_APPLICATIONS_STORAGE_KEY);
@@ -53,6 +65,10 @@ function validateJobApplication(record) {
 
   if (missing.length) {
     throw new Error(`Missing required field(s): ${missing.join(", ")}`);
+  }
+
+  if (!JOB_APPLICATION_STATUSES.includes(record.status)) {
+    throw new Error(`Invalid job status: ${record.status}`);
   }
 }
 

@@ -33,6 +33,25 @@ function initializeJobsAppliedController() {
     saveJobFromForm(addJobForm);
   });
 
+  document.addEventListener("submit", (event) => {
+    const form = event.target.closest("[data-job-detail-form]");
+    if (!form) {
+      return;
+    }
+
+    event.preventDefault();
+    saveJobDetailUpdates(form);
+  });
+
+  document.addEventListener("change", (event) => {
+    const control = event.target.closest("[data-tracker-status]");
+    if (!control) {
+      return;
+    }
+
+    saveTrackerStatus(control);
+  });
+
   window.addEventListener("hashchange", handleJobsRouteChange);
   ensureJobsRoute();
   handleJobsRouteChange();
@@ -74,6 +93,52 @@ function saveJobFromForm(form) {
   }
 }
 
+function saveJobDetailUpdates(form) {
+  const formData = new FormData(form);
+  const jobId = form.dataset.jobDetailForm;
+  const updates = {
+    status: cleanValue(formData.get("status")),
+    dateApplied: cleanValue(formData.get("dateApplied")),
+    followUpDate: cleanValue(formData.get("followUpDate")),
+    notes: cleanValue(formData.get("notes")),
+  };
+
+  if (!isValidJobStatus(updates.status)) {
+    setJobsStatus("Choose a valid job status before saving.");
+    return;
+  }
+
+  try {
+    RightForMeJobsAppliedStorage.updateJobApplication(jobId, updates);
+    selectedJobId = jobId;
+    refreshJobsAppliedViews();
+    setJobsStatus("Job details saved. Your dashboard is up to date.");
+  } catch (error) {
+    setJobsStatus(error.message || "Job details could not be saved.");
+  }
+}
+
+function saveTrackerStatus(control) {
+  const jobId = control.dataset.trackerStatus;
+  const status = cleanValue(control.value);
+
+  if (!isValidJobStatus(status)) {
+    setJobsStatus("Choose a valid job status before saving.");
+    refreshJobsAppliedViews();
+    return;
+  }
+
+  try {
+    RightForMeJobsAppliedStorage.updateJobApplication(jobId, { status });
+    selectedJobId = jobId;
+    refreshJobsAppliedViews();
+    setJobsStatus("Status updated. NextMove refreshed your dashboard and tracker.");
+  } catch (error) {
+    setJobsStatus(error.message || "Status could not be updated.");
+    refreshJobsAppliedViews();
+  }
+}
+
 function handleJobsRouteChange() {
   const route = currentJobsRoute();
   const jobs = RightForMeJobsAppliedStorage.getJobApplications();
@@ -81,6 +146,12 @@ function handleJobsRouteChange() {
 
   renderJobsAppliedViews(jobs);
   showJobsPage(route.page);
+}
+
+function refreshJobsAppliedViews() {
+  const jobs = RightForMeJobsAppliedStorage.getJobApplications();
+  renderJobsAppliedViews(jobs);
+  updateSelectedJobLinks();
 }
 
 function showJobsPage(pageName) {
@@ -133,8 +204,30 @@ function renderJobDetail(job) {
       ${detailRow("URL", job.jobUrl ? `<a href="${escapeAttribute(job.jobUrl)}">${escapeHtml(job.jobUrl)}</a>` : "Not saved yet", true)}
     </dl>
     <div class="section-block">
-      <h2>Notes</h2>
-      <p>${escapeHtml(job.notes || "No notes yet.")}</p>
+      <h2>Status Controls</h2>
+      <form class="input-panel flat-panel job-update-form" data-job-detail-form="${escapeAttribute(job.id)}">
+        <div class="form-grid">
+          <label>
+            Status
+            <select name="status">
+              ${statusOptions(job.status)}
+            </select>
+          </label>
+          <label>
+            Date Applied
+            <input name="dateApplied" type="date" value="${escapeAttribute(job.dateApplied || "")}">
+          </label>
+          <label>
+            Follow-up Date
+            <input name="followUpDate" type="date" value="${escapeAttribute(job.followUpDate || "")}">
+          </label>
+        </div>
+        <label>
+          Notes
+          <textarea name="notes" rows="5">${escapeHtml(job.notes || "")}</textarea>
+        </label>
+        <button type="submit">Save Job Updates</button>
+      </form>
     </div>
   `;
 
@@ -224,7 +317,7 @@ function renderTracker(jobs) {
       <div class="section-block">
         <h2>${status}</h2>
         <div class="job-card-list">
-          ${matchingJobs.map((job) => jobCard(job, true)).join("")}
+          ${matchingJobs.map((job) => trackerJobCard(job)).join("")}
         </div>
       </div>
     `;
@@ -286,6 +379,27 @@ function jobCard(job, includeDates = false, dashboardCard = false) {
         ${dates}
       </div>
       <a class="small-button nav-link-button" href="#/jobs/detail/${escapeAttribute(job.id)}" data-select-job="${escapeAttribute(job.id)}">Open</a>
+    </article>
+  `;
+}
+
+function trackerJobCard(job) {
+  return `
+    <article class="job-card tracker-job-card">
+      <div>
+        <h3>${escapeHtml(job.roleTitle)}</h3>
+        <p>${escapeHtml(job.company)} | Found: ${escapeHtml(formatValue(job.dateFound))}</p>
+        <p>Applied: ${escapeHtml(formatValue(job.dateApplied))} | Follow-up: ${escapeHtml(formatValue(job.followUpDate))}</p>
+      </div>
+      <div class="tracker-card-actions">
+        <label>
+          Status
+          <select data-tracker-status="${escapeAttribute(job.id)}">
+            ${statusOptions(job.status)}
+          </select>
+        </label>
+        <a class="small-button nav-link-button" href="#/jobs/detail/${escapeAttribute(job.id)}" data-select-job="${escapeAttribute(job.id)}">Open</a>
+      </div>
     </article>
   `;
 }
@@ -409,6 +523,17 @@ function isDueOrPast(dateValue) {
   }
 
   return date <= new Date().toISOString().slice(0, 10);
+}
+
+function statusOptions(selectedStatus) {
+  return JOB_STATUSES.map((status) => {
+    const selected = status === selectedStatus ? " selected" : "";
+    return `<option value="${escapeAttribute(status)}"${selected}>${escapeHtml(status)}</option>`;
+  }).join("");
+}
+
+function isValidJobStatus(status) {
+  return JOB_STATUSES.includes(status);
 }
 
 function createJobId() {

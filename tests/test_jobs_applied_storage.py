@@ -43,16 +43,32 @@ class JobsAppliedStorageTests(unittest.TestCase):
 
         updated = update_job_application(
             "job_2026_0001",
-            {"status": "Applied", "dateApplied": "2026-07-03"},
+            {
+                "status": "Applied",
+                "dateApplied": "2026-07-03",
+                "followUpDate": "2026-07-10",
+                "notes": "Applied with tailored resume and cover letter.",
+            },
             self.storage_path,
         )
 
         self.assertEqual(updated["status"], "Applied")
-        self.assertEqual(read_job_applications(self.storage_path)[0]["dateApplied"], "2026-07-03")
+        saved = read_job_applications(self.storage_path)[0]
+        self.assertEqual(saved["dateApplied"], "2026-07-03")
+        self.assertEqual(saved["followUpDate"], "2026-07-10")
+        self.assertEqual(saved["notes"], "Applied with tailored resume and cover letter.")
+        self.assertEqual(saved["company"], "Example Company")
 
     def test_rejecting_record_missing_required_fields(self) -> None:
         record = sample_record()
         record["company"] = ""
+
+        with self.assertRaises(JobApplicationValidationError):
+            add_job_application(record, self.storage_path)
+
+    def test_rejecting_invalid_status(self) -> None:
+        record = sample_record()
+        record["status"] = "Thinking About It"
 
         with self.assertRaises(JobApplicationValidationError):
             add_job_application(record, self.storage_path)

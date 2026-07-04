@@ -8,6 +8,18 @@ from typing import Any
 ROOT_DIR = Path(__file__).resolve().parents[2]
 DEFAULT_STORAGE_PATH = ROOT_DIR / "data" / "job-applications.json"
 REQUIRED_FIELDS = ["id", "company", "roleTitle", "status"]
+VALID_STATUSES = {
+    "Found",
+    "Reviewing",
+    "Apply",
+    "Maybe",
+    "Skip",
+    "Applied",
+    "Interviewing",
+    "Rejected",
+    "Offer",
+    "Closed",
+}
 
 
 class JobApplicationValidationError(ValueError):
@@ -72,6 +84,9 @@ def validate_job_application(record: dict[str, Any]) -> None:
     if missing:
         names = ", ".join(missing)
         raise JobApplicationValidationError(f"Missing required field(s): {names}")
+
+    if record.get("status") not in VALID_STATUSES:
+        raise JobApplicationValidationError(f"Invalid job status: {record.get('status')}")
 
 
 def write_job_applications(
