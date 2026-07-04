@@ -866,7 +866,7 @@ function recommendedNextAction(jobs) {
       "Application packet",
       `Complete the packet for ${incompleteApplyPacketJob.roleTitle}.`,
       "This role has an Apply recommendation and still needs a saved resume draft or cover letter draft.",
-      "Open packet",
+      "Open Application Studio",
       incompleteApplyPacketJob,
       "studio"
     );
@@ -889,7 +889,7 @@ function recommendedNextAction(jobs) {
       "Application packet",
       `Build the packet for ${applyRecommendationJob.roleTitle}.`,
       "This role has an Apply recommendation. Pull the tailored resume, cover letter, and notes together.",
-      "Open packet",
+      "Open Application Studio",
       applyRecommendationJob,
       "studio"
     );
@@ -1294,7 +1294,7 @@ function setJobsStatus(message) {
 }
 
 function ensureJobsRoute() {
-  if (!currentJobsRoute().page) {
+  if (!window.location.hash) {
     navigateToJobsRoute("dashboard");
   }
 }
