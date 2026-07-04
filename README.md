@@ -94,14 +94,47 @@ Job application records for the Jobs Applied pipeline are stored in `data/job-ap
 
 The first lightweight Jobs Applied app pages are available in `index.html`. The visible workflow now groups related work into Dashboard, Opportunity Review, Application Studio, Tracker, Profile / Story Bank, and Settings. The browser UI stores saved jobs in local storage for now, using the same fields documented in `docs/jobs-applied-data-model.md`.
 
-Jobs Applied pages use hash routes, starting at `#/jobs/dashboard`. Opportunity Review includes job intake, manually editable Job Intelligence fields, and Fit Review context. Application Studio groups resume drafts, cover letter drafts, and packet notes. Job Intelligence now has local rule-based extraction from pasted posting text and can generate a local first-pass Fit Review; live AI extraction is not wired yet.
+Jobs Applied pages use hash routes, starting at `#/jobs/dashboard`. Opportunity Review includes job intake, manually editable Job Intelligence fields, and Fit Review context. Application Studio groups resume drafts, cover letter drafts, and packet notes. Job Intelligence has local rule-based extraction from pasted posting text, can generate a local first-pass Fit Review, and now includes an optional live AI analysis pass.
 
-AI output structure and prompt templates have been added for future fit analysis, tailored resume, and cover letter drafts. Live AI generation is not wired yet; there are no API calls, API keys, or provider credentials in this version.
+AI output structure and prompt templates have been added for fit analysis, tailored resume, and cover letter drafts. Live AI analysis is available through a small local Node server, and it requires an OpenAI API key.
+
+### Live AI setup
+
+Copy `.env.example` to `.env` and set:
+
+```bash
+OPENAI_API_KEY=your_api_key_here
+```
+
+Optional:
+
+```bash
+OPENAI_MODEL=gpt-5.5
+PORT=4173
+```
+
+Run the local server with:
+
+```bash
+node server.js
+```
+
+Then open `http://localhost:4173` and use Opportunity Review -> Analyze with AI after pasting a job posting. Opening `index.html` directly still works for local-only features, but live AI requires the local server so the API key stays out of the browser.
+
+AI calls use the OpenAI API and may cost money through your provider account. Never commit `.env` or any real API key.
 
 Run the current Python tests with:
 
 ```bash
 python -m unittest discover -s tests
+```
+
+Run the current JavaScript helper tests with:
+
+```bash
+node tests/jobIntelligenceExtractor.test.js
+node tests/fitReviewPrefill.test.js
+node tests/aiJobAnalysis.test.js
 ```
 
 ## Contributing
