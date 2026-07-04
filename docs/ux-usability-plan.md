@@ -1,15 +1,15 @@
 # UX and Usability Plan
 
-This plan describes the intended user experience for the RightForMe job application pipeline. It is a planning document only; it does not introduce a full UI redesign.
+This plan describes the intended user experience for the NextMove job application pipeline. The product should feel like a small set of guided experiences rather than a long list of disconnected tools.
 
 ## Product UX Goal
 
-RightForMe should feel like a guided assistant for a job seeker who is trying to make good decisions quickly. The app should connect job postings, fit analysis, tailored outputs, application tracking, and follow-up actions into one calm workflow instead of asking the user to manage a spreadsheet beside the product.
+NextMove should feel like a guided assistant for a job seeker who is trying to make good decisions quickly. The app should connect job postings, fit analysis, tailored outputs, application tracking, and follow-up actions into one calm workflow instead of asking the user to manage a spreadsheet beside the product.
 
 The experience should help the user answer three questions:
 
 1. Is this job worth pursuing?
-2. What evidence from my Career Vault should I use?
+2. What evidence from my Profile / Story Bank should I use?
 3. What is the next action?
 
 ## Primary User Journey
@@ -20,10 +20,12 @@ The experience should help the user answer three questions:
 - User sees next actions.
 - User can quickly add a new job.
 
-### 2. Add Job Posting
+### 2. Opportunity Review
 
 - User pastes a job description or job URL.
 - User captures company, role title, location, salary, work arrangement, and notes.
+- User manually structures Job Intelligence: responsibilities, required skills, preferred skills, tools, leadership expectations, certifications, and years of experience.
+- User reviews fit score and Apply, Maybe, or Skip recommendation when available.
 
 ### 3. Fit Review
 
@@ -31,11 +33,11 @@ The experience should help the user answer three questions:
 - User sees Apply, Maybe, or Skip recommendation.
 - User sees strengths, concerns, gaps, and suggested positioning.
 
-### 4. Application Packet
+### 4. Application Studio
 
 - User sees tailored resume content.
 - User sees tailored cover letter content.
-- User can export or save the packet.
+- User edits resume draft, cover letter draft, and packet notes in one focused area.
 
 ### 5. Tracking
 
@@ -46,13 +48,51 @@ The experience should help the user answer three questions:
 
 ## Core Screens and Pages
 
+## Primary Experience Areas
+
+### Dashboard
+
+- Purpose: Career command center and next best action.
+- Main user actions: Review status summary, open the recommended next action, add a new opportunity.
+- Key data shown: Status counts, recent jobs, follow-ups, recommendation-driven next action.
+
+### Opportunity Review
+
+- Purpose: Add or paste a job posting, review Job Intelligence, and decide Apply, Maybe, or Skip.
+- Main user actions: Save core job details, edit structured posting fields, review fit results, open Application Studio.
+- Key data shown: Core job details, responsibilities, required skills, preferred skills, technologies/tools, leadership expectations, certifications, years of experience, notes, source posting text, fit recommendation.
+
+### Application Studio
+
+- Purpose: Bring resume draft, cover letter draft, and packet notes together.
+- Main user actions: Edit and approve resume draft, edit and approve cover letter draft, save packet notes.
+- Key data shown: Packet completeness, fit summary, resume status, cover letter status, packet notes.
+
+### Tracker
+
+- Purpose: Manage application statuses, dates, follow-ups, and notes.
+- Main user actions: Update status, review applied/follow-up dates, open a job record.
+- Key data shown: Jobs grouped by status, date found, date applied, follow-up date.
+
+### Profile / Story Bank
+
+- Purpose: Store the user's professional profile, accomplishments, skills, stories, tools, and reusable career evidence.
+- Main user actions: Save profile data, add work history, add skills/tools/accomplishments, export JSON.
+- Key data shown: Contact profile, work history, skills, tools, accomplishments.
+
+### Settings
+
+- Purpose: Preferences and future configuration.
+- Main user actions: Review storage/export/reminder settings when those features exist.
+- Key data shown: Future workflow defaults and preference placeholders.
+
 ### Dashboard
 
 - Purpose: Give the user a quick view of their job search and what needs attention.
 - Main user actions: Add job, open job detail, filter by status, review next actions.
 - Key data shown: Jobs grouped by status, follow-up dates, recommendations, recently updated jobs.
 
-### Add Job
+### Add Job / Opportunity Review
 
 - Purpose: Capture a new opportunity with as little duplicate typing as possible.
 - Main user actions: Paste job description, add job URL, enter company, role title, location, salary, work arrangement, and notes.
@@ -64,7 +104,7 @@ The experience should help the user answer three questions:
 - Main user actions: Edit job details, run fit analysis, generate packet, update status, add notes.
 - Key data shown: Company, role title, job URL, status, dates, notes, saved outputs, source posting text.
 
-### Fit Analysis
+### Fit Review
 
 - Purpose: Help the user decide whether to Apply, Maybe, or Skip.
 - Main user actions: Review recommendation, inspect strengths and gaps, save analysis, move job into Apply or Skip.
@@ -72,19 +112,19 @@ The experience should help the user answer three questions:
 
 ### Resume Builder
 
-- Purpose: Create or review resume content based on Career Vault data.
+- Purpose: Create or review resume content based on Profile / Story Bank data.
 - Main user actions: Generate resume, generate tailored resume, copy resume, download Markdown.
 - Key data shown: Resume preview, generation status, related job if tailoring is active.
 
 ### Cover Letter Builder
 
-- Purpose: Create or review cover letter content based on Career Vault data and the job posting.
+- Purpose: Create or review cover letter content based on Profile / Story Bank data and the job posting.
 - Main user actions: Generate cover letter, copy cover letter, download Markdown.
 - Key data shown: Cover letter preview, generation status, related job if available.
 
-### Application Packet
+### Application Packet / Application Studio
 
-- Purpose: Bring the tailored resume, cover letter, and application notes together.
+- Purpose: Bring the tailored resume, cover letter, and application notes together inside Application Studio.
 - Main user actions: Generate packet, save packet, copy outputs, download outputs.
 - Key data shown: Tailored resume, cover letter, strongest matching skills/tools, resume emphasis, possible gaps.
 
@@ -104,18 +144,15 @@ The experience should help the user answer three questions:
 
 - Dashboard
 - Jobs
-  - Add Job
-  - Job Detail
-  - Fit Analysis
+  - Opportunity Review
+  - Fit Review
   - Application Tracker
 - Outputs
-  - Resume Builder
-  - Cover Letter Builder
-  - Application Packet
-- Career Vault
+  - Application Studio
+- Profile / Story Bank
 - Settings
 
-The job record should become the connecting object. Fit analysis, tailored resume output, cover letter output, application notes, follow-up dates, and status should all be reachable from the job detail view.
+The job record should become the connecting object. Job Intelligence, fit analysis, tailored resume output, cover letter output, application notes, follow-up dates, and status should all be reachable from the primary experience areas.
 
 ## Key User Actions
 
@@ -142,7 +179,7 @@ The job record should become the connecting object. Fit analysis, tailored resum
 - Save every useful output.
 - Make the product feel like a guided assistant, not a blank form.
 - Support a job seeker who is tired, stressed, and trying to move quickly.
-- Keep Career Vault as the source of truth for claims and evidence.
+- Keep Profile / Story Bank as the source of truth for claims and evidence.
 - Make status and follow-up visible without forcing the user to hunt.
 
 ## MVP Usability Improvements
@@ -155,10 +192,13 @@ The job record should become the connecting object. Fit analysis, tailored resum
 - Add clear status controls for Found, Reviewing, Apply, Maybe, Skip, Applied, Interviewing, Rejected, Offer, and Closed.
 - Show follow-up date and next action near the top of the job detail page.
 - Keep copy and download actions close to each generated output.
+- Group top-level navigation into Dashboard, Opportunity Review, Application Studio, Tracker, Profile / Story Bank, and Settings.
+- Add Job Intelligence v1 as manually editable structured posting data.
 
 ## Future UX Improvements
 
-- Guided onboarding for Career Vault setup.
+- Guided onboarding for Profile / Story Bank setup.
+- AI-assisted extraction from source posting text into Job Intelligence fields.
 - A checklist-style application packet review before applying.
 - Calendar-style follow-up view.
 - Status history and activity timeline.

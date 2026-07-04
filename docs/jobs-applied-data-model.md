@@ -13,6 +13,13 @@ This document proposes a small job application record for the future Jobs Applie
   "location": "Remote",
   "salaryRange": "$100,000 - $125,000",
   "workArrangement": "Remote",
+  "responsibilities": ["Lead operational transformation roadmap"],
+  "requiredSkills": ["Change management", "Stakeholder communication"],
+  "preferredSkills": ["Manufacturing operations"],
+  "technologies": ["Jira", "Power BI"],
+  "leadershipExpectations": ["Influence cross-functional leaders"],
+  "certifications": ["PMP preferred"],
+  "yearsExperience": "7+ years",
   "status": "Reviewing",
   "fitScore": 78,
   "fitRecommendation": "Apply",
@@ -38,6 +45,13 @@ This document proposes a small job application record for the future Jobs Applie
 - `location`: Location listed in the posting.
 - `salaryRange`: Salary or compensation range, if known.
 - `workArrangement`: Remote, hybrid, onsite, travel-heavy, or another short description.
+- `responsibilities`: Optional structured list of role responsibilities from the posting.
+- `requiredSkills`: Optional structured list of required skills from the posting.
+- `preferredSkills`: Optional structured list of preferred or nice-to-have skills from the posting.
+- `technologies`: Optional structured list of tools, systems, platforms, or technologies mentioned.
+- `leadershipExpectations`: Optional structured list of leadership, ownership, stakeholder, or management expectations.
+- `certifications`: Optional structured list of certifications, licenses, or credentials.
+- `yearsExperience`: Optional years-of-experience requirement or range from the posting.
 - `status`: Current application status.
 - `fitScore`: Numeric fit score from the analyzer.
 - `fitRecommendation`: Apply, Maybe, Skip, or another recommendation label.
@@ -70,7 +84,9 @@ See [AI Outputs Data Model](ai-outputs-data-model.md) for the structure of draft
 ## Implementation Notes
 
 - Start with a plain JSON record so the shape stays easy to inspect and migrate.
+- Job Intelligence fields are optional and backward-compatible. Existing records without these fields should still load.
+- In v1, Job Intelligence can be edited manually. Future AI extraction may populate these fields from `sourcePostingText`, but live AI is not required for the data model.
 - Keep generated resume and cover letter content separate from the application record; store paths or references in the record.
 - Preserve the original job posting text so future analysis can be rerun if the matching rules improve.
 - Keep status names human-readable because users will see them directly.
-- Do not store invented claims or generated facts outside the Career Vault evidence model.
+- Do not store invented claims or generated facts outside the Profile / Story Bank evidence model.

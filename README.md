@@ -65,7 +65,7 @@ See [docs/product-identity.md](docs/product-identity.md) for the NextMove identi
 
 The app has a light NextMove UI brand pass: visible copy now frames the product as a guided career operating system, with calmer navigation labels and restrained styling. Code identifiers and storage keys still use the earlier RightForMe naming to avoid disruptive churn.
 
-UX planning has also started. See [docs/ux-usability-plan.md](docs/ux-usability-plan.md) for the proposed guided workflow, screen list, information architecture, and usability principles for the job application pipeline.
+UX planning has also started. See [docs/ux-usability-plan.md](docs/ux-usability-plan.md) for the proposed guided workflow, screen list, information architecture, and usability principles for the job application pipeline. The current app is moving toward six primary experiences: Dashboard, Opportunity Review, Application Studio, Tracker, Profile / Story Bank, and Settings.
 
 ## Delivery Workflow
 
@@ -92,9 +92,9 @@ Open `index.html` in a browser to run the prototype.
 
 Job application records for the Jobs Applied pipeline are stored in `data/job-applications.json`. The first storage helper lives in `tools/jobs_applied/storage.py` and supports reading, adding, updating, and validating records before a UI is added.
 
-The first lightweight Jobs Applied app pages are available in `index.html`: Dashboard, Add Job, Job Detail, Fit Analysis, Resume Builder, Cover Letter Builder, Application Packet, Application Tracker, and Settings. The browser UI stores saved jobs in local storage for now, using the same fields documented in `docs/jobs-applied-data-model.md`.
+The first lightweight Jobs Applied app pages are available in `index.html`. The visible workflow now groups related work into Dashboard, Opportunity Review, Application Studio, Tracker, Profile / Story Bank, and Settings. The browser UI stores saved jobs in local storage for now, using the same fields documented in `docs/jobs-applied-data-model.md`.
 
-Jobs Applied pages use hash routes, starting at `#/jobs/dashboard`. Use the Jobs Applied navigation to move between Dashboard, Add Job, Job Detail, Fit Analysis, Resume Builder, Cover Letter Builder, Application Packet, Tracker, and Settings without leaving `index.html`.
+Jobs Applied pages use hash routes, starting at `#/jobs/dashboard`. Opportunity Review includes job intake, manually editable Job Intelligence fields, and Fit Review context. Application Studio groups resume drafts, cover letter drafts, and packet notes. Live AI extraction is not wired yet.
 
 AI output structure and prompt templates have been added for future fit analysis, tailored resume, and cover letter drafts. Live AI generation is not wired yet; there are no API calls, API keys, or provider credentials in this version.
 
