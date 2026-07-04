@@ -13,6 +13,24 @@ function initializeCoverLetterController() {
   }
 
   function generateCoverLetterMarkdown() {
+    const feedback = NextMoveActionFeedback.createActionFeedback({
+      button: generateButton,
+      statusNode: status,
+      workingText: "Generating...",
+      successText: "Cover letter generated.",
+      failureText: "Cover letter could not be generated.",
+    });
+
+    feedback.run(() => {
+      const markdown = generateCoverLetterMarkdownNow();
+      return {
+        markdown,
+        message: jobDescription.value.trim() ? "Cover letter generated." : "Generic cover letter generated.",
+      };
+    });
+  }
+
+  function generateCoverLetterMarkdownNow() {
     RightForMeCareerVault.saveVault();
 
     const coverLetter = RightForMeCoverLetterBuilder.buildCoverLetter(
@@ -28,7 +46,7 @@ function initializeCoverLetterController() {
   }
 
   function currentOrGeneratedMarkdown() {
-    return preview.value.trim() ? preview.value : generateCoverLetterMarkdown();
+    return preview.value.trim() ? preview.value : generateCoverLetterMarkdownNow();
   }
 
   async function copyCoverLetter() {

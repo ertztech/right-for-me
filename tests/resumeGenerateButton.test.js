@@ -29,6 +29,7 @@ function createElement(selector = "") {
     children: [],
     className: "",
     style: {},
+    dataset: {},
     handlers: {},
     addEventListener(eventName, handler) {
       this.handlers[eventName] = handler;
@@ -44,6 +45,7 @@ function createElement(selector = "") {
 }
 
 require("../src/careerVault/storage");
+require("../src/shared/actionFeedback");
 require("../src/careerVault/view");
 require("../src/careerVault/controller");
 require("../src/careerVault/vault");
