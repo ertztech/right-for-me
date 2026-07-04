@@ -102,7 +102,7 @@ function renderDashboard(jobs) {
 function renderJobDetail(job) {
   const node = document.querySelector("#job-detail-content");
   if (!job) {
-    node.innerHTML = emptyMessage("No job selected yet. Add a job to see its detail page.");
+    node.innerHTML = emptyMessage("No opportunity selected yet. Start with Job Intake and NextMove will keep the next step clear.");
     return;
   }
 
@@ -132,7 +132,7 @@ function renderJobDetail(job) {
 function renderFitAnalysis(job) {
   const node = document.querySelector("#fit-analysis-placeholder");
   if (!job) {
-    node.innerHTML = emptyMessage("Fit analysis will appear after a job is saved.");
+    node.innerHTML = emptyMessage("Fit Review will appear after an opportunity is saved. Start with Job Intake when you are ready.");
     return;
   }
 
@@ -144,39 +144,39 @@ function renderFitAnalysis(job) {
       <article><span>Recommendation</span><strong>${escapeHtml(formatValue(fitAnalysis.recommendation || job.fitRecommendation))}</strong></article>
       <article><span>Status</span><strong>${escapeHtml(job.status)}</strong></article>
     </div>
-    ${placeholderBlock("Strengths", listOrPlaceholder(fitAnalysis.strengths, "AI-generated strengths will appear here after fit analysis is wired."))}
-    ${placeholderBlock("Gaps", listOrPlaceholder(fitAnalysis.gaps, "AI-generated gaps will appear here."))}
-    ${placeholderBlock("Concerns", listOrPlaceholder(fitAnalysis.concerns, "AI-generated concerns and tradeoffs will appear here."))}
-    ${placeholderBlock("Suggested Positioning", fitAnalysis.suggestedPositioning || "Apply, Maybe, or Skip positioning will appear here.")}
+    ${placeholderBlock("Strengths", listOrPlaceholder(fitAnalysis.strengths, "Strengths will appear here after Fit Review is connected to this opportunity."))}
+    ${placeholderBlock("Gaps", listOrPlaceholder(fitAnalysis.gaps, "Gaps to prepare for will appear here."))}
+    ${placeholderBlock("Concerns", listOrPlaceholder(fitAnalysis.concerns, "Concerns and tradeoffs will appear here."))}
+    ${placeholderBlock("Suggested Positioning", fitAnalysis.suggestedPositioning || "NextMove will help frame an honest Apply, Maybe, or Skip recommendation here.")}
     ${aiMetadataBlock(fitAnalysis)}
   `;
 }
 
 function renderResumeBuilder(job) {
   if (!job) {
-    document.querySelector("#jobs-resume-placeholder").innerHTML = emptyMessage("Save a job before reviewing tailored resume output.");
+    document.querySelector("#jobs-resume-placeholder").innerHTML = emptyMessage("Save an opportunity before reviewing tailored resume output.");
     return;
   }
 
   const resumeDraft = job.resumeDraft || {};
   document.querySelector("#jobs-resume-placeholder").innerHTML = `
-    ${placeholderBlock("Tailored Summary", resumeDraft.tailoredSummary || "AI-generated tailored summary will appear here.")}
-    ${placeholderBlock("Tailored Skills", listOrPlaceholder(resumeDraft.tailoredSkills, "AI-generated tailored skills will appear here."))}
-    ${placeholderBlock("Tailored Experience Bullets", listOrPlaceholder(resumeDraft.tailoredExperienceBullets, "AI-generated experience bullets will appear here."))}
-    ${placeholderBlock("Markdown Preview", resumeDraft.markdownPreview || job.resumeVersionPath || "Markdown resume preview placeholder.")}
+    ${placeholderBlock("Tailored Summary", resumeDraft.tailoredSummary || "A tailored summary grounded in your Career Vault will appear here.")}
+    ${placeholderBlock("Tailored Skills", listOrPlaceholder(resumeDraft.tailoredSkills, "Tailored skills will appear here."))}
+    ${placeholderBlock("Tailored Experience Bullets", listOrPlaceholder(resumeDraft.tailoredExperienceBullets, "Experience bullets grounded in your Career Vault will appear here."))}
+    ${placeholderBlock("Markdown Preview", resumeDraft.markdownPreview || job.resumeVersionPath || "Markdown resume preview will appear here when generated or saved.")}
     ${aiMetadataBlock(resumeDraft)}
   `;
 }
 
 function renderCoverLetterBuilder(job) {
   if (!job) {
-    document.querySelector("#jobs-cover-letter-placeholder").innerHTML = emptyMessage("Save a job before reviewing cover letter output.");
+    document.querySelector("#jobs-cover-letter-placeholder").innerHTML = emptyMessage("Save an opportunity before reviewing cover letter output.");
     return;
   }
 
   const coverLetterDraft = job.coverLetterDraft || {};
   document.querySelector("#jobs-cover-letter-placeholder").innerHTML = `
-    ${placeholderBlock("Draft Cover Letter", coverLetterDraft.draftText || job.coverLetterPath || "AI-generated draft cover letter will appear here.")}
+    ${placeholderBlock("Draft Cover Letter", coverLetterDraft.draftText || job.coverLetterPath || "A warm, honest draft cover letter will appear here.")}
     ${placeholderBlock("Tone Note", coverLetterDraft.toneNote || "Tone target: warm, friendly, confident, and human.")}
     ${placeholderBlock("User Approval Status", coverLetterDraft.userApproved ? "Approved by user." : "Not approved yet.")}
     ${aiMetadataBlock(coverLetterDraft)}
@@ -189,16 +189,16 @@ function renderApplicationPacket(job) {
       ${placeholderBlock("Job Details", `${job.company} - ${job.roleTitle}`)}
       ${placeholderBlock("Resume", job.resumeVersionPath || "Resume output will connect here.")}
       ${placeholderBlock("Cover Letter", job.coverLetterPath || "Cover letter output will connect here.")}
-      ${placeholderBlock("Application Notes", job.notes || "Application notes will connect here.")}
+      ${placeholderBlock("Application Notes", job.notes || "NextMove will gather notes, evidence, and follow-up context here.")}
       <button type="button" class="secondary-button" disabled>Export packet later</button>
     `
-    : emptyMessage("Save a job before building an application packet.");
+    : emptyMessage("Save an opportunity before building an application packet.");
 }
 
 function renderTracker(jobs) {
   const node = document.querySelector("#application-tracker-list");
   if (!jobs.length) {
-    node.innerHTML = emptyMessage("Saved jobs will appear here by status.");
+    node.innerHTML = emptyMessage("Saved opportunities will appear here by status. Add one role, then track the next move.");
     return;
   }
 
@@ -232,13 +232,13 @@ function renderJobCards(selector, jobs) {
   const node = document.querySelector(selector);
   node.innerHTML = jobs.length
     ? jobs.map((job) => jobCard(job)).join("")
-    : emptyMessage("No saved jobs yet.");
+    : emptyMessage("No saved opportunities yet. Start with Job Intake when you have a role to review.");
 }
 
 function renderNextActions(jobs) {
   const node = document.querySelector("#jobs-next-actions");
   if (!jobs.length) {
-    node.innerHTML = "<li>Add a job posting to start the workflow.</li>";
+    node.innerHTML = "<li>Start with Job Intake. One saved opportunity is enough to begin.</li>";
     return;
   }
 
@@ -287,8 +287,8 @@ function recentJobs(jobs) {
 
 function nextActionFor(job) {
   if (job.status === "Found") return `Review ${job.roleTitle} at ${job.company}.`;
-  if (job.status === "Reviewing") return `Run fit analysis for ${job.roleTitle}.`;
-  if (job.status === "Apply") return `Generate packet for ${job.roleTitle}.`;
+  if (job.status === "Reviewing") return `Complete Fit Review for ${job.roleTitle}.`;
+  if (job.status === "Apply") return `Build the application packet for ${job.roleTitle}.`;
   if (job.status === "Applied") return `Check follow-up date for ${job.roleTitle}.`;
   return `Prepare for ${job.roleTitle}.`;
 }
