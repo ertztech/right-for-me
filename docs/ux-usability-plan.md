@@ -25,6 +25,7 @@ The experience should help the user answer three questions:
 - User pastes a job description or job URL.
 - User captures company, role title, location, salary, work arrangement, and notes.
 - User manually structures Job Intelligence: responsibilities, required skills, preferred skills, tools, leadership expectations, certifications, and years of experience.
+- User can run local rule-based extraction to fill blank Job Intelligence fields, then review and edit the result.
 - User reviews fit score and Apply, Maybe, or Skip recommendation when available.
 
 ### 3. Fit Review
