@@ -94,6 +94,15 @@ function initializeJobsAppliedController() {
     saveJobIntelligenceUpdates(form);
   });
 
+  document.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-extract-job-intelligence]");
+    if (!button) {
+      return;
+    }
+
+    extractJobIntelligenceForForm(button);
+  });
+
   document.addEventListener("change", (event) => {
     const control = event.target.closest("[data-tracker-status]");
     if (!control) {
@@ -178,6 +187,35 @@ function saveJobIntelligenceUpdates(form) {
   }
 
   saveJobDraft(jobId, updates, "Opportunity Intelligence saved. NextMove refreshed the review workspace.");
+}
+
+function extractJobIntelligenceForForm(button) {
+  const form = button.closest("[data-job-intelligence-form]");
+  if (!form) {
+    return;
+  }
+
+  const sourceText = cleanValue(form.elements.sourcePostingText?.value);
+  if (!sourceText) {
+    setJobsStatus("Paste the source posting text before extracting Job Intelligence.");
+    return;
+  }
+
+  const existing = jobIntelligenceValuesFromForm(form);
+  const extracted = RightForMeJobIntelligenceExtractor.extractJobIntelligence(sourceText);
+  const updates = RightForMeJobIntelligenceExtractor.mergeExtractedJobIntelligence(existing, extracted);
+
+  if (!Object.keys(updates).length) {
+    setJobsStatus("No blank Job Intelligence fields were filled. Existing edits were preserved.");
+    return;
+  }
+
+  applyJobIntelligenceValuesToForm(form, updates);
+  saveJobDraft(
+    form.dataset.jobIntelligenceForm,
+    jobIntelligenceValuesFromForm(form),
+    `Extraction complete. Filled ${Object.keys(updates).length} blank field(s); existing edits were preserved.`
+  );
 }
 
 function saveJobDetailUpdates(form) {
@@ -1008,7 +1046,11 @@ function jobIntelligenceForm(job) {
         Source Posting Text
         <textarea name="sourcePostingText" rows="8">${escapeHtml(job.sourcePostingText || "")}</textarea>
       </label>
-      <button type="submit">Save Opportunity Intelligence</button>
+      <p class="helper-copy">Rule-based extraction is a first pass. Review and edit anything it fills before relying on it.</p>
+      <div class="button-row">
+        <button type="button" class="secondary-button" data-extract-job-intelligence>Extract from posting</button>
+        <button type="submit">Save Opportunity Intelligence</button>
+      </div>
     </form>
   `;
 }
@@ -1195,6 +1237,37 @@ function fitRecommendationOptions(selectedRecommendation) {
 
 function isValidJobStatus(status) {
   return JOB_STATUSES.includes(status);
+}
+
+function jobIntelligenceValuesFromForm(form) {
+  return {
+    company: cleanValue(form.elements.company?.value),
+    roleTitle: cleanValue(form.elements.roleTitle?.value),
+    jobUrl: cleanValue(form.elements.jobUrl?.value),
+    location: cleanValue(form.elements.location?.value),
+    salaryRange: cleanValue(form.elements.salaryRange?.value),
+    workArrangement: cleanValue(form.elements.workArrangement?.value),
+    responsibilities: linesFromText(form.elements.responsibilities?.value),
+    requiredSkills: linesFromText(form.elements.requiredSkills?.value),
+    preferredSkills: linesFromText(form.elements.preferredSkills?.value),
+    technologies: linesFromText(form.elements.technologies?.value),
+    leadershipExpectations: linesFromText(form.elements.leadershipExpectations?.value),
+    certifications: linesFromText(form.elements.certifications?.value),
+    yearsExperience: cleanValue(form.elements.yearsExperience?.value),
+    notes: cleanValue(form.elements.notes?.value),
+    sourcePostingText: cleanValue(form.elements.sourcePostingText?.value),
+  };
+}
+
+function applyJobIntelligenceValuesToForm(form, values) {
+  Object.entries(values).forEach(([field, value]) => {
+    const control = form.elements[field];
+    if (!control) {
+      return;
+    }
+
+    control.value = Array.isArray(value) ? value.join("\n") : value;
+  });
 }
 
 function linesFromText(value) {
