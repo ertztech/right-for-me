@@ -104,6 +104,15 @@ function initializeJobsAppliedController() {
   });
 
   document.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-analyze-job-ai]");
+    if (!button) {
+      return;
+    }
+
+    analyzeJobWithAIForForm(button);
+  });
+
+  document.addEventListener("click", (event) => {
     const button = event.target.closest("[data-prefill-fit-review]");
     if (!button) {
       return;
@@ -225,6 +234,71 @@ function extractJobIntelligenceForForm(button) {
     jobIntelligenceValuesFromForm(form),
     `Extraction complete. Filled ${Object.keys(updates).length} blank field(s); existing edits were preserved.`
   );
+}
+
+async function analyzeJobWithAIForForm(button) {
+  const form = button.closest("[data-job-intelligence-form]");
+  if (!form) {
+    return;
+  }
+
+  const jobId = form.dataset.jobIntelligenceForm;
+  const sourcePostingText = cleanValue(form.elements.sourcePostingText?.value);
+  if (!sourcePostingText) {
+    setJobsStatus("Paste the source posting text before running AI analysis.");
+    return;
+  }
+
+  const savedJob = findJobById(jobId);
+  if (!savedJob) {
+    setJobsStatus("Save the opportunity before running AI analysis.");
+    return;
+  }
+
+  const jobRecord = {
+    ...savedJob,
+    ...jobIntelligenceValuesFromForm(form),
+  };
+  const originalText = button.textContent;
+
+  button.disabled = true;
+  button.textContent = "Analyzing...";
+  setJobsStatus("NextMove is analyzing the posting with AI. This may take a moment.");
+
+  try {
+    const response = await fetch("/api/analyze-job", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        jobRecord,
+        userProfile: readCareerVaultProfile(),
+      }),
+    });
+    const payload = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(payload.error || "AI analysis could not be completed.");
+    }
+
+    const analysis = RightForMeAIJobAnalysis.validateAIJobAnalysis(payload.analysis || {});
+    // Merge strategy: AI fills only blank fields so user-entered edits remain the source of truth.
+    const updates = RightForMeAIJobAnalysis.mergeAIJobAnalysis(savedJob, analysis);
+
+    if (!Object.keys(updates).length) {
+      setJobsStatus("AI analysis returned valid data, but no blank fields needed updates.");
+      return;
+    }
+
+    RightForMeJobsAppliedStorage.updateJobApplication(jobId, updates);
+    selectedJobId = jobId;
+    refreshJobsAppliedViews();
+    setJobsStatus("AI analysis saved. Opportunity Review, Fit Review, and Application Studio were refreshed.");
+  } catch (error) {
+    setJobsStatus(error.message || "AI analysis could not be completed.");
+  } finally {
+    button.disabled = false;
+    button.textContent = originalText;
+  }
 }
 
 function saveJobDetailUpdates(form) {
@@ -891,6 +965,14 @@ function findJobById(jobId) {
   return RightForMeJobsAppliedStorage.getJobApplications().find((job) => job.id === jobId) || null;
 }
 
+function readCareerVaultProfile() {
+  if (window.RightForMeCareerVault?.getVault) {
+    return window.RightForMeCareerVault.getVault();
+  }
+
+  return {};
+}
+
 function recentJobs(jobs) {
   return [...jobs].sort((a, b) => String(b.dateFound || "").localeCompare(String(a.dateFound || ""))).slice(0, 5);
 }
@@ -1127,9 +1209,10 @@ function jobIntelligenceForm(job) {
         Source Posting Text
         <textarea name="sourcePostingText" rows="8">${escapeHtml(job.sourcePostingText || "")}</textarea>
       </label>
-      <p class="helper-copy">Rule-based extraction is a first pass. Review and edit anything it fills before relying on it.</p>
+      <p class="helper-copy">Use rule-based extraction for a fast local pass, or Analyze with AI when OPENAI_API_KEY is configured. Both can be edited before you rely on them.</p>
       <div class="button-row">
         <button type="button" class="secondary-button" data-extract-job-intelligence>Extract from posting</button>
+        <button type="button" class="secondary-button" data-analyze-job-ai>Analyze with AI</button>
         <button type="submit">Save Opportunity Intelligence</button>
       </div>
     </form>
