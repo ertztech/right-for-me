@@ -449,6 +449,39 @@ ul {
   text-transform: uppercase;
 }
 
+.job-update-form {
+  margin-top: 10px;
+}
+
+.job-update-form textarea {
+  min-height: 120px;
+}
+
+.tracker-job-card {
+  align-items: center;
+}
+
+.tracker-card-actions {
+  display: grid;
+  gap: 8px;
+  justify-items: end;
+  min-width: 150px;
+}
+
+.tracker-card-actions label {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.tracker-card-actions select {
+  width: 100%;
+}
+
 .placeholder-block {
   display: block;
   margin-bottom: 10px;
