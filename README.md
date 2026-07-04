@@ -94,7 +94,7 @@ Job application records for the Jobs Applied pipeline are stored in `data/job-ap
 
 The first lightweight Jobs Applied app pages are available in `index.html`. The visible workflow now groups related work into Dashboard, Opportunity Review, Application Studio, Tracker, Profile / Story Bank, and Settings. The browser UI stores saved jobs in local storage for now, using the same fields documented in `docs/jobs-applied-data-model.md`.
 
-Jobs Applied pages use hash routes, starting at `#/jobs/dashboard`. Opportunity Review includes job intake, manually editable Job Intelligence fields, and Fit Review context. Application Studio groups resume drafts, cover letter drafts, and packet notes. Job Intelligence now has local rule-based extraction from pasted posting text; live AI extraction is not wired yet.
+Jobs Applied pages use hash routes, starting at `#/jobs/dashboard`. Opportunity Review includes job intake, manually editable Job Intelligence fields, and Fit Review context. Application Studio groups resume drafts, cover letter drafts, and packet notes. Job Intelligence now has local rule-based extraction from pasted posting text and can generate a local first-pass Fit Review; live AI extraction is not wired yet.
 
 AI output structure and prompt templates have been added for future fit analysis, tailored resume, and cover letter drafts. Live AI generation is not wired yet; there are no API calls, API keys, or provider credentials in this version.
 
