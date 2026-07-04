@@ -20,6 +20,7 @@ VALID_STATUSES = {
     "Offer",
     "Closed",
 }
+FIT_RECOMMENDATIONS = {"Apply", "Maybe", "Skip"}
 
 
 class JobApplicationValidationError(ValueError):
@@ -87,6 +88,26 @@ def validate_job_application(record: dict[str, Any]) -> None:
 
     if record.get("status") not in VALID_STATUSES:
         raise JobApplicationValidationError(f"Invalid job status: {record.get('status')}")
+
+    validate_fit_review(record)
+
+
+def validate_fit_review(record: dict[str, Any]) -> None:
+    fit_analysis = record.get("fitAnalysis") or {}
+    score = fit_analysis.get("fitScore", record.get("fitScore"))
+    recommendation = fit_analysis.get("recommendation", record.get("fitRecommendation"))
+
+    if str(score or "").strip():
+        try:
+            numeric_score = float(score)
+        except (TypeError, ValueError) as exc:
+            raise JobApplicationValidationError("Fit score must be a number from 0 to 100.") from exc
+
+        if numeric_score < 0 or numeric_score > 100:
+            raise JobApplicationValidationError("Fit score must be a number from 0 to 100.")
+
+    if str(recommendation or "").strip() and recommendation not in FIT_RECOMMENDATIONS:
+        raise JobApplicationValidationError(f"Invalid fit recommendation: {recommendation}")
 
 
 def write_job_applications(

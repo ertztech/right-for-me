@@ -457,6 +457,28 @@ ul {
   min-height: 120px;
 }
 
+.fit-review-form {
+  margin-top: 10px;
+}
+
+.fit-review-form textarea {
+  min-height: 96px;
+}
+
+.checkbox-label {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 10px 0 14px;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.checkbox-label input {
+  width: auto;
+  margin: 0;
+}
+
 .tracker-job-card {
   align-items: center;
 }
