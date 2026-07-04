@@ -131,6 +131,7 @@ function initializeCareerVaultController(vaultStore) {
   render();
 
   return {
+    render,
     syncFromForm,
   };
 }

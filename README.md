@@ -142,17 +142,27 @@ node tests/aiJobAnalysis.test.js
 node tests/resumeGenerator.test.js
 node tests/resumeGenerateButton.test.js
 node tests/actionFeedback.test.js
+node tests/demoDataSeeder.test.js
 ```
+
+### Demo data
+
+Dashboard and Settings include `Load Sample Data` and `Clear Demo Data` buttons for local testing. Loading sample data adds three marked demo job records: a strong Apply fit, a healthy Maybe stretch, and a Skip/questionable fit. If the Profile / Story Bank is empty or already demo-seeded, the seeder also adds sample profile evidence. Existing real jobs are preserved, and existing real Profile / Story Bank data is not overwritten.
+
+Clear Demo Data removes only records marked by the demo seeder and clears the demo Profile / Story Bank only when it owns that sample profile.
 
 ### Manual testing
 
 1. Start the local server with `node server.js`.
 2. Open `http://localhost:4173`.
-3. Add or select a saved opportunity in Opportunity Review.
-4. Paste a job posting and click `Review Opportunity`; confirm the button shows a working state and a success or useful error message.
-5. Open Application Studio and click `Generate Resume`; confirm the resume draft appears and the status says it was saved.
-6. Refresh the browser and reopen the same job; confirm the resume draft is still present.
-7. Try an error case, such as clicking `Review Opportunity` without running the local server or without `OPENAI_API_KEY`; confirm the error is readable and not silent.
+3. Go to Dashboard or Settings and click `Load Sample Data`; confirm success feedback.
+4. Verify Dashboard, Tracker, Opportunity Review, and Application Studio show useful sample records and draft content.
+5. Refresh the browser and confirm sample data persists.
+6. Add or select a saved opportunity in Opportunity Review.
+7. Paste a job posting and click `Review Opportunity`; confirm the button shows a working state and a success or useful error message.
+8. Open Application Studio and click `Generate Resume`; confirm the resume draft appears and the status says it was saved.
+9. Click `Clear Demo Data`; confirm demo records are removed and real records remain.
+10. Try an error case, such as clicking `Review Opportunity` without running the local server or without `OPENAI_API_KEY`; confirm the error is readable and not silent.
 
 Current limitations: resume generation is deterministic local logic, not a live AI resume call yet. It prioritizes existing Profile / Story Bank and job-record evidence and does not invent experience.
 

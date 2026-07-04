@@ -61,6 +61,12 @@ function saveJobApplications(records) {
   localStorage.setItem(JOB_APPLICATIONS_STORAGE_KEY, JSON.stringify(records, null, 2));
 }
 
+function replaceJobApplications(records) {
+  records.forEach(validateJobApplication);
+  saveJobApplications(records);
+  return records;
+}
+
 function validateJobApplication(record) {
   const missing = JOB_APPLICATION_REQUIRED_FIELDS.filter((field) => !String(record[field] || "").trim());
 
@@ -95,4 +101,5 @@ window.RightForMeJobsAppliedStorage = {
   getJobApplications,
   addJobApplication,
   updateJobApplication,
+  replaceJobApplications,
 };

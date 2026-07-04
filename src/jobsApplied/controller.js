@@ -122,6 +122,24 @@ function initializeJobsAppliedController() {
   });
 
   document.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-load-demo-data]");
+    if (!button) {
+      return;
+    }
+
+    loadDemoData(button);
+  });
+
+  document.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-clear-demo-data]");
+    if (!button) {
+      return;
+    }
+
+    clearDemoData(button);
+  });
+
+  document.addEventListener("click", (event) => {
     const button = event.target.closest("[data-prefill-fit-review]");
     if (!button) {
       return;
@@ -362,6 +380,67 @@ function generateResumeForJob(jobId = selectedJobId) {
     markdown: resumeDraft.markdownContent,
     resumeDraft,
   };
+}
+
+async function loadDemoData(button) {
+  const feedback = createJobsActionFeedback(button, {
+    workingText: "Loading...",
+    successText: "Sample data loaded.",
+    failureText: "Sample data could not be loaded.",
+  });
+
+  return feedback.run(async () => {
+    if (hasUserData() && !window.confirm("Load sample data alongside your existing data? Existing real records will be preserved.")) {
+      return { message: "Sample data load canceled." };
+    }
+
+    const result = NextMoveDemoDataSeeder.loadSampleData();
+    selectedJobId = "demo-job-operations-transformation-lead";
+    refreshJobsAppliedViews();
+    updateSelectedJobLinks();
+
+    return {
+      ...result,
+      message: `Loaded ${result.jobsAdded} sample jobs.${result.vaultSeeded ? " Demo Profile / Story Bank added." : " Existing Profile / Story Bank preserved."}`,
+    };
+  });
+}
+
+async function clearDemoData(button) {
+  const feedback = createJobsActionFeedback(button, {
+    workingText: "Clearing...",
+    successText: "Demo data cleared.",
+    failureText: "Demo data could not be cleared.",
+  });
+
+  return feedback.run(async () => {
+    const result = NextMoveDemoDataSeeder.clearDemoData();
+    const jobs = RightForMeJobsAppliedStorage.getJobApplications();
+    selectedJobId = jobs[0]?.id || "";
+    refreshJobsAppliedViews();
+    updateSelectedJobLinks();
+
+    return {
+      ...result,
+      message: `Cleared ${result.jobsRemoved} demo jobs.${result.vaultCleared ? " Demo Profile / Story Bank cleared." : " Real Profile / Story Bank preserved."}`,
+    };
+  });
+}
+
+function hasUserData() {
+  const realJobs = RightForMeJobsAppliedStorage
+    .getJobApplications()
+    .some((job) => !NextMoveDemoDataSeeder.isDemoRecord(job));
+  const vault = RightForMeCareerVault.getVault();
+  const hasVaultData = Boolean(
+    String(vault.person?.name || "").trim()
+    || (vault.roles || []).length
+    || (vault.skills || []).length
+    || (vault.tools || []).length
+    || (vault.accomplishments || []).length
+  );
+
+  return realJobs || (hasVaultData && !NextMoveDemoDataSeeder.isDemoRecord(vault));
 }
 
 function selectedJob() {
