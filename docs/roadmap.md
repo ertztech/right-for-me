@@ -10,9 +10,9 @@ NextMove is evolving toward an AI-powered Career Operating System: a guided plac
 
 ## Product Pillars
 
-- Career Vault: a structured place to store work history, skills, tools, accomplishments, and professional evidence.
+- Profile / Story Bank: a structured place to store work history, skills, tools, accomplishments, stories, and professional evidence.
 - Professional Profile Engine: turns raw career information into a clear professional profile.
-- Resume Generator: creates a practical first-draft resume from the Career Vault.
+- Resume Generator: creates a practical first-draft resume from the Profile / Story Bank.
 - Job Analyzer: helps compare a role against the person's experience and direction.
 - Tailoring Engine: adapts outputs for a specific job without inventing facts.
 - Professional Outputs: resumes, cover letters, LinkedIn copy, interview notes, and portfolio material.
@@ -22,7 +22,7 @@ NextMove is evolving toward an AI-powered Career Operating System: a guided plac
 
 ### MVP
 
-- Career Vault
+- Profile / Story Bank
 - Resume Generator
 - Job Analyzer
 
@@ -71,20 +71,20 @@ The Jobs Applied Pipeline is the planned workflow for turning a job posting into
 Intended workflow:
 
 1. User adds or pastes a job posting.
-2. App analyzes fit against the Career Vault.
+2. App analyzes fit against the Profile / Story Bank.
 3. App recommends Apply, Maybe, or Skip.
-4. App generates tailored resume content from existing Career Vault data.
-5. App generates tailored cover letter content from existing Career Vault data.
+4. App generates tailored resume content from existing Profile / Story Bank data.
+5. App generates tailored cover letter content from existing Profile / Story Bank data.
 6. User marks the job as Applied.
 7. App tracks follow-up dates, status, notes, and interview prep.
 
-The pipeline should keep Career Vault as the source of truth. It may select, prioritize, and organize existing evidence, but it should not invent experience.
+The pipeline should keep Profile / Story Bank as the source of truth. It may select, prioritize, and organize existing evidence, but it should not invent experience.
 
 Future automation ideas:
 
 - Suggest follow-up dates after an application is marked Applied.
 - Surface stale applications that need a next action.
-- Generate interview prep notes from saved job requirements and Career Vault evidence.
+- Generate interview prep notes from saved job requirements and Profile / Story Bank evidence.
 - Remind the user to update status after interviews, rejections, offers, or closed postings.
 - Export an application packet when a job moves from Reviewing to Apply.
 
@@ -95,6 +95,19 @@ Near-term implementation should stay local, simple, and rule-based until the wor
 RightForMe will move toward a guided workflow for job seekers. Job records, fit analysis, tailored resume output, cover letter output, application packet notes, and tracking should connect into one experience instead of living as separate tools.
 
 Future UI work should follow [UX and Usability Plan](ux-usability-plan.md). The revamp should make the next action obvious, reduce duplicate typing, preserve honest fit decisions, and help users move quickly from saved posting to application follow-up.
+
+## Job Intelligence v1
+
+NextMove is organizing the app around six primary experience areas:
+
+1. Dashboard: career command center and next best action.
+2. Opportunity Review: job intake, structured Job Intelligence, and fit recommendation.
+3. Application Studio: resume draft, cover letter draft, and packet notes.
+4. Tracker: statuses, dates, follow-ups, and notes.
+5. Profile / Story Bank: professional evidence and reusable career stories.
+6. Settings: preferences and future configuration.
+
+Job Intelligence v1 adds optional structured posting fields to job records, including responsibilities, required skills, preferred skills, technologies/tools, leadership expectations, certifications, and years of experience. These fields are manually editable now. Future AI extraction can populate them automatically from the saved source posting text, but the app should continue to support manual editing and should not require live AI calls.
 
 ## Not Yet
 

@@ -84,6 +84,16 @@ function initializeJobsAppliedController() {
     savePacketNotesUpdates(form);
   });
 
+  document.addEventListener("submit", (event) => {
+    const form = event.target.closest("[data-job-intelligence-form]");
+    if (!form) {
+      return;
+    }
+
+    event.preventDefault();
+    saveJobIntelligenceUpdates(form);
+  });
+
   document.addEventListener("change", (event) => {
     const control = event.target.closest("[data-tracker-status]");
     if (!control) {
@@ -117,6 +127,13 @@ function saveJobFromForm(form) {
     resumeVersionPath: "",
     coverLetterPath: "",
     notes: cleanValue(formData.get("notes")),
+    responsibilities: linesFromText(formData.get("responsibilities")),
+    requiredSkills: linesFromText(formData.get("requiredSkills")),
+    preferredSkills: linesFromText(formData.get("preferredSkills")),
+    technologies: linesFromText(formData.get("technologies")),
+    leadershipExpectations: linesFromText(formData.get("leadershipExpectations")),
+    certifications: linesFromText(formData.get("certifications")),
+    yearsExperience: cleanValue(formData.get("yearsExperience")),
     sourcePostingText: cleanValue(formData.get("sourcePostingText")),
     fitAnalysis: null,
     resumeDraft: null,
@@ -128,10 +145,39 @@ function saveJobFromForm(form) {
     selectedJobId = record.id;
     form.reset();
     setJobsStatus("Job saved.");
-    navigateToJobsRoute("detail", record.id);
+    navigateToJobsRoute("opportunity", record.id);
   } catch (error) {
     setJobsStatus(error.message || "Job could not be saved.");
   }
+}
+
+function saveJobIntelligenceUpdates(form) {
+  const formData = new FormData(form);
+  const jobId = form.dataset.jobIntelligenceForm;
+  const updates = {
+    company: cleanValue(formData.get("company")),
+    roleTitle: cleanValue(formData.get("roleTitle")),
+    jobUrl: cleanValue(formData.get("jobUrl")),
+    location: cleanValue(formData.get("location")),
+    salaryRange: cleanValue(formData.get("salaryRange")),
+    workArrangement: cleanValue(formData.get("workArrangement")),
+    responsibilities: linesFromText(formData.get("responsibilities")),
+    requiredSkills: linesFromText(formData.get("requiredSkills")),
+    preferredSkills: linesFromText(formData.get("preferredSkills")),
+    technologies: linesFromText(formData.get("technologies")),
+    leadershipExpectations: linesFromText(formData.get("leadershipExpectations")),
+    certifications: linesFromText(formData.get("certifications")),
+    yearsExperience: cleanValue(formData.get("yearsExperience")),
+    notes: cleanValue(formData.get("notes")),
+    sourcePostingText: cleanValue(formData.get("sourcePostingText")),
+  };
+
+  if (!updates.company || !updates.roleTitle) {
+    setJobsStatus("Company and role title are required before saving Opportunity Intelligence.");
+    return;
+  }
+
+  saveJobDraft(jobId, updates, "Opportunity Intelligence saved. NextMove refreshed the review workspace.");
 }
 
 function saveJobDetailUpdates(form) {
@@ -314,11 +360,13 @@ function showJobsPage(pageName) {
 
 function renderJobsAppliedViews(jobs) {
   renderDashboard(jobs);
+  renderOpportunityReview(currentJob(jobs));
   renderJobDetail(currentJob(jobs));
   renderFitAnalysis(currentJob(jobs));
   renderResumeBuilder(currentJob(jobs));
   renderCoverLetterBuilder(currentJob(jobs));
   renderApplicationPacket(currentJob(jobs));
+  renderApplicationStudio(currentJob(jobs));
   renderTracker(jobs);
 }
 
@@ -331,7 +379,7 @@ function renderDashboard(jobs) {
 function renderJobDetail(job) {
   const node = document.querySelector("#job-detail-content");
   if (!job) {
-    node.innerHTML = emptyMessage("No opportunity selected yet. Start with Job Intake and NextMove will keep the next step clear.");
+    node.innerHTML = emptyMessage("No opportunity selected yet. Start with Opportunity Review and NextMove will keep the next step clear.");
     return;
   }
 
@@ -349,6 +397,7 @@ function renderJobDetail(job) {
       ${detailRow("Cover letter path", formatValue(job.coverLetterPath))}
       ${detailRow("URL", job.jobUrl ? `<a href="${escapeAttribute(job.jobUrl)}">${escapeHtml(job.jobUrl)}</a>` : "Not saved yet", true)}
     </dl>
+    ${jobIntelligenceSummaryBlock(job)}
     ${fitReviewSummaryBlock(job)}
     ${applicationPacketStatusBlock(job)}
     <div class="section-block">
@@ -382,10 +431,40 @@ function renderJobDetail(job) {
   updateSelectedJobLinks();
 }
 
+function renderOpportunityReview(job) {
+  const node = document.querySelector("#opportunity-review-content");
+  if (!node) {
+    return;
+  }
+
+  if (!job) {
+    node.innerHTML = emptyMessage("After you save a posting, Opportunity Intelligence and Fit Review will appear here.");
+    return;
+  }
+
+  node.innerHTML = `
+    <div class="section-block">
+      <div class="panel-header compact-header">
+        <div>
+          <h2>Opportunity Intelligence</h2>
+          <p class="support-copy">Manual structure today. Future AI extraction can fill this in from the posting.</p>
+        </div>
+        <a class="secondary-button nav-link-button" href="#/jobs/fit/${escapeAttribute(job.id)}" data-selected-job-route="fit">Open Fit Review</a>
+      </div>
+      ${jobIntelligenceForm(job)}
+    </div>
+    <div class="section-block">
+      <h2>Fit Review Connection</h2>
+      ${fitReviewSummaryBlock(job)}
+      <p class="empty-copy">${hasFitAnalysis(job) ? "Fit Review is saved for this opportunity." : "Fit Review is not saved yet. Use Apply, Maybe, or Skip once you have enough evidence."}</p>
+    </div>
+  `;
+}
+
 function renderFitAnalysis(job) {
   const node = document.querySelector("#fit-analysis-placeholder");
   if (!job) {
-    node.innerHTML = emptyMessage("Fit Review will appear after an opportunity is saved. Start with Job Intake when you are ready.");
+    node.innerHTML = emptyMessage("Fit Review will appear after an opportunity is saved. Start with Opportunity Review when you are ready.");
     return;
   }
 
@@ -452,9 +531,9 @@ function renderResumeBuilder(job) {
   const resumeDraft = job.resumeDraft || {};
   const markdownContent = resumeDraft.markdownContent || resumeDraft.markdownPreview || job.resumeVersionPath || "";
   document.querySelector("#jobs-resume-placeholder").innerHTML = `
-    ${placeholderBlock("Tailored Summary", resumeDraft.tailoredSummary || "A tailored summary grounded in your Career Vault will appear here.")}
+    ${placeholderBlock("Tailored Summary", resumeDraft.tailoredSummary || "A tailored summary grounded in your Profile / Story Bank will appear here.")}
     ${placeholderBlock("Tailored Skills", listOrPlaceholder(resumeDraft.tailoredSkills, "Tailored skills will appear here."))}
-    ${placeholderBlock("Tailored Experience Bullets", listOrPlaceholder(resumeDraft.tailoredExperienceBullets, "Experience bullets grounded in your Career Vault will appear here."))}
+    ${placeholderBlock("Tailored Experience Bullets", listOrPlaceholder(resumeDraft.tailoredExperienceBullets, "Experience bullets grounded in your Profile / Story Bank will appear here."))}
     ${placeholderBlock("Markdown Preview", markdownContent || "Markdown resume preview will appear here when generated or saved.")}
     ${aiMetadataBlock(resumeDraft)}
     <div class="section-block">
@@ -538,6 +617,37 @@ function renderApplicationPacket(job) {
       <button type="button" class="secondary-button" disabled>Export packet later</button>
     `
     : emptyMessage("Save an opportunity before building an application packet.");
+}
+
+function renderApplicationStudio(job) {
+  const node = document.querySelector("#application-studio-content");
+  if (!node) {
+    return;
+  }
+
+  if (!job) {
+    node.innerHTML = emptyMessage("Save an opportunity before opening Application Studio.");
+    return;
+  }
+
+  node.innerHTML = `
+    ${placeholderBlock("Selected Opportunity", `${job.company} - ${job.roleTitle}`)}
+    ${packetStatusGrid(job)}
+    <div class="two-column">
+      <div class="section-block first-section">
+        <h2>Resume Draft</h2>
+        ${resumeDraftEditorBlock(job)}
+      </div>
+      <div class="section-block first-section">
+        <h2>Cover Letter Draft</h2>
+        ${coverLetterDraftEditorBlock(job)}
+      </div>
+    </div>
+    <div class="section-block">
+      <h2>Packet Notes</h2>
+      ${packetNotesEditorBlock(job)}
+    </div>
+  `;
 }
 
 function renderTracker(jobs) {
@@ -672,8 +782,8 @@ function recommendedNextAction(jobs) {
       label: "Start here",
       title: "Add your first job posting.",
       detail: "Paste a role you are considering so NextMove can help you review fit and organize the application work.",
-      buttonText: "Start Job Intake",
-      href: "#/jobs/add",
+      buttonText: "Open Opportunity Review",
+      href: "#/jobs/opportunity",
     };
   }
 
@@ -720,7 +830,7 @@ function recommendedNextAction(jobs) {
       "This role has an Apply recommendation and still needs a saved resume draft or cover letter draft.",
       "Open packet",
       incompleteApplyPacketJob,
-      "packet"
+      "studio"
     );
   }
 
@@ -743,7 +853,7 @@ function recommendedNextAction(jobs) {
       "This role has an Apply recommendation. Pull the tailored resume, cover letter, and notes together.",
       "Open packet",
       applyRecommendationJob,
-      "packet"
+      "studio"
     );
   }
 
@@ -836,6 +946,82 @@ function fitReviewSummaryBlock(job) {
   `;
 }
 
+function jobIntelligenceSummaryBlock(job) {
+  return `
+    <div class="section-block">
+      <h2>Opportunity Intelligence</h2>
+      <div class="three-column">
+        ${placeholderBlock("Responsibilities", listOrPlaceholder(job.responsibilities, "No responsibilities saved yet."))}
+        ${placeholderBlock("Required Skills", listOrPlaceholder(job.requiredSkills, "No required skills saved yet."))}
+        ${placeholderBlock("Technologies / Tools", listOrPlaceholder(job.technologies, "No technologies saved yet."))}
+      </div>
+    </div>
+  `;
+}
+
+function jobIntelligenceForm(job) {
+  return `
+    <form class="input-panel flat-panel job-intelligence-form" data-job-intelligence-form="${escapeAttribute(job.id)}">
+      <div class="form-grid">
+        <label>
+          Company
+          <input name="company" type="text" required value="${escapeAttribute(job.company || "")}">
+        </label>
+        <label>
+          Role Title
+          <input name="roleTitle" type="text" required value="${escapeAttribute(job.roleTitle || "")}">
+        </label>
+        <label>
+          Job URL
+          <input name="jobUrl" type="url" value="${escapeAttribute(job.jobUrl || "")}">
+        </label>
+        <label>
+          Location
+          <input name="location" type="text" value="${escapeAttribute(job.location || "")}">
+        </label>
+        <label>
+          Salary Range
+          <input name="salaryRange" type="text" value="${escapeAttribute(job.salaryRange || "")}">
+        </label>
+        <label>
+          Work Arrangement
+          <input name="workArrangement" type="text" value="${escapeAttribute(job.workArrangement || "")}">
+        </label>
+        <label>
+          Years of Experience
+          <input name="yearsExperience" type="text" value="${escapeAttribute(job.yearsExperience || "")}">
+        </label>
+      </div>
+      <div class="form-grid">
+        ${jobIntelligenceTextarea("Responsibilities", "responsibilities", job.responsibilities)}
+        ${jobIntelligenceTextarea("Required Skills", "requiredSkills", job.requiredSkills)}
+        ${jobIntelligenceTextarea("Preferred Skills", "preferredSkills", job.preferredSkills)}
+        ${jobIntelligenceTextarea("Technologies / Tools", "technologies", job.technologies)}
+        ${jobIntelligenceTextarea("Leadership Expectations", "leadershipExpectations", job.leadershipExpectations)}
+        ${jobIntelligenceTextarea("Certifications", "certifications", job.certifications)}
+      </div>
+      <label>
+        Notes
+        <textarea name="notes" rows="5">${escapeHtml(job.notes || "")}</textarea>
+      </label>
+      <label>
+        Source Posting Text
+        <textarea name="sourcePostingText" rows="8">${escapeHtml(job.sourcePostingText || "")}</textarea>
+      </label>
+      <button type="submit">Save Opportunity Intelligence</button>
+    </form>
+  `;
+}
+
+function jobIntelligenceTextarea(label, name, value) {
+  return `
+    <label>
+      ${escapeHtml(label)}
+      <textarea name="${escapeAttribute(name)}" rows="4" placeholder="One item per line">${escapeHtml(textFromLines(value))}</textarea>
+    </label>
+  `;
+}
+
 function applicationPacketStatusBlock(job) {
   return `
     <div class="section-block">
@@ -846,6 +1032,70 @@ function applicationPacketStatusBlock(job) {
         <article><span>Packet Notes</span><strong>${job.notes ? "Present" : "Missing"}</strong></article>
       </div>
     </div>
+  `;
+}
+
+function resumeDraftEditorBlock(job) {
+  const resumeDraft = job.resumeDraft || {};
+  const markdownContent = resumeDraft.markdownContent || resumeDraft.markdownPreview || job.resumeVersionPath || "";
+
+  return `
+    ${placeholderBlock("Status", resumeDraftStatus(job))}
+    <form class="input-panel flat-panel packet-draft-form" data-resume-draft-form="${escapeAttribute(job.id)}">
+      <label>
+        Tailored Summary
+        <textarea name="tailoredSummary" rows="4">${escapeHtml(resumeDraft.tailoredSummary || "")}</textarea>
+      </label>
+      <label>
+        Tailored Skills
+        <textarea name="tailoredSkills" rows="4" placeholder="One skill per line">${escapeHtml(textFromLines(resumeDraft.tailoredSkills))}</textarea>
+      </label>
+      <label>
+        Tailored Experience Bullets
+        <textarea name="tailoredExperienceBullets" rows="5" placeholder="One bullet per line">${escapeHtml(textFromLines(resumeDraft.tailoredExperienceBullets))}</textarea>
+      </label>
+      <label>
+        Markdown Content
+        <textarea name="markdownContent" rows="8">${escapeHtml(markdownContent)}</textarea>
+      </label>
+      <label class="checkbox-label">
+        <input name="userApproved" type="checkbox"${resumeDraft.userApproved ? " checked" : ""}>
+        User approved
+      </label>
+      <button type="submit">Save Resume Draft</button>
+    </form>
+  `;
+}
+
+function coverLetterDraftEditorBlock(job) {
+  const coverLetterDraft = job.coverLetterDraft || {};
+  const coverLetterContent = coverLetterDraft.coverLetterContent || coverLetterDraft.draftText || job.coverLetterPath || "";
+
+  return `
+    ${placeholderBlock("Status", coverLetterDraftStatus(job))}
+    <form class="input-panel flat-panel packet-draft-form" data-cover-letter-draft-form="${escapeAttribute(job.id)}">
+      <label>
+        Cover Letter Content
+        <textarea name="coverLetterContent" rows="10">${escapeHtml(coverLetterContent)}</textarea>
+      </label>
+      <label class="checkbox-label">
+        <input name="userApproved" type="checkbox"${coverLetterDraft.userApproved ? " checked" : ""}>
+        User approved
+      </label>
+      <button type="submit">Save Cover Letter Draft</button>
+    </form>
+  `;
+}
+
+function packetNotesEditorBlock(job) {
+  return `
+    <form class="input-panel flat-panel packet-draft-form" data-packet-notes-form="${escapeAttribute(job.id)}">
+      <label>
+        Packet Notes
+        <textarea name="packetNotes" rows="6">${escapeHtml(job.notes || "")}</textarea>
+      </label>
+      <button type="submit">Save Packet Notes</button>
+    </form>
   `;
 }
 
@@ -983,21 +1233,33 @@ function currentJobsRoute() {
     return { page: "", jobId: "" };
   }
 
+  const pageName = jobsPageAlias(page);
+
   return {
-    page: knownJobsPage(page) ? page : "dashboard",
+    page: knownJobsPage(pageName) ? pageName : "dashboard",
     jobId: jobId || "",
   };
+}
+
+function jobsPageAlias(page) {
+  if (page === "add") {
+    return "opportunity";
+  }
+
+  return page;
 }
 
 function knownJobsPage(page) {
   return [
     "dashboard",
+    "opportunity",
     "add",
     "detail",
     "fit",
     "resume",
     "cover-letter",
     "packet",
+    "studio",
     "tracker",
     "settings",
   ].includes(page);
@@ -1014,7 +1276,7 @@ function updateSelectedJobLinks() {
   });
 
   document.querySelectorAll("[data-jobs-route-link]").forEach((link) => {
-    if (["detail", "fit", "resume", "cover-letter", "packet"].includes(link.dataset.jobsRouteLink)) {
+    if (["opportunity", "detail", "fit", "resume", "cover-letter", "packet", "studio"].includes(link.dataset.jobsRouteLink)) {
       link.href = `#/jobs/${link.dataset.jobsRouteLink}${selectedJobId ? `/${encodeURIComponent(selectedJobId)}` : ""}`;
     }
   });

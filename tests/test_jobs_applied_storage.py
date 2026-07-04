@@ -153,6 +153,31 @@ class JobsAppliedStorageTests(unittest.TestCase):
         self.assertEqual(saved["notes"], "Packet ready. Follow up next Friday.")
         self.assertEqual(saved["fitRecommendation"], "Apply")
 
+    def test_updating_job_intelligence_fields_persists(self) -> None:
+        add_job_application(sample_record(), self.storage_path)
+
+        update_job_application(
+            "job_2026_0001",
+            {
+                "responsibilities": ["Lead transformation roadmap", "Improve operating metrics"],
+                "requiredSkills": ["Change management", "Stakeholder communication"],
+                "preferredSkills": ["Manufacturing operations"],
+                "technologies": ["Jira", "Power BI"],
+                "leadershipExpectations": ["Influence cross-functional leaders"],
+                "certifications": ["PMP preferred"],
+                "yearsExperience": "7+ years",
+                "sourcePostingText": "Updated structured posting text...",
+            },
+            self.storage_path,
+        )
+
+        saved = read_job_applications(self.storage_path)[0]
+        self.assertEqual(saved["responsibilities"][0], "Lead transformation roadmap")
+        self.assertEqual(saved["requiredSkills"], ["Change management", "Stakeholder communication"])
+        self.assertEqual(saved["technologies"], ["Jira", "Power BI"])
+        self.assertEqual(saved["yearsExperience"], "7+ years")
+        self.assertEqual(saved["company"], "Example Company")
+
     def test_rejecting_record_missing_required_fields(self) -> None:
         record = sample_record()
         record["company"] = ""
@@ -204,6 +229,13 @@ def sample_record() -> dict:
         "coverLetterPath": "outputs/example-company-cover-letter.md",
         "notes": "Strong match on transformation, metrics, and stakeholder communication.",
         "sourcePostingText": "Full pasted job description text...",
+        "responsibilities": [],
+        "requiredSkills": [],
+        "preferredSkills": [],
+        "technologies": [],
+        "leadershipExpectations": [],
+        "certifications": [],
+        "yearsExperience": "",
     }
 
 

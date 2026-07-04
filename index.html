@@ -16,11 +16,10 @@
 
       <nav class="primary-flow-nav" aria-label="Primary workflow">
         <a href="#/jobs/dashboard">Dashboard</a>
-        <a href="#career-vault">Career Vault</a>
-        <a href="#/jobs/add">Job Intake</a>
-        <a href="#/jobs/fit">Fit Review</a>
-        <a href="#/jobs/packet">Application Packet</a>
+        <a href="#/jobs/opportunity">Opportunity Review</a>
+        <a href="#/jobs/studio">Application Studio</a>
         <a href="#/jobs/tracker">Tracker</a>
+        <a href="#profile-story-bank">Profile / Story Bank</a>
         <a href="#/jobs/settings">Settings</a>
       </nav>
 
@@ -33,12 +32,8 @@
 
           <div class="jobs-nav" aria-label="Jobs Applied pages">
             <a class="secondary-button nav-link-button" href="#/jobs/dashboard" data-jobs-route-link="dashboard">Dashboard</a>
-            <a class="secondary-button nav-link-button" href="#/jobs/add" data-jobs-route-link="add">Job Intake</a>
-            <a class="secondary-button nav-link-button" href="#/jobs/detail" data-jobs-route-link="detail">Job Detail</a>
-            <a class="secondary-button nav-link-button" href="#/jobs/fit" data-jobs-route-link="fit">Fit Review</a>
-            <a class="secondary-button nav-link-button" href="#/jobs/resume" data-jobs-route-link="resume">Resume Builder</a>
-            <a class="secondary-button nav-link-button" href="#/jobs/cover-letter" data-jobs-route-link="cover-letter">Cover Letter Builder</a>
-            <a class="secondary-button nav-link-button" href="#/jobs/packet" data-jobs-route-link="packet">Application Packet</a>
+            <a class="secondary-button nav-link-button" href="#/jobs/opportunity" data-jobs-route-link="opportunity">Opportunity Review</a>
+            <a class="secondary-button nav-link-button" href="#/jobs/studio" data-jobs-route-link="studio">Application Studio</a>
             <a class="secondary-button nav-link-button" href="#/jobs/tracker" data-jobs-route-link="tracker">Tracker</a>
             <a class="secondary-button nav-link-button" href="#/jobs/settings" data-jobs-route-link="settings">Settings</a>
           </div>
@@ -50,7 +45,7 @@
               <h2>Dashboard</h2>
               <p class="support-copy">Your career command center for opportunities, momentum, and the next useful action.</p>
             </div>
-            <a class="nav-link-button primary-dashboard-action" href="#/jobs/add">Add or Paste Job Posting</a>
+            <a class="nav-link-button primary-dashboard-action" href="#/jobs/opportunity">Add or Paste Job Posting</a>
           </div>
 
           <div class="score-grid" id="jobs-status-summary"></div>
@@ -68,9 +63,15 @@
           </div>
         </section>
 
-        <section data-jobs-page="add" class="hidden">
+        <section data-jobs-page="opportunity" class="hidden">
           <div class="section-block first-section">
-            <h2>Job Intake</h2>
+            <div class="panel-header compact-header">
+              <div>
+                <h2>Opportunity Review</h2>
+                <p class="support-copy">Capture the posting, structure the role, and decide Apply, Maybe, or Skip.</p>
+              </div>
+              <a class="secondary-button nav-link-button" href="#/jobs/studio" data-selected-job-route="studio">Open Application Studio</a>
+            </div>
             <form id="add-job-form" class="input-panel flat-panel">
               <div class="form-grid">
                 <label>
@@ -111,6 +112,37 @@
                 <textarea name="notes" placeholder="Decision notes, salary notes, or questions to revisit..."></textarea>
               </label>
 
+              <div class="form-grid">
+                <label>
+                  Responsibilities
+                  <textarea name="responsibilities" placeholder="One responsibility per line..."></textarea>
+                </label>
+                <label>
+                  Required Skills
+                  <textarea name="requiredSkills" placeholder="One required skill per line..."></textarea>
+                </label>
+                <label>
+                  Preferred Skills
+                  <textarea name="preferredSkills" placeholder="One preferred skill per line..."></textarea>
+                </label>
+                <label>
+                  Technologies / Tools
+                  <textarea name="technologies" placeholder="One technology or tool per line..."></textarea>
+                </label>
+                <label>
+                  Leadership Expectations
+                  <textarea name="leadershipExpectations" placeholder="Leadership, stakeholder, or ownership expectations..."></textarea>
+                </label>
+                <label>
+                  Certifications
+                  <textarea name="certifications" placeholder="One certification per line..."></textarea>
+                </label>
+                <label>
+                  Years of Experience
+                  <input name="yearsExperience" type="text" placeholder="5+ years">
+                </label>
+              </div>
+
               <label>
                 Source Posting Text
                 <textarea name="sourcePostingText" placeholder="Paste the job posting here..."></textarea>
@@ -118,6 +150,8 @@
 
               <button type="submit">Save Opportunity</button>
             </form>
+
+            <div id="opportunity-review-content"></div>
           </div>
         </section>
 
@@ -129,10 +163,8 @@
                 <p class="support-copy">Review the opportunity and choose the next step with confidence.</p>
               </div>
               <div class="button-row">
-                <a class="secondary-button nav-link-button" href="#/jobs/fit" data-selected-job-route="fit">Fit Review</a>
-                <a class="secondary-button nav-link-button" href="#/jobs/resume" data-selected-job-route="resume">Resume Builder</a>
-                <a class="secondary-button nav-link-button" href="#/jobs/cover-letter" data-selected-job-route="cover-letter">Cover Letter Builder</a>
-                <a class="secondary-button nav-link-button" href="#/jobs/packet" data-selected-job-route="packet">Application Packet</a>
+                <a class="secondary-button nav-link-button" href="#/jobs/opportunity" data-selected-job-route="opportunity">Opportunity Review</a>
+                <a class="secondary-button nav-link-button" href="#/jobs/studio" data-selected-job-route="studio">Application Studio</a>
                 <a class="secondary-button nav-link-button" href="#/jobs/tracker">Tracker</a>
               </div>
             </div>
@@ -168,6 +200,19 @@
           </div>
         </section>
 
+        <section data-jobs-page="studio" class="hidden">
+          <div class="section-block first-section">
+            <div class="panel-header compact-header">
+              <div>
+                <h2>Application Studio</h2>
+                <p class="support-copy">Shape the resume draft, cover letter draft, and packet notes in one focused workspace.</p>
+              </div>
+              <a class="secondary-button nav-link-button" href="#/jobs/opportunity" data-selected-job-route="opportunity">Back to Opportunity Review</a>
+            </div>
+            <div id="application-studio-content"></div>
+          </div>
+        </section>
+
         <section data-jobs-page="tracker" class="hidden">
           <div class="section-block first-section">
             <h2>Application Tracker</h2>
@@ -185,14 +230,14 @@
         <p id="jobs-applied-status" class="status-message"></p>
       </section>
 
-      <section class="vault-panel" id="career-vault" aria-label="Career Vault Editor">
+      <section class="vault-panel" id="profile-story-bank" aria-label="Profile and Story Bank Editor">
         <div class="panel-header">
           <div>
-            <p class="eyebrow">Career Vault</p>
-            <h2>Profile</h2>
+            <p class="eyebrow">Profile / Story Bank</p>
+            <h2>Professional Evidence</h2>
           </div>
           <div class="button-row">
-            <button type="button" id="save-vault">Save Vault</button>
+            <button type="button" id="save-vault">Save Story Bank</button>
             <button type="button" id="export-vault" class="secondary-button">Export JSON</button>
           </div>
         </div>
