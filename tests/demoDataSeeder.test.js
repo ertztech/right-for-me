@@ -30,7 +30,7 @@ const {
 
 const sampleJobs = createSampleJobs();
 assert.equal(sampleJobs.length, 3);
-assert.deepEqual(sampleJobs.map((job) => job.status), ["Apply", "Reviewing", "Applied"]);
+assert.deepEqual(sampleJobs.map((job) => job.status), ["Apply", "Reviewing", "Found"]);
 assert.equal(sampleJobs.some((job) => /Agile Delivery Transformation/.test(job.roleTitle)), true);
 assert.equal(sampleJobs.some((job) => /AI Enablement Product Operations/.test(job.roleTitle)), true);
 assert.equal(sampleJobs.some((job) => /Manufacturing Operations Continuous Improvement/.test(job.roleTitle)), true);
@@ -39,11 +39,18 @@ sampleJobs.forEach((job) => {
   assert.equal(job.demoData.batchId, "nextmove-demo-data-v1");
   assert.equal(job.demoData.source, "demo");
   assert.ok(job.sourcePostingText);
-  assert.ok(job.fitAnalysis?.recommendation);
-  assert.ok(job.resumeDraft?.markdownContent);
-  assert.ok(job.coverLetterDraft?.coverLetterContent);
   assert.ok(job.interviewPrep?.likelyQuestions?.length);
 });
+assert.ok(sampleJobs[0].fitAnalysis?.recommendation);
+assert.ok(sampleJobs[0].resumeDraft?.markdownContent);
+assert.ok(sampleJobs[0].coverLetterDraft?.coverLetterContent);
+assert.equal(sampleJobs[0].packetChecklist.resumeReviewed, true);
+assert.ok(sampleJobs[1].fitAnalysis?.recommendation);
+assert.ok(sampleJobs[1].resumeDraft?.markdownContent);
+assert.equal(sampleJobs[1].coverLetterDraft, null);
+assert.equal(sampleJobs[2].fitAnalysis, null);
+assert.equal(sampleJobs[2].resumeDraft, null);
+assert.equal(sampleJobs[2].coverLetterDraft, null);
 
 RightForMeJobsAppliedStorage.addJobApplication({
   id: "real-job-1",

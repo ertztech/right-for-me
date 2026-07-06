@@ -149,6 +149,12 @@
         modelName: "demo",
         userApproved: false,
       },
+      packetChecklist: {
+        resumeReviewed: true,
+        coverLetterReviewed: true,
+        applicationSubmitted: false,
+        followUpScheduled: true,
+      },
       demoData: demoMarker(),
     };
   }
@@ -193,7 +199,7 @@
         "Could be a stretch if they require deep AI product ownership.",
       ], "Position as an operations and delivery leader who can bring structure to AI product execution while learning product-specific depth quickly."),
       resumeDraft: resumeDraft("BrightForge AI"),
-      coverLetterDraft: coverLetterDraft("BrightForge AI", "AI Enablement Product Operations Manager"),
+      coverLetterDraft: null,
       interviewPrep: {
         likelyQuestions: [
           "How have you supported product or engineering delivery?",
@@ -206,6 +212,12 @@
         promptVersion: "demo-data-v1",
         modelName: "demo",
         userApproved: false,
+      },
+      packetChecklist: {
+        resumeReviewed: false,
+        coverLetterReviewed: false,
+        applicationSubmitted: false,
+        followUpScheduled: false,
       },
       demoData: demoMarker(),
     };
@@ -220,15 +232,15 @@
       location: "Green Bay, WI",
       salaryRange: "$105,000 - $132,000",
       workArrangement: "On-site",
-      status: "Applied",
-      fitScore: 73,
-      fitRecommendation: "Apply",
+      status: "Found",
+      fitScore: "",
+      fitRecommendation: "",
       dateFound: "2026-07-03",
-      dateApplied: "2026-07-05",
-      followUpDate: "2026-07-12",
+      dateApplied: "",
+      followUpDate: "",
       resumeVersionPath: "",
       coverLetterPath: "",
-      notes: "Applied after tailoring the packet toward manufacturing operations, CI facilitation, and visible operating metrics. Follow up with plant director if no response.",
+      notes: "Early-stage saved role. Review fit before investing in application materials.",
       responsibilities: [
         "Lead continuous improvement projects across machining and assembly lines.",
         "Coach supervisors on daily management, root cause problem solving, and KPI review.",
@@ -241,16 +253,9 @@
       certifications: ["Lean Six Sigma Green Belt preferred"],
       yearsExperience: "6+ years",
       sourcePostingText: "HarborWorks Precision needs a Manufacturing Operations Continuous Improvement Manager to lead Lean projects, coach supervisors, improve OEE, reduce rework, run daily management routines, use Power BI and Excel reporting, and partner across operations, quality, and maintenance.",
-      fitAnalysis: fitAnalysis(73, "Apply", [
-        "Strong operating rhythm, dashboard, and leader coaching evidence.",
-        "Manufacturing transformation stories map well to CI facilitation and KPI review.",
-      ], [
-        "Prepare deeper examples around formal Lean tools and shop-floor problem solving.",
-      ], [
-        "On-site cadence may limit flexibility; verify travel and shift expectations.",
-      ], "Position Mike as an operations transformation leader who makes improvement routines visible, measurable, and sustainable with frontline supervisors."),
-      resumeDraft: resumeDraft("HarborWorks Precision"),
-      coverLetterDraft: coverLetterDraft("HarborWorks Precision", "Manufacturing Operations Continuous Improvement Manager"),
+      fitAnalysis: null,
+      resumeDraft: null,
+      coverLetterDraft: null,
       interviewPrep: {
         likelyQuestions: [
           "Tell us about a CI project that changed frontline behavior.",
@@ -263,6 +268,12 @@
         promptVersion: "demo-data-v1",
         modelName: "demo",
         userApproved: false,
+      },
+      packetChecklist: {
+        resumeReviewed: false,
+        coverLetterReviewed: false,
+        applicationSubmitted: false,
+        followUpScheduled: false,
       },
       demoData: demoMarker(),
     };

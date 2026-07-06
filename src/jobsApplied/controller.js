@@ -166,6 +166,15 @@ function initializeJobsAppliedController() {
     saveTrackerStatus(control);
   });
 
+  document.addEventListener("change", (event) => {
+    const control = event.target.closest("[data-packet-checklist]");
+    if (!control) {
+      return;
+    }
+
+    savePacketChecklistToggle(control);
+  });
+
   window.addEventListener("hashchange", handleJobsRouteChange);
   ensureJobsRoute();
   handleJobsRouteChange();
@@ -724,6 +733,40 @@ function saveTrackerStatus(control) {
   }
 }
 
+function savePacketChecklistToggle(control) {
+  const jobId = control.dataset.jobId;
+  const field = control.dataset.packetChecklist;
+  const allowedFields = ["resumeReviewed", "coverLetterReviewed", "applicationSubmitted", "followUpScheduled"];
+
+  if (!jobId || !allowedFields.includes(field)) {
+    setJobsStatus("Checklist item could not be saved.", "failure");
+    refreshJobsAppliedViews();
+    return;
+  }
+
+  const job = findJobById(jobId);
+  if (!job) {
+    setJobsStatus("Select an opportunity before updating checklist items.", "failure");
+    refreshJobsAppliedViews();
+    return;
+  }
+
+  try {
+    RightForMeJobsAppliedStorage.updateJobApplication(jobId, {
+      packetChecklist: {
+        ...(job.packetChecklist || {}),
+        [field]: Boolean(control.checked),
+      },
+    });
+    selectedJobId = jobId;
+    refreshJobsAppliedViews();
+    setJobsStatus("Readiness checklist updated.", "success");
+  } catch (error) {
+    setJobsStatus(error.message || "Checklist item could not be saved.", "failure");
+    refreshJobsAppliedViews();
+  }
+}
+
 function handleJobsRouteChange() {
   const route = currentJobsRoute();
   const jobs = RightForMeJobsAppliedStorage.getJobApplications();
@@ -1030,64 +1073,85 @@ function renderApplicationStudio(job) {
     return;
   }
 
+  const readiness = applicationPacketReadiness(job);
+
   node.innerHTML = `
-    <div class="section-block first-section">
-      <div class="panel-header compact-header">
-        <div>
-          <p class="eyebrow">Selected Opportunity</p>
-          <h2>${escapeHtml(job.roleTitle)}</h2>
-          <p class="support-copy">${escapeHtml(job.company)} | ${escapeHtml(formatValue(job.location))} | ${escapeHtml(formatValue(job.workArrangement))}</p>
-        </div>
-        <div class="button-row">
-          <a class="secondary-button nav-link-button" href="#/jobs/dashboard">Dashboard</a>
-          <a class="secondary-button nav-link-button" href="#/jobs/tracker">Tracker</a>
-          <a class="secondary-button nav-link-button" href="#/jobs/opportunity/${escapeAttribute(job.id)}">Opportunity Review</a>
-        </div>
+    <div class="studio-hero">
+      <div class="studio-hero-main">
+        <p class="eyebrow">Application Studio</p>
+        <h2>${escapeHtml(job.roleTitle)}</h2>
+        <p>${escapeHtml(job.company)} | ${escapeHtml(formatValue(job.location))} | ${escapeHtml(formatValue(job.workArrangement))}</p>
       </div>
-      ${applicationStudioStatusForm(job)}
-      ${packetStatusGrid(job)}
+      <div class="studio-hero-status">
+        <span>Status</span>
+        <strong>${escapeHtml(job.status)}</strong>
+        <p>${escapeHtml(readinessSummaryText(readiness))}</p>
+      </div>
+    </div>
+
+    <div class="studio-action-bar">
+      <a class="secondary-button nav-link-button" href="#/jobs/dashboard">Dashboard</a>
+      <a class="secondary-button nav-link-button" href="#/jobs/tracker">Tracker</a>
+      <a class="secondary-button nav-link-button" href="#/jobs/opportunity/${escapeAttribute(job.id)}">Opportunity Review</a>
+    </div>
+
+    <div class="studio-grid">
+      <section class="studio-card studio-card-primary">
+        <div>
+          <h2>Packet Readiness</h2>
+          <p class="support-copy">${escapeHtml(readinessSummaryText(readiness))}</p>
+        </div>
+        ${readinessMeterBlock(readiness)}
+        ${readinessChecklistBlock(job, readiness)}
+      </section>
+
+      <section class="studio-card">
+        <h2>Status and Next Step</h2>
+        ${applicationStudioStatusForm(job)}
+        ${packetStatusGrid(job)}
+      </section>
     </div>
 
     <div class="two-column">
-      <div class="section-block">
+      <section class="studio-card">
         <h2>Opportunity Snapshot</h2>
         ${jobDetailsSnapshotBlock(job)}
         ${postingSummaryBlock(job)}
-      </div>
-      <div class="section-block">
+      </section>
+      <section class="studio-card">
         <h2>Fit Review</h2>
         ${fitReviewWorkspaceBlock(job)}
-      </div>
+      </section>
     </div>
 
-    <div class="section-block">
+    <section class="studio-card">
       <h2>Job Intelligence</h2>
       ${jobIntelligenceWorkspaceBlock(job)}
-    </div>
+    </section>
 
     <div class="two-column">
-      <div class="section-block">
+      <section class="studio-card">
         <h2>Resume Draft</h2>
         ${draftPreviewBlock("Resume Content", resumeDraftText(job), "No resume draft yet. Generate a resume or save markdown content here when ready.")}
         <div class="button-row">
           <button type="button" class="secondary-button" data-copy-packet-draft="resume" data-job-id="${escapeAttribute(job.id)}">Copy Resume Draft</button>
         </div>
         ${resumeDraftEditorBlock(job)}
-      </div>
-      <div class="section-block">
+      </section>
+      <section class="studio-card">
         <h2>Cover Letter Draft</h2>
         ${draftPreviewBlock("Cover Letter Content", coverLetterDraftText(job), "No cover letter draft yet. Save draft content here when ready.")}
         <div class="button-row">
           <button type="button" class="secondary-button" data-copy-packet-draft="cover-letter" data-job-id="${escapeAttribute(job.id)}">Copy Cover Letter Draft</button>
         </div>
         ${coverLetterDraftEditorBlock(job)}
-      </div>
+      </section>
     </div>
-    <div class="section-block">
+    <section class="studio-card">
       <h2>Notes and Follow-up</h2>
       ${placeholderBlock("Follow-up Date", formatValue(job.followUpDate))}
       ${packetNotesEditorBlock(job)}
-    </div>
+    </section>
   `;
 }
 
@@ -1116,6 +1180,94 @@ function applicationStudioStatusForm(job) {
       </label>
       <button type="submit">Update Status and Notes</button>
     </form>
+  `;
+}
+
+function applicationPacketReadiness(job) {
+  const checklist = job.packetChecklist || {};
+  const submittedByStatus = ["Applied", "Interviewing", "Rejected", "Offer", "Closed"].includes(job.status);
+  const items = [
+    readinessItem("Job posting saved", Boolean(cleanValue(job.sourcePostingText)), "Add the posting text in Opportunity Review."),
+    readinessItem("Job intelligence available", hasJobIntelligence(job), "Extract or enter responsibilities, skills, tools, and role details."),
+    readinessItem("Fit review available", hasFitAnalysis(job), "Save an Apply, Maybe, or Skip fit review."),
+    readinessItem("Resume draft available", hasResumeDraft(job), "Generate or save a tailored resume draft."),
+    readinessItem("Cover letter draft available", hasCoverLetterDraft(job), "Save a cover letter draft."),
+    readinessItem("Notes added", Boolean(cleanValue(job.notes)), "Add packet notes or follow-up context."),
+    readinessItem("Status selected", Boolean(cleanValue(job.status)), "Choose a current application status."),
+    readinessItem("Follow-up details added", Boolean(cleanValue(job.followUpDate)), "Add a follow-up date when useful."),
+    readinessItem("Resume reviewed", Boolean(checklist.resumeReviewed), "Review the resume draft before using it.", "resumeReviewed"),
+    readinessItem("Cover letter reviewed", Boolean(checklist.coverLetterReviewed), "Review the cover letter draft before using it.", "coverLetterReviewed"),
+    readinessItem("Application submitted", Boolean(checklist.applicationSubmitted || submittedByStatus), "Mark this when the application is submitted.", "applicationSubmitted"),
+    readinessItem("Follow-up scheduled", Boolean(checklist.followUpScheduled || cleanValue(job.followUpDate)), "Mark this when the next follow-up is scheduled.", "followUpScheduled"),
+  ];
+  const completed = items.filter((item) => item.complete).length;
+
+  return {
+    completed,
+    items,
+    total: items.length,
+  };
+}
+
+function readinessItem(label, complete, emptyText, field = "") {
+  return {
+    complete: Boolean(complete),
+    emptyText,
+    field,
+    label,
+  };
+}
+
+function readinessSummaryText(readiness) {
+  return `${readiness.completed} of ${readiness.total} complete`;
+}
+
+function readinessMeterBlock(readiness) {
+  const percent = readiness.total ? Math.round((readiness.completed / readiness.total) * 100) : 0;
+  return `
+    <div class="readiness-meter" aria-label="${escapeAttribute(readinessSummaryText(readiness))}">
+      <div class="readiness-meter-fill" style="width: ${percent}%"></div>
+    </div>
+  `;
+}
+
+function readinessChecklistBlock(job, readiness) {
+  return `
+    <div class="readiness-checklist">
+      ${readiness.items.map((item) => readinessChecklistItem(job, item)).join("")}
+    </div>
+  `;
+}
+
+function readinessChecklistItem(job, item) {
+  const stateText = item.complete ? "Complete" : item.emptyText;
+  const stateClass = item.complete ? "complete" : "incomplete";
+
+  if (item.field) {
+    return `
+      <label class="readiness-item ${stateClass}">
+        <input
+          type="checkbox"
+          data-packet-checklist="${escapeAttribute(item.field)}"
+          data-job-id="${escapeAttribute(job.id)}"
+          ${item.complete ? "checked" : ""}
+        >
+        <span>
+          <strong>${escapeHtml(item.label)}</strong>
+          <small>${escapeHtml(stateText)}</small>
+        </span>
+      </label>
+    `;
+  }
+
+  return `
+    <div class="readiness-item ${stateClass}">
+      <span class="readiness-dot" aria-hidden="true"></span>
+      <span>
+        <strong>${escapeHtml(item.label)}</strong>
+        <small>${escapeHtml(stateText)}</small>
+      </span>
+    </div>
   `;
 }
 
@@ -1715,6 +1867,18 @@ function hasFitAnalysis(job) {
 
 function fitRecommendationFor(job) {
   return job.fitAnalysis?.recommendation || job.fitRecommendation || "";
+}
+
+function hasJobIntelligence(job) {
+  return Boolean(
+    (Array.isArray(job.responsibilities) && job.responsibilities.length) ||
+    (Array.isArray(job.requiredSkills) && job.requiredSkills.length) ||
+    (Array.isArray(job.preferredSkills) && job.preferredSkills.length) ||
+    (Array.isArray(job.technologies) && job.technologies.length) ||
+    (Array.isArray(job.leadershipExpectations) && job.leadershipExpectations.length) ||
+    (Array.isArray(job.certifications) && job.certifications.length) ||
+    cleanValue(job.yearsExperience)
+  );
 }
 
 function hasResumeDraft(job) {
