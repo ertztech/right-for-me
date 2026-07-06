@@ -23,9 +23,27 @@ global.RightForMeCareerVault = {
 
 const {
   clearDemoData,
+  createSampleJobs,
   isDemoRecord,
   loadSampleData,
 } = require("../src/demoData/seeder");
+
+const sampleJobs = createSampleJobs();
+assert.equal(sampleJobs.length, 3);
+assert.deepEqual(sampleJobs.map((job) => job.status), ["Apply", "Reviewing", "Applied"]);
+assert.equal(sampleJobs.some((job) => /Agile Delivery Transformation/.test(job.roleTitle)), true);
+assert.equal(sampleJobs.some((job) => /AI Enablement Product Operations/.test(job.roleTitle)), true);
+assert.equal(sampleJobs.some((job) => /Manufacturing Operations Continuous Improvement/.test(job.roleTitle)), true);
+sampleJobs.forEach((job) => {
+  assert.equal(isDemoRecord(job), true);
+  assert.equal(job.demoData.batchId, "nextmove-demo-data-v1");
+  assert.equal(job.demoData.source, "demo");
+  assert.ok(job.sourcePostingText);
+  assert.ok(job.fitAnalysis?.recommendation);
+  assert.ok(job.resumeDraft?.markdownContent);
+  assert.ok(job.coverLetterDraft?.coverLetterContent);
+  assert.ok(job.interviewPrep?.likelyQuestions?.length);
+});
 
 RightForMeJobsAppliedStorage.addJobApplication({
   id: "real-job-1",

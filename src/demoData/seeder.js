@@ -1,6 +1,7 @@
 (function attachDemoDataSeeder(root) {
   const DEMO_SEEDED_BY = "nextmove-demo-data-seeder";
   const DEMO_VERSION = "demo-data-v1";
+  const DEMO_BATCH_ID = "nextmove-demo-data-v1";
 
   function loadSampleData() {
     const existingJobs = RightForMeJobsAppliedStorage.getJobApplications();
@@ -42,16 +43,16 @@
     return [
       strongFitJob(),
       healthyStretchJob(),
-      questionableFitJob(),
+      manufacturingContinuousImprovementJob(),
     ];
   }
 
   function createSampleProfile() {
     return {
       person: {
-        name: "Jordan Rivera",
+        name: "Mike Thompson",
         location: "Milwaukee, WI",
-        email: "jordan.rivera@example.com",
+        email: "mike.thompson@example.com",
         phone: "414-555-0138",
       },
       roles: [
@@ -94,8 +95,8 @@
     return {
       id: "demo-job-operations-transformation-lead",
       company: "Atlas Components",
-      roleTitle: "Operations Transformation Lead",
-      jobUrl: "https://example.com/jobs/operations-transformation-lead",
+      roleTitle: "Agile Delivery Transformation Lead",
+      jobUrl: "https://example.com/jobs/agile-delivery-transformation-lead",
       location: "Milwaukee, WI",
       salaryRange: "$118,000 - $142,000",
       workArrangement: "Hybrid",
@@ -124,7 +125,7 @@
       leadershipExpectations: ["Lead cross-functional teams", "Influence senior operations leaders"],
       certifications: ["Lean Six Sigma preferred"],
       yearsExperience: "7+ years",
-      sourcePostingText: "Atlas Components is hiring an Operations Transformation Lead to guide manufacturing transformation, operating metrics, leader coaching, change management, Power BI reporting, and cross-functional execution.",
+      sourcePostingText: "Atlas Components is hiring an Agile Delivery Transformation Lead to guide manufacturing transformation, operating metrics, leader coaching, change management, Power BI reporting, Jira portfolio rhythms, and cross-functional execution.",
       fitAnalysis: fitAnalysis(88, "Apply", [
         "Strong match on transformation, operations, metrics, and change leadership.",
         "Profile / Story Bank includes manufacturing and Power BI evidence.",
@@ -134,7 +135,7 @@
         "Role may expect formal Lean Six Sigma credentials.",
       ], "Lead with transformation roadmap, operating cadence, and measurable delivery improvements."),
       resumeDraft: resumeDraft("Atlas Components"),
-      coverLetterDraft: coverLetterDraft("Atlas Components", "Operations Transformation Lead"),
+      coverLetterDraft: coverLetterDraft("Atlas Components", "Agile Delivery Transformation Lead"),
       interviewPrep: {
         likelyQuestions: [
           "Tell us about a transformation roadmap you led.",
@@ -154,10 +155,10 @@
 
   function healthyStretchJob() {
     return {
-      id: "demo-job-ai-product-operations-manager",
+      id: "demo-job-ai-enablement-product-operations",
       company: "BrightForge AI",
-      roleTitle: "AI Product Operations Manager",
-      jobUrl: "https://example.com/jobs/ai-product-operations-manager",
+      roleTitle: "AI Enablement Product Operations Manager",
+      jobUrl: "https://example.com/jobs/ai-enablement-product-operations-manager",
       location: "Remote - US",
       salaryRange: "$130,000 - $160,000",
       workArrangement: "Remote",
@@ -192,7 +193,7 @@
         "Could be a stretch if they require deep AI product ownership.",
       ], "Position as an operations and delivery leader who can bring structure to AI product execution while learning product-specific depth quickly."),
       resumeDraft: resumeDraft("BrightForge AI"),
-      coverLetterDraft: coverLetterDraft("BrightForge AI", "AI Product Operations Manager"),
+      coverLetterDraft: coverLetterDraft("BrightForge AI", "AI Enablement Product Operations Manager"),
       interviewPrep: {
         likelyQuestions: [
           "How have you supported product or engineering delivery?",
@@ -210,51 +211,54 @@
     };
   }
 
-  function questionableFitJob() {
+  function manufacturingContinuousImprovementJob() {
     return {
-      id: "demo-job-senior-clinical-director",
-      company: "CarePath Health",
-      roleTitle: "Senior Clinical Director",
-      jobUrl: "https://example.com/jobs/senior-clinical-director",
-      location: "Chicago, IL",
-      salaryRange: "$145,000 - $175,000",
+      id: "demo-job-manufacturing-continuous-improvement-manager",
+      company: "HarborWorks Precision",
+      roleTitle: "Manufacturing Operations Continuous Improvement Manager",
+      jobUrl: "https://example.com/jobs/manufacturing-continuous-improvement-manager",
+      location: "Green Bay, WI",
+      salaryRange: "$105,000 - $132,000",
       workArrangement: "On-site",
-      status: "Skip",
-      fitScore: 31,
-      fitRecommendation: "Skip",
+      status: "Applied",
+      fitScore: 73,
+      fitRecommendation: "Apply",
       dateFound: "2026-07-03",
-      dateApplied: "",
-      followUpDate: "",
+      dateApplied: "2026-07-05",
+      followUpDate: "2026-07-12",
       resumeVersionPath: "",
       coverLetterPath: "",
-      notes: "Questionable fit. Senior leadership is appealing, but clinical licensure appears central.",
+      notes: "Applied after tailoring the packet toward manufacturing operations, CI facilitation, and visible operating metrics. Follow up with plant director if no response.",
       responsibilities: [
-        "Lead clinical teams and oversee patient care quality.",
-        "Maintain compliance with healthcare regulations.",
-        "Own clinical supervision and licensing requirements.",
+        "Lead continuous improvement projects across machining and assembly lines.",
+        "Coach supervisors on daily management, root cause problem solving, and KPI review.",
+        "Partner with operations, quality, and maintenance to reduce downtime and rework.",
       ],
-      requiredSkills: ["State clinical licensure", "Healthcare compliance", "Clinical supervision"],
-      preferredSkills: ["Hospital operations", "Patient care quality improvement"],
-      technologies: ["EHR systems"],
-      leadershipExpectations: ["Senior clinical leadership", "Regulatory accountability"],
-      certifications: ["Active clinical license required"],
-      yearsExperience: "10+ years",
-      sourcePostingText: "CarePath Health requires a Senior Clinical Director with active state licensure, clinical supervision experience, healthcare compliance, patient care quality, and on-site leadership.",
-      fitAnalysis: fitAnalysis(31, "Skip", [
-        "Leadership and operations experience could transfer at a high level.",
+      requiredSkills: ["Manufacturing operations", "Lean continuous improvement", "Root cause analysis", "Frontline leader coaching"],
+      preferredSkills: ["Value stream mapping", "OEE improvement", "Lean Six Sigma Green Belt"],
+      technologies: ["Power BI", "Excel", "ERP reporting"],
+      leadershipExpectations: ["Influence plant leaders", "Coach supervisors", "Coordinate cross-functional improvement teams"],
+      certifications: ["Lean Six Sigma Green Belt preferred"],
+      yearsExperience: "6+ years",
+      sourcePostingText: "HarborWorks Precision needs a Manufacturing Operations Continuous Improvement Manager to lead Lean projects, coach supervisors, improve OEE, reduce rework, run daily management routines, use Power BI and Excel reporting, and partner across operations, quality, and maintenance.",
+      fitAnalysis: fitAnalysis(73, "Apply", [
+        "Strong operating rhythm, dashboard, and leader coaching evidence.",
+        "Manufacturing transformation stories map well to CI facilitation and KPI review.",
       ], [
-        "Active clinical licensure is not represented in the Profile / Story Bank.",
-        "Patient care and clinical supervision appear central to the role.",
+        "Prepare deeper examples around formal Lean tools and shop-floor problem solving.",
       ], [
-        "This role likely requires credentials and experience that should not be inferred.",
-      ], "Treat as a skip unless the clinical credential requirement is flexible or there is unrecorded healthcare licensure evidence."),
-      resumeDraft: resumeDraft("CarePath Health"),
-      coverLetterDraft: coverLetterDraft("CarePath Health", "Senior Clinical Director"),
+        "On-site cadence may limit flexibility; verify travel and shift expectations.",
+      ], "Position Mike as an operations transformation leader who makes improvement routines visible, measurable, and sustainable with frontline supervisors."),
+      resumeDraft: resumeDraft("HarborWorks Precision"),
+      coverLetterDraft: coverLetterDraft("HarborWorks Precision", "Manufacturing Operations Continuous Improvement Manager"),
       interviewPrep: {
-        likelyQuestions: ["Do you hold active clinical licensure?", "What clinical teams have you supervised?"],
-        storiesToPrepare: ["General operations leadership only if role requirements prove flexible"],
-        riskAreas: ["Clinical credentials", "Healthcare compliance", "On-site clinical supervision"],
-        salaryNotes: "High salary does not offset likely credential mismatch.",
+        likelyQuestions: [
+          "Tell us about a CI project that changed frontline behavior.",
+          "How do you use metrics without turning daily management into a reporting exercise?",
+        ],
+        storiesToPrepare: ["Plant change rollout", "Power BI operating dashboard", "Supervisor coaching cadence"],
+        riskAreas: ["Formal Lean tool depth", "On-site schedule expectations"],
+        salaryNotes: "Range is reasonable for plant-facing CI leadership; clarify bonus and relocation expectations.",
         generatedAt: "2026-07-03T12:00:00.000Z",
         promptVersion: "demo-data-v1",
         modelName: "demo",
@@ -289,7 +293,7 @@
         "Built reporting rhythms that made operational bottlenecks and follow-up actions visible.",
         "Coached leaders through process change while keeping work grounded in measurable outcomes.",
       ],
-      markdownContent: `# Jordan Rivera\n\nMilwaukee, WI | jordan.rivera@example.com | 414-555-0138\n\n## Professional Summary\nOperations and transformation leader with experience in change management, metrics, stakeholder communication, and practical delivery improvement. Tailored for ${company} using demo Profile / Story Bank evidence only.\n\n## Skills & Tools\n- Operations transformation\n- Change management\n- Stakeholder communication\n- Power BI\n- Jira\n\n## Selected Accomplishments\n- Improved delivery cadence by 30% by redesigning weekly operating reviews.\n- Built Power BI dashboards that helped leaders identify bottlenecks and follow-up actions.\n`,
+      markdownContent: `# Mike Thompson\n\nMilwaukee, WI | mike.thompson@example.com | 414-555-0138\n\n## Professional Summary\nOperations and transformation leader with experience in change management, metrics, stakeholder communication, and practical delivery improvement. Tailored for ${company} using demo Profile / Story Bank evidence only.\n\n## Skills & Tools\n- Operations transformation\n- Change management\n- Stakeholder communication\n- Power BI\n- Jira\n\n## Selected Accomplishments\n- Improved delivery cadence by 30% by redesigning weekly operating reviews.\n- Built Power BI dashboards that helped leaders identify bottlenecks and follow-up actions.\n`,
       markdownPreview: "",
       generatedAt: "2026-07-03T12:00:00.000Z",
       promptVersion: "demo-data-v1",
@@ -300,7 +304,7 @@
 
   function coverLetterDraft(company, roleTitle) {
     return {
-      coverLetterContent: `Dear ${company} team,\n\nI am interested in the ${roleTitle} role because it connects directly to my work leading transformation, improving operating rhythms, and helping teams turn metrics into practical action. My background includes change management, stakeholder communication, Power BI reporting, and cross-functional delivery improvement.\n\nI would welcome the chance to discuss how this experience could support ${company}'s goals.\n\nSincerely,\nJordan Rivera`,
+      coverLetterContent: `Dear ${company} team,\n\nI am interested in the ${roleTitle} role because it connects directly to my work leading transformation, improving operating rhythms, and helping teams turn metrics into practical action. My background includes change management, stakeholder communication, Power BI reporting, and cross-functional delivery improvement.\n\nI would welcome the chance to discuss how this experience could support ${company}'s goals.\n\nSincerely,\nMike Thompson`,
       draftText: "",
       toneNote: "Warm, friendly, confident, and practical.",
       generatedAt: "2026-07-03T12:00:00.000Z",
@@ -333,6 +337,8 @@
     return {
       seededBy: DEMO_SEEDED_BY,
       version: DEMO_VERSION,
+      batchId: DEMO_BATCH_ID,
+      source: "demo",
     };
   }
 

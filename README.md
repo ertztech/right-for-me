@@ -145,9 +145,11 @@ node tests/actionFeedback.test.js
 node tests/demoDataSeeder.test.js
 ```
 
-### Demo data
+### Demo Data / Local Testing
 
-Dashboard and Settings include `Load Sample Data` and `Clear Demo Data` buttons for local testing. Loading sample data adds three marked demo job records: a strong Apply fit, a healthy Maybe stretch, and a Skip/questionable fit. If the Profile / Story Bank is empty or already demo-seeded, the seeder also adds sample profile evidence. Existing real jobs are preserved, and existing real Profile / Story Bank data is not overwritten.
+Dashboard and Settings include `Load Sample Data` and `Clear Demo Data` buttons for local testing. Loading sample data adds three marked demo job records for an agile delivery / transformation role, an AI enablement / product operations role, and a manufacturing operations / continuous improvement role. The records include multiple statuses, posting text, job intelligence fields, fit review data, resume notes, generated resume drafts, cover letter drafts, interview prep, and follow-up fields where the app supports them.
+
+If the Profile / Story Bank is empty or already demo-seeded, the seeder also adds sample profile evidence for Mike's target roles. Existing real jobs are preserved, and existing real Profile / Story Bank data is not overwritten. If local real data exists, the app asks before loading sample data alongside it.
 
 Clear Demo Data removes only records marked by the demo seeder and clears the demo Profile / Story Bank only when it owns that sample profile.
 
