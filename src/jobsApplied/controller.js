@@ -122,6 +122,15 @@ function initializeJobsAppliedController() {
   });
 
   document.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-copy-packet-draft]");
+    if (!button) {
+      return;
+    }
+
+    copyPacketDraft(button);
+  });
+
+  document.addEventListener("click", (event) => {
     const button = event.target.closest("[data-load-demo-data]");
     if (!button) {
       return;
@@ -344,6 +353,47 @@ async function generateResumeDraftForJob(button) {
       message: "Resume generated and saved.",
     };
   });
+}
+
+async function copyPacketDraft(button) {
+  const job = findJobById(button.dataset.jobId || selectedJobId);
+  if (!job) {
+    setJobsStatus("Select an opportunity before copying packet content.", "failure");
+    return;
+  }
+
+  const draftType = button.dataset.copyPacketDraft;
+  const text = draftType === "cover-letter" ? coverLetterDraftText(job) : resumeDraftText(job);
+  const label = draftType === "cover-letter" ? "Cover letter draft" : "Resume draft";
+
+  if (!text) {
+    setJobsStatus(`${label} is empty. Generate or save draft content first.`, "failure");
+    return;
+  }
+
+  try {
+    await copyTextToClipboard(text);
+    setJobsStatus(`${label} copied.`, "success");
+  } catch {
+    setJobsStatus(`${label} could not be copied. Select the text and copy manually.`, "failure");
+  }
+}
+
+async function copyTextToClipboard(text) {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "fixed";
+  textarea.style.left = "-9999px";
+  document.body.appendChild(textarea);
+  textarea.select();
+  document.execCommand("copy");
+  textarea.remove();
 }
 
 function generateResumeForJob(jobId = selectedJobId) {
@@ -981,23 +1031,151 @@ function renderApplicationStudio(job) {
   }
 
   node.innerHTML = `
-    ${placeholderBlock("Selected Opportunity", `${job.company} - ${job.roleTitle}`)}
-    ${packetStatusGrid(job)}
+    <div class="section-block first-section">
+      <div class="panel-header compact-header">
+        <div>
+          <p class="eyebrow">Selected Opportunity</p>
+          <h2>${escapeHtml(job.roleTitle)}</h2>
+          <p class="support-copy">${escapeHtml(job.company)} | ${escapeHtml(formatValue(job.location))} | ${escapeHtml(formatValue(job.workArrangement))}</p>
+        </div>
+        <div class="button-row">
+          <a class="secondary-button nav-link-button" href="#/jobs/dashboard">Dashboard</a>
+          <a class="secondary-button nav-link-button" href="#/jobs/tracker">Tracker</a>
+          <a class="secondary-button nav-link-button" href="#/jobs/opportunity/${escapeAttribute(job.id)}">Opportunity Review</a>
+        </div>
+      </div>
+      ${applicationStudioStatusForm(job)}
+      ${packetStatusGrid(job)}
+    </div>
+
     <div class="two-column">
-      <div class="section-block first-section">
+      <div class="section-block">
+        <h2>Opportunity Snapshot</h2>
+        ${jobDetailsSnapshotBlock(job)}
+        ${postingSummaryBlock(job)}
+      </div>
+      <div class="section-block">
+        <h2>Fit Review</h2>
+        ${fitReviewWorkspaceBlock(job)}
+      </div>
+    </div>
+
+    <div class="section-block">
+      <h2>Job Intelligence</h2>
+      ${jobIntelligenceWorkspaceBlock(job)}
+    </div>
+
+    <div class="two-column">
+      <div class="section-block">
         <h2>Resume Draft</h2>
+        ${draftPreviewBlock("Resume Content", resumeDraftText(job), "No resume draft yet. Generate a resume or save markdown content here when ready.")}
+        <div class="button-row">
+          <button type="button" class="secondary-button" data-copy-packet-draft="resume" data-job-id="${escapeAttribute(job.id)}">Copy Resume Draft</button>
+        </div>
         ${resumeDraftEditorBlock(job)}
       </div>
-      <div class="section-block first-section">
+      <div class="section-block">
         <h2>Cover Letter Draft</h2>
+        ${draftPreviewBlock("Cover Letter Content", coverLetterDraftText(job), "No cover letter draft yet. Save draft content here when ready.")}
+        <div class="button-row">
+          <button type="button" class="secondary-button" data-copy-packet-draft="cover-letter" data-job-id="${escapeAttribute(job.id)}">Copy Cover Letter Draft</button>
+        </div>
         ${coverLetterDraftEditorBlock(job)}
       </div>
     </div>
     <div class="section-block">
-      <h2>Packet Notes</h2>
+      <h2>Notes and Follow-up</h2>
+      ${placeholderBlock("Follow-up Date", formatValue(job.followUpDate))}
       ${packetNotesEditorBlock(job)}
     </div>
   `;
+}
+
+function applicationStudioStatusForm(job) {
+  return `
+    <form class="input-panel flat-panel job-update-form" data-job-detail-form="${escapeAttribute(job.id)}">
+      <div class="form-grid">
+        <label>
+          Status
+          <select name="status">
+            ${statusOptions(job.status)}
+          </select>
+        </label>
+        <label>
+          Date Applied
+          <input name="dateApplied" type="date" value="${escapeAttribute(job.dateApplied || "")}">
+        </label>
+        <label>
+          Follow-up Date
+          <input name="followUpDate" type="date" value="${escapeAttribute(job.followUpDate || "")}">
+        </label>
+      </div>
+      <label>
+        Packet / Follow-up Notes
+        <textarea name="notes" rows="4">${escapeHtml(job.notes || "")}</textarea>
+      </label>
+      <button type="submit">Update Status and Notes</button>
+    </form>
+  `;
+}
+
+function jobDetailsSnapshotBlock(job) {
+  return `
+    <dl class="detail-grid">
+      ${detailRow("Company", job.company)}
+      ${detailRow("Role", job.roleTitle)}
+      ${detailRow("Status", job.status)}
+      ${detailRow("Date found", formatValue(job.dateFound))}
+      ${detailRow("Date applied", formatValue(job.dateApplied))}
+      ${detailRow("Follow-up", formatValue(job.followUpDate))}
+      ${detailRow("Location", formatValue(job.location))}
+      ${detailRow("Salary", formatValue(job.salaryRange))}
+      ${detailRow("Work arrangement", formatValue(job.workArrangement))}
+      ${detailRow("Job URL", job.jobUrl ? `<a href="${escapeAttribute(job.jobUrl)}">${escapeHtml(job.jobUrl)}</a>` : "Not saved yet", true)}
+    </dl>
+  `;
+}
+
+function postingSummaryBlock(job) {
+  return placeholderBlock(
+    "Job Posting Text",
+    job.sourcePostingText || "No source posting text is saved yet. Add or paste the posting in Opportunity Review."
+  );
+}
+
+function fitReviewWorkspaceBlock(job) {
+  const fitAnalysis = job.fitAnalysis || {};
+  return `
+    <div class="score-grid">
+      <article><span>Score</span><strong>${escapeHtml(formatValue(fitAnalysis.fitScore ?? job.fitScore))}</strong></article>
+      <article><span>Recommendation</span><strong>${escapeHtml(formatValue(fitAnalysis.recommendation || job.fitRecommendation))}</strong></article>
+      <article><span>Approval</span><strong>${fitAnalysis.userApproved ? "Approved" : "Missing"}</strong></article>
+    </div>
+    ${placeholderBlock("Strengths", listOrPlaceholder(fitAnalysis.strengths, "No fit strengths saved yet."))}
+    ${placeholderBlock("Gaps", listOrPlaceholder(fitAnalysis.gaps, "No fit gaps saved yet."))}
+    ${placeholderBlock("Concerns", listOrPlaceholder(fitAnalysis.concerns, "No fit concerns saved yet."))}
+    ${placeholderBlock("Suggested Positioning", fitAnalysis.suggestedPositioning || "No positioning note saved yet.")}
+  `;
+}
+
+function jobIntelligenceWorkspaceBlock(job) {
+  return `
+    <div class="three-column">
+      ${placeholderBlock("Responsibilities", listOrPlaceholder(job.responsibilities, "No responsibilities saved yet."))}
+      ${placeholderBlock("Required Skills", listOrPlaceholder(job.requiredSkills, "No required skills saved yet."))}
+      ${placeholderBlock("Preferred Skills", listOrPlaceholder(job.preferredSkills, "No preferred skills saved yet."))}
+      ${placeholderBlock("Technologies / Tools", listOrPlaceholder(job.technologies, "No technologies saved yet."))}
+      ${placeholderBlock("Leadership Expectations", listOrPlaceholder(job.leadershipExpectations, "No leadership expectations saved yet."))}
+      ${placeholderBlock("Certifications", listOrPlaceholder(job.certifications, "No certifications saved yet."))}
+      ${placeholderBlock("Years of Experience", formatValue(job.yearsExperience))}
+    </div>
+  `;
+}
+
+function draftPreviewBlock(title, content, emptyText) {
+  return content
+    ? `<div class="placeholder-block packet-preview-block"><h3>${escapeHtml(title)}</h3><pre>${escapeHtml(content)}</pre></div>`
+    : placeholderBlock(title, emptyText);
 }
 
 function renderTracker(jobs) {
@@ -1078,7 +1256,10 @@ function jobCard(job, includeDates = false, dashboardCard = false) {
         <p>${escapeHtml(job.company)} | ${escapeHtml(job.status)}</p>
         ${dates}
       </div>
-      <a class="small-button nav-link-button" href="#/jobs/detail/${escapeAttribute(job.id)}" data-select-job="${escapeAttribute(job.id)}">Open</a>
+      <div class="tracker-card-actions">
+        <a class="small-button nav-link-button" href="#/jobs/studio/${escapeAttribute(job.id)}">Studio</a>
+        <a class="small-button nav-link-button" href="#/jobs/detail/${escapeAttribute(job.id)}" data-select-job="${escapeAttribute(job.id)}">Open</a>
+      </div>
     </article>
   `;
 }
@@ -1098,6 +1279,7 @@ function trackerJobCard(job) {
             ${statusOptions(job.status)}
           </select>
         </label>
+        <a class="small-button nav-link-button" href="#/jobs/studio/${escapeAttribute(job.id)}">Studio</a>
         <a class="small-button nav-link-button" href="#/jobs/detail/${escapeAttribute(job.id)}" data-select-job="${escapeAttribute(job.id)}">Open</a>
       </div>
     </article>
@@ -1400,7 +1582,7 @@ function applicationPacketStatusBlock(job) {
 
 function resumeDraftEditorBlock(job) {
   const resumeDraft = job.resumeDraft || {};
-  const markdownContent = resumeDraft.markdownContent || resumeDraft.markdownPreview || job.resumeVersionPath || "";
+  const markdownContent = resumeDraftText(job);
 
   return `
     ${placeholderBlock("Status", resumeDraftStatus(job))}
@@ -1435,7 +1617,7 @@ function resumeDraftEditorBlock(job) {
 
 function coverLetterDraftEditorBlock(job) {
   const coverLetterDraft = job.coverLetterDraft || {};
-  const coverLetterContent = coverLetterDraft.coverLetterContent || coverLetterDraft.draftText || job.coverLetterPath || "";
+  const coverLetterContent = coverLetterDraftText(job);
 
   return `
     ${placeholderBlock("Status", coverLetterDraftStatus(job))}
@@ -1485,6 +1667,16 @@ function packetStatusGrid(job) {
       <article><span>Packet Notes</span><strong>${job.notes ? "Present" : "Missing"}</strong></article>
     </div>
   `;
+}
+
+function resumeDraftText(job) {
+  const resumeDraft = job.resumeDraft || {};
+  return resumeDraft.markdownContent || resumeDraft.markdownPreview || job.resumeVersionPath || "";
+}
+
+function coverLetterDraftText(job) {
+  const coverLetterDraft = job.coverLetterDraft || {};
+  return coverLetterDraft.coverLetterContent || coverLetterDraft.draftText || job.coverLetterPath || "";
 }
 
 function resumeDraftStatus(job) {

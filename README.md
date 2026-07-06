@@ -145,6 +145,7 @@ node tests/resumeGenerator.test.js
 node tests/resumeGenerateButton.test.js
 node tests/actionFeedback.test.js
 node tests/demoDataSeeder.test.js
+node tests/applicationStudioPacket.test.js
 ```
 
 ### Demo Data / Local Testing
