@@ -14,6 +14,12 @@ function writeVault() {
   RightForMeCareerVaultStorage.saveVault(careerVault);
 }
 
+function replaceVault(nextVault) {
+  careerVault = nextVault;
+  writeVault();
+  careerVaultControllerApi?.render();
+}
+
 function initializeCareerVault() {
   careerVaultControllerApi = RightForMeCareerVaultController.initializeCareerVaultController({
     getVault,
@@ -24,5 +30,6 @@ function initializeCareerVault() {
 window.RightForMeCareerVault = {
   initializeCareerVault,
   getVault,
+  replaceVault,
   saveVault,
 };
