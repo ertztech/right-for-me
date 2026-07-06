@@ -26,6 +26,8 @@ Help professionals confidently navigate career decisions from discovering opport
 
 RightForMe is in early MVP development.
 
+For the current single source of truth on product phase, completed capabilities, active outcome, next priorities, and branch workflow expectations, see [PRODUCT_STATUS.md](PRODUCT_STATUS.md).
+
 Version `0.1` focuses on one workflow:
 
 1. Paste a job description.
