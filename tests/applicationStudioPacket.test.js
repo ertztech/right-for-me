@@ -7,6 +7,7 @@ global.window = global;
 const { createSampleJobs } = require("../src/demoData/seeder");
 
 const nodes = new Map();
+let savedJob = null;
 const documentStub = {
   addEventListener() {},
   querySelector(selector) {
@@ -31,8 +32,11 @@ const context = {
   document: documentStub,
   window: {},
   RightForMeJobsAppliedStorage: {
-    getJobApplications: () => [],
-    updateJobApplication: () => ({}),
+    getJobApplications: () => (savedJob ? [savedJob] : []),
+    updateJobApplication: (jobId, updates) => {
+      savedJob = { ...savedJob, ...updates, id: jobId };
+      return savedJob;
+    },
   },
 };
 
@@ -44,9 +48,12 @@ vm.runInContext(
 );
 
 const seededJob = createSampleJobs()[0];
+savedJob = seededJob;
 context.renderApplicationStudio(seededJob);
 
 const studioHtml = nodes.get("#application-studio-content").innerHTML;
+assert.ok(studioHtml.includes("Packet Readiness"));
+assert.ok(studioHtml.includes("11 of 12 complete"));
 assert.ok(studioHtml.includes("Agile Delivery Transformation Lead"));
 assert.ok(studioHtml.includes("Atlas Components"));
 assert.ok(studioHtml.includes("Job Posting Text"));
@@ -57,6 +64,17 @@ assert.ok(studioHtml.includes("Dear Atlas Components team"));
 assert.ok(studioHtml.includes("Copy Resume Draft"));
 assert.ok(studioHtml.includes("Copy Cover Letter Draft"));
 assert.ok(studioHtml.includes("Update Status and Notes"));
+assert.ok(studioHtml.includes("Resume reviewed"));
+assert.ok(studioHtml.includes("Application submitted"));
+
+context.savePacketChecklistToggle({
+  checked: true,
+  dataset: {
+    jobId: seededJob.id,
+    packetChecklist: "applicationSubmitted",
+  },
+});
+assert.equal(savedJob.packetChecklist.applicationSubmitted, true);
 
 const emptyJob = {
   id: "empty-job",
@@ -65,8 +83,10 @@ const emptyJob = {
   status: "Found",
 };
 
+savedJob = emptyJob;
 context.renderApplicationStudio(emptyJob);
 const emptyHtml = nodes.get("#application-studio-content").innerHTML;
+assert.ok(emptyHtml.includes("1 of 12 complete"));
 assert.ok(emptyHtml.includes("No source posting text is saved yet."));
 assert.ok(emptyHtml.includes("No resume draft yet."));
 assert.ok(emptyHtml.includes("No cover letter draft yet."));

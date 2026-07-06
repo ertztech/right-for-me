@@ -69,6 +69,8 @@ The app has a light NextMove UI brand pass: visible copy now frames the product 
 
 UX planning has also started. See [docs/ux-usability-plan.md](docs/ux-usability-plan.md) for the proposed guided workflow, screen list, information architecture, and usability principles for the job application pipeline. The current app is moving toward six primary experiences: Dashboard, Opportunity Review, Application Studio, Tracker, Profile / Story Bank, and Settings.
 
+See [docs/UX_NOTES.md](docs/UX_NOTES.md) for current Application Studio UX modernization notes and text-only NextMove brand/logo exploration.
+
 ## Delivery Workflow
 
 See [AGENTS.md](AGENTS.md) for the RightForMe delivery workflow: Trello for product intent, GitHub Issues for engineering work, feature branches for each change, and learning-in-public notes after each merge.
@@ -96,7 +98,7 @@ Job application records for the Jobs Applied pipeline are stored in `data/job-ap
 
 The first lightweight Jobs Applied app pages are available in `index.html`. The visible workflow now groups related work into Dashboard, Opportunity Review, Application Studio, Tracker, Profile / Story Bank, and Settings. The browser UI stores saved jobs in local storage for now, using the same fields documented in `docs/jobs-applied-data-model.md`.
 
-Jobs Applied pages use hash routes, starting at `#/jobs/dashboard`. Opportunity Review includes job intake, manually editable Job Intelligence fields, and Fit Review context. Application Studio groups resume drafts, cover letter drafts, and packet notes. Job Intelligence has local rule-based extraction from pasted posting text, can generate a local first-pass Fit Review, and now includes an optional live AI-powered Review Opportunity pass.
+Jobs Applied pages use hash routes, starting at `#/jobs/dashboard`. Opportunity Review includes job intake, manually editable Job Intelligence fields, and Fit Review context. Application Studio presents a selected-opportunity packet workspace with readiness checklist, status/follow-up controls, job details, job intelligence, fit review, resume draft, cover letter draft, and notes. Job Intelligence has local rule-based extraction from pasted posting text, can generate a local first-pass Fit Review, and now includes an optional live AI-powered Review Opportunity pass.
 
 Application Studio now includes a Resume Generation MVP. Generate Resume creates a deterministic local resume draft from the selected opportunity, Job Intelligence, Fit Review, Profile / Story Bank, background notes, and existing application information. The draft is saved on the selected job record in browser localStorage, so it remains available after refreshing the browser.
 
