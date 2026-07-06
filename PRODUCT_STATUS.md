@@ -39,7 +39,7 @@ The current product is a local-first prototype with browser localStorage persist
 - Local rule-based Job Intelligence extraction from pasted posting text.
 - Fit Review support with fit score, Apply / Maybe / Skip recommendation, strengths, gaps, concerns, suggested positioning, and approval state.
 - Optional live AI Opportunity Review through the local Node server when `OPENAI_API_KEY` is configured.
-- Application Studio for reviewing and editing resume drafts, cover letter drafts, packet notes, fit review summary, and job intelligence.
+- Application Studio as a selected-opportunity packet workspace for reviewing job details, status, follow-up fields, job intelligence, fit review, resume drafts, cover letter drafts, and packet notes.
 - Deterministic local resume generation from the selected opportunity, Job Intelligence, Fit Review, Profile / Story Bank, background notes, and existing application information.
 - Cover letter generation and editable cover letter draft support grounded in Career Vault / Profile / Story Bank data and the job posting.
 - Application packet notes and markdown preview helpers for resume, cover letter, and application notes.
@@ -64,7 +64,7 @@ The demo data seeder is part of this outcome. It gives developers and product ow
    Make the saved-job path feel more complete from Opportunity Review through applied status, follow-up, and next action.
 
 2. Strengthen Application Studio.
-   Improve how seeded and real records open in Studio, make resume and cover letter drafts easier to review, and make packet readiness clearer.
+   Continue improving packet readiness, draft review ergonomics, and handoff from generated content into submitted applications.
 
 3. Improve AI coaching and recommendations.
    Expand recommendation quality for fit, positioning, interview prep, and next actions while keeping outputs grounded in Profile / Story Bank evidence.

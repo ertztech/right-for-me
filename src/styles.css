@@ -541,6 +541,18 @@ ul {
   margin-bottom: 10px;
 }
 
+.packet-preview-block pre {
+  max-height: 320px;
+  margin: 0;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--muted);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
 .job-card h3,
 .placeholder-block h3 {
   margin: 0 0 6px;
