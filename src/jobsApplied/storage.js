@@ -37,7 +37,11 @@ function addJobApplication(record) {
     throw new Error(`Job application already exists: ${record.id}`);
   }
 
-  const nextRecords = [...records, record];
+  const timestampedRecord = {
+    ...record,
+    updatedAt: record.updatedAt || new Date().toISOString(),
+  };
+  const nextRecords = [...records, timestampedRecord];
   saveJobApplications(nextRecords);
   return nextRecords;
 }
@@ -50,7 +54,7 @@ function updateJobApplication(jobId, updates) {
     throw new Error(`Job application not found: ${jobId}`);
   }
 
-  const updated = { ...records[index], ...updates, id: jobId };
+  const updated = { ...records[index], ...updates, id: jobId, updatedAt: new Date().toISOString() };
   validateJobApplication(updated);
   records[index] = updated;
   saveJobApplications(records);

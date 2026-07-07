@@ -733,7 +733,7 @@ button[data-clear-demo-data]:hover {
 }
 
 .dashboard-recent-list {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .dashboard-recent-list .job-card {
@@ -839,11 +839,20 @@ button[data-clear-demo-data]:hover {
   margin-top: var(--space-4);
 }
 
+.studio-action-bar .secondary-button,
+.studio-action-bar .nav-link-button {
+  min-height: 40px;
+}
+
 .studio-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
   gap: var(--space-5);
   margin-top: var(--space-5);
+}
+
+.active-workspace-grid {
+  grid-template-columns: minmax(340px, 1.2fr) minmax(280px, 0.9fr) minmax(240px, 0.7fr);
 }
 
 .studio-card {
@@ -863,6 +872,16 @@ button[data-clear-demo-data]:hover {
 .studio-card h2 {
   margin-bottom: var(--space-2);
   font-size: 1rem;
+}
+
+.studio-disclosure summary {
+  cursor: pointer;
+  color: var(--ink);
+  font-weight: 850;
+}
+
+.studio-disclosure summary + * {
+  margin-top: var(--space-3);
 }
 
 .studio-card-primary {
