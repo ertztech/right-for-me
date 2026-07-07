@@ -15,7 +15,7 @@ function renderResumeMarkdown(resume) {
   }
 
   addSection(lines, "Professional Summary", [
-    resume.summary || "Professional summary will be generated from the Career Vault.",
+    resume.summary || "Professional summary will be generated from Professional Experience.",
   ]);
 
   const skills = compactList(resume.skills);

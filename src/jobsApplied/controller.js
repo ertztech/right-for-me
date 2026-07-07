@@ -390,8 +390,12 @@ async function copyPacketDraft(button) {
 
 async function copyTextToClipboard(text) {
   if (navigator.clipboard?.writeText) {
-    await navigator.clipboard.writeText(text);
-    return;
+    try {
+      await navigator.clipboard.writeText(text);
+      return;
+    } catch {
+      // Fall back for browser contexts where Clipboard API exists but write permission is denied.
+    }
   }
 
   const textarea = document.createElement("textarea");
@@ -460,7 +464,7 @@ async function loadDemoData(button) {
 
     return {
       ...result,
-      message: `Loaded ${result.jobsAdded} sample jobs.${result.vaultSeeded ? " Demo Profile / Story Bank added." : " Existing Profile / Story Bank preserved."}`,
+      message: `Loaded ${result.jobsAdded} sample jobs.${result.vaultSeeded ? " Demo Professional Experience profile added." : " Existing Professional Experience preserved."}`,
     };
   });
 }
@@ -481,7 +485,7 @@ async function clearDemoData(button) {
 
     return {
       ...result,
-      message: `Cleared ${result.jobsRemoved} demo jobs.${result.vaultCleared ? " Demo Profile / Story Bank cleared." : " Real Profile / Story Bank preserved."}`,
+      message: `Cleared ${result.jobsRemoved} demo jobs.${result.vaultCleared ? " Demo Professional Experience profile cleared." : " Real Professional Experience preserved."}`,
     };
   });
 }
@@ -807,15 +811,15 @@ function renderJobsAppliedViews(jobs) {
 }
 
 function renderDashboard(jobs) {
-  renderStatusSummary("#jobs-status-summary", jobs);
-  renderJobCards("#recent-jobs-list", recentJobs(jobs));
+  renderDashboardSummary("#jobs-status-summary", jobs);
+  renderJobCards("#recent-jobs-list", recentJobs(jobs).slice(0, 3));
   renderNextActions(jobs);
 }
 
 function renderJobDetail(job) {
   const node = document.querySelector("#job-detail-content");
   if (!job) {
-    node.innerHTML = emptyMessage("No opportunity selected yet. Start with Opportunity Review and NextMove will keep the next step clear.");
+    node.innerHTML = emptyMessage("No opportunity selected yet. Start with Opportunity Review to analyze a posting before building an application packet.");
     return;
   }
 
@@ -874,7 +878,7 @@ function renderOpportunityReview(job) {
   }
 
   if (!job) {
-    node.innerHTML = emptyMessage("After you save a posting, Opportunity Intelligence and Fit Review will appear here.");
+    node.innerHTML = emptyMessage("Save a posting to extract requirements, assess fit, and identify how to position your experience.");
     return;
   }
 
@@ -883,14 +887,14 @@ function renderOpportunityReview(job) {
       <div class="panel-header compact-header">
         <div>
           <h2>Opportunity Intelligence</h2>
-          <p class="support-copy">Manual structure today. Future AI extraction can fill this in from the posting.</p>
+          <p class="support-copy">Use this workspace to analyze the posting, capture key requirements, and decide whether the opportunity is worth pursuing.</p>
         </div>
         <a class="secondary-button nav-link-button" href="#/jobs/fit/${escapeAttribute(job.id)}" data-selected-job-route="fit">Open Fit Review</a>
       </div>
       ${jobIntelligenceForm(job)}
     </div>
     <div class="section-block">
-      <h2>Fit Review Connection</h2>
+      <h2>Fit Review</h2>
       ${fitReviewSummaryBlock(job)}
       <p class="empty-copy">${hasFitAnalysis(job) ? "Fit Review is saved for this opportunity." : "Fit Review is not saved yet. Use Apply, Maybe, or Skip once you have enough evidence."}</p>
     </div>
@@ -971,9 +975,9 @@ function renderResumeBuilder(job) {
   const resumeDraft = job.resumeDraft || {};
   const markdownContent = resumeDraft.markdownContent || resumeDraft.markdownPreview || job.resumeVersionPath || "";
   document.querySelector("#jobs-resume-placeholder").innerHTML = `
-    ${placeholderBlock("Tailored Summary", resumeDraft.tailoredSummary || "A tailored summary grounded in your Profile / Story Bank will appear here.")}
+    ${placeholderBlock("Tailored Summary", resumeDraft.tailoredSummary || "A tailored summary grounded in your Professional Experience will appear here.")}
     ${placeholderBlock("Tailored Skills", listOrPlaceholder(resumeDraft.tailoredSkills, "Tailored skills will appear here."))}
-    ${placeholderBlock("Tailored Experience Bullets", listOrPlaceholder(resumeDraft.tailoredExperienceBullets, "Experience bullets grounded in your Profile / Story Bank will appear here."))}
+    ${placeholderBlock("Tailored Experience Bullets", listOrPlaceholder(resumeDraft.tailoredExperienceBullets, "Experience bullets grounded in your Professional Experience will appear here."))}
     ${placeholderBlock("Markdown Preview", markdownContent || "Markdown resume preview will appear here when generated or saved.")}
     ${aiMetadataBlock(resumeDraft)}
     <div class="section-block">
@@ -1069,7 +1073,7 @@ function renderApplicationStudio(job) {
   }
 
   if (!job) {
-    node.innerHTML = emptyMessage("Save an opportunity before opening Application Studio.");
+    node.innerHTML = emptyMessage("Save an opportunity before opening Application Studio to prepare the application packet.");
     return;
   }
 
@@ -1084,14 +1088,13 @@ function renderApplicationStudio(job) {
       </div>
       <div class="studio-hero-status">
         <span>Status</span>
-        <strong>${escapeHtml(job.status)}</strong>
+        ${statusBadge(job.status)}
         <p>${escapeHtml(readinessSummaryText(readiness))}</p>
       </div>
     </div>
 
     <div class="studio-action-bar">
-      <a class="secondary-button nav-link-button" href="#/jobs/dashboard">Dashboard</a>
-      <a class="secondary-button nav-link-button" href="#/jobs/tracker">Tracker</a>
+      <a class="secondary-button nav-link-button" href="#/jobs/tracker">Open Tracker</a>
       <a class="secondary-button nav-link-button" href="#/jobs/opportunity/${escapeAttribute(job.id)}">Opportunity Review</a>
     </div>
 
@@ -1333,7 +1336,7 @@ function draftPreviewBlock(title, content, emptyText) {
 function renderTracker(jobs) {
   const node = document.querySelector("#application-tracker-list");
   if (!jobs.length) {
-    node.innerHTML = emptyMessage("Saved opportunities will appear here by status. Add one role, then track the next move.");
+    node.innerHTML = emptyMessage("Saved opportunities will appear here by pipeline status. Add one role, then track dates, follow-ups, and next steps.");
     return;
   }
 
@@ -1345,7 +1348,7 @@ function renderTracker(jobs) {
 
     return `
       <div class="section-block">
-        <h2>${status}</h2>
+        <h2>${statusBadge(status)}</h2>
         <div class="job-card-list">
           ${matchingJobs.map((job) => trackerJobCard(job)).join("")}
         </div>
@@ -1363,13 +1366,56 @@ function renderStatusSummary(selector, jobs) {
     const label = count === 1 ? "job" : "jobs";
 
     return `
-      <article class="${count ? "status-card" : "status-card muted-card"}">
-        <span>${status}</span>
+      <article class="${count ? `status-card ${statusClass(status)}` : "status-card muted-card"}">
+        <span>${escapeHtml(status)}</span>
         <strong>${count}</strong>
         <p>${label}</p>
       </article>
     `;
   }).join("");
+}
+
+function renderDashboardSummary(selector, jobs) {
+  const node = document.querySelector(selector);
+  const activeJobs = jobs.filter((job) => !["Skip", "Rejected", "Closed"].includes(job.status));
+  const packetDraftsNeedingReview = jobs.filter((job) => fitRecommendationFor(job) === "Apply" && !isApplicationPacketComplete(job));
+  const followUpsDue = jobs.filter((job) => job.status === "Applied" && isDueOrPast(job.followUpDate));
+  const submittedJobs = jobs.filter((job) => ["Applied", "Interviewing", "Offer"].includes(job.status));
+
+  const metrics = [
+    {
+      label: "Active",
+      value: activeJobs.length,
+      detail: "opportunities in play",
+      className: "status-reviewing",
+    },
+    {
+      label: "Packets",
+      value: packetDraftsNeedingReview.length,
+      detail: "need draft work",
+      className: packetDraftsNeedingReview.length ? "status-apply" : "status-found",
+    },
+    {
+      label: "Follow-up",
+      value: followUpsDue.length,
+      detail: "due or past due",
+      className: followUpsDue.length ? "status-maybe" : "status-found",
+    },
+    {
+      label: "Submitted",
+      value: submittedJobs.length,
+      detail: "applied/interviewing",
+      className: "status-applied",
+    },
+  ];
+
+  node.innerHTML = metrics.map((metric) => `
+    <article class="dashboard-metric-card ${metric.className}">
+      <span>${escapeHtml(metric.label)}</span>
+      <strong>${metric.value}</strong>
+      <p>${escapeHtml(metric.detail)}</p>
+    </article>
+  `).join("");
 }
 
 function renderJobCards(selector, jobs) {
@@ -1382,19 +1428,63 @@ function renderJobCards(selector, jobs) {
 function renderNextActions(jobs) {
   const node = document.querySelector("#jobs-next-actions");
   const action = recommendedNextAction(jobs);
+  const secondaryActions = dashboardSecondaryActions(jobs);
+
   node.innerHTML = `
-    <article class="next-action-card">
+    <div class="dashboard-primary-action">
       <p class="next-action-label">${escapeHtml(action.label)}</p>
       <h3>${escapeHtml(action.title)}</h3>
       <p>${escapeHtml(action.detail)}</p>
-      <a class="small-button nav-link-button" href="${escapeAttribute(action.href)}">${escapeHtml(action.buttonText)}</a>
-    </article>
+      <a class="nav-link-button" href="${escapeAttribute(action.href)}">${escapeHtml(action.buttonText)}</a>
+    </div>
+    <div class="dashboard-secondary-actions">
+      ${secondaryActions.map((secondaryAction) => dashboardSecondaryActionLink(secondaryAction)).join("")}
+    </div>
   `;
+}
+
+function dashboardSecondaryActions(jobs) {
+  if (!jobs.length) {
+    return [
+      {
+        type: "button",
+        label: "Load Sample Data",
+        className: "secondary-button",
+        dataAttribute: "data-load-demo-data",
+      },
+      {
+        type: "link",
+        label: "Complete Experience",
+        href: "#professional-experience",
+      },
+    ];
+  }
+
+  return [
+    {
+      type: "link",
+      label: "View Tracker",
+      href: "#/jobs/tracker",
+    },
+    {
+      type: "link",
+      label: "Open Studio",
+      href: `#/jobs/studio${selectedJobId ? `/${encodeURIComponent(selectedJobId)}` : ""}`,
+    },
+  ];
+}
+
+function dashboardSecondaryActionLink(action) {
+  if (action.type === "button") {
+    return `<button type="button" class="${escapeAttribute(action.className || "secondary-button")}" ${action.dataAttribute}>${escapeHtml(action.label)}</button>`;
+  }
+
+  return `<a class="secondary-button nav-link-button" href="${escapeAttribute(action.href)}">${escapeHtml(action.label)}</a>`;
 }
 
 function jobCard(job, includeDates = false, dashboardCard = false) {
   const summary = dashboardCard
-    ? `<p>${escapeHtml(job.company)} | ${escapeHtml(job.status)} | Found: ${escapeHtml(formatValue(job.dateFound))}</p>`
+    ? `<p>Found: ${escapeHtml(formatValue(job.dateFound))}</p>`
     : `<p>${escapeHtml(formatValue(job.location))} | ${escapeHtml(formatValue(job.fitRecommendation))}</p>`;
 
   const dates = includeDates
@@ -1405,11 +1495,10 @@ function jobCard(job, includeDates = false, dashboardCard = false) {
     <article class="job-card">
       <div>
         <h3>${escapeHtml(job.roleTitle)}</h3>
-        <p>${escapeHtml(job.company)} | ${escapeHtml(job.status)}</p>
+        <p>${escapeHtml(job.company)} ${statusBadge(job.status)}</p>
         ${dates}
       </div>
       <div class="tracker-card-actions">
-        <a class="small-button nav-link-button" href="#/jobs/studio/${escapeAttribute(job.id)}">Studio</a>
         <a class="small-button nav-link-button" href="#/jobs/detail/${escapeAttribute(job.id)}" data-select-job="${escapeAttribute(job.id)}">Open</a>
       </div>
     </article>
@@ -1421,7 +1510,8 @@ function trackerJobCard(job) {
     <article class="job-card tracker-job-card">
       <div>
         <h3>${escapeHtml(job.roleTitle)}</h3>
-        <p>${escapeHtml(job.company)} | Found: ${escapeHtml(formatValue(job.dateFound))}</p>
+        <p>${escapeHtml(job.company)} ${statusBadge(job.status)}</p>
+        <p>Found: ${escapeHtml(formatValue(job.dateFound))}</p>
         <p>Applied: ${escapeHtml(formatValue(job.dateApplied))} | Follow-up: ${escapeHtml(formatValue(job.followUpDate))}</p>
       </div>
       <div class="tracker-card-actions">
@@ -2107,6 +2197,14 @@ function emptyMessage(message) {
 
 function formatValue(value) {
   return String(value || "").trim() || "Not saved yet";
+}
+
+function statusBadge(status) {
+  return `<span class="status-badge ${statusClass(status)}">${escapeHtml(formatValue(status))}</span>`;
+}
+
+function statusClass(status) {
+  return `status-${String(status || "unknown").trim().toLowerCase().replace(/[^a-z0-9]+/g, "-") || "unknown"}`;
 }
 
 function escapeHtml(value) {
