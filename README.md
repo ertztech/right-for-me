@@ -119,6 +119,7 @@ Optional:
 ```bash
 OPENAI_MODEL=gpt-5.5
 PORT=4173
+VITE_AI_TEST_MODE=false
 ```
 
 Run the local server with:
@@ -130,6 +131,14 @@ node server.js
 Then open `http://localhost:4173` and use Opportunity Review -> Review Opportunity after pasting a job posting. Opening `index.html` directly still works for local-only features, but live AI requires the local server so the API key stays out of the browser.
 
 AI calls use the OpenAI API and may cost money through your provider account. Never commit `.env` or any real API key. `.env` is ignored by Git.
+
+For repeatable local development without calling the live API, set:
+
+```bash
+VITE_AI_TEST_MODE=true
+```
+
+In test mode, Review Opportunity returns a deterministic mock job analysis and the tucked-away AI Debug panel shows mode, request summary, raw response, parsed response, duration, and any error. With test mode disabled, the app uses the live OpenAI path and fails with a readable setup message if `OPENAI_API_KEY` is missing.
 
 Run the current Python tests with:
 
@@ -143,6 +152,7 @@ Run the current JavaScript helper tests with:
 node tests/jobIntelligenceExtractor.test.js
 node tests/fitReviewPrefill.test.js
 node tests/aiJobAnalysis.test.js
+node tests/aiClient.test.js
 node tests/resumeGenerator.test.js
 node tests/resumeGenerateButton.test.js
 node tests/actionFeedback.test.js

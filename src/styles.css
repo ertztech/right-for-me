@@ -1218,18 +1218,6 @@ ul {
   font-weight: 800;
 }
 
-.status-message[data-action-state="working"] {
-  color: #5f6f62;
-}
-
-.status-message[data-action-state="success"] {
-  color: var(--green);
-}
-
-.status-message[data-action-state="failure"] {
-  color: #9b3d30;
-}
-
 @media (max-width: 860px) {
   .shell {
     width: min(100% - 22px, 680px);
@@ -1283,6 +1271,16 @@ ul {
   .results-panel,
   .empty-state {
     min-height: auto;
+  }
+
+  .ai-debug-panel {
+    right: 11px;
+    bottom: 11px;
+    width: calc(100vw - 22px);
+  }
+
+  .ai-debug-grid {
+    grid-template-columns: 1fr;
   }
 }
 
