@@ -570,6 +570,102 @@ ul {
   font-weight: 800;
 }
 
+.ai-debug-panel {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 30;
+  width: min(420px, calc(100vw - 36px));
+  max-height: min(680px, calc(100vh - 36px));
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 250, 0.96);
+  box-shadow: 0 18px 50px rgba(38, 50, 43, 0.14);
+  color: var(--ink);
+}
+
+.ai-debug-panel summary {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  cursor: pointer;
+  font-size: 0.86rem;
+  font-weight: 850;
+}
+
+.ai-debug-panel summary::-webkit-details-marker {
+  display: none;
+}
+
+.ai-debug-panel summary strong {
+  border-radius: 999px;
+  padding: 3px 8px;
+  background: #edf3ee;
+  color: var(--green);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+}
+
+.ai-debug-panel[data-ai-mode="test"] summary strong {
+  background: #fff4cc;
+  color: #71570a;
+}
+
+.ai-debug-panel-body {
+  border-top: 1px solid var(--line);
+  padding: 12px;
+}
+
+.ai-debug-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
+  margin-bottom: 12px;
+}
+
+.ai-debug-grid dt {
+  color: var(--ink);
+  font-size: 0.72rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.ai-debug-grid dd {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+  overflow-wrap: anywhere;
+}
+
+.ai-debug-block {
+  margin-top: 10px;
+}
+
+.ai-debug-block h3 {
+  margin: 0 0 5px;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+}
+
+.ai-debug-block pre {
+  max-height: 240px;
+  overflow: auto;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 9px;
+  background: #f7f8f4;
+  color: var(--muted);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 @media (max-width: 860px) {
   .shell {
     width: min(100% - 22px, 680px);
@@ -591,5 +687,15 @@ ul {
   .results-panel,
   .empty-state {
     min-height: auto;
+  }
+
+  .ai-debug-panel {
+    right: 11px;
+    bottom: 11px;
+    width: calc(100vw - 22px);
+  }
+
+  .ai-debug-grid {
+    grid-template-columns: 1fr;
   }
 }

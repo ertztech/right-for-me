@@ -4,8 +4,13 @@ const path = require("path");
 const { URL } = require("url");
 
 const {
-  analyzeJobWithAI,
-} = require("./src/jobsApplied/aiJobAnalysis");
+  analyzeJob,
+  getAIMode,
+  isAITestModeEnabled,
+} = require("./src/lib/ai/aiClient");
+const {
+  getLatestAIRequest,
+} = require("./src/lib/ai/aiDebugStore");
 
 const rootDir = __dirname;
 const port = Number(process.env.PORT || 4173);
@@ -29,6 +34,11 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    if (req.method === "GET" && requestUrl.pathname === "/api/ai-debug") {
+      handleAIDebug(req, res);
+      return;
+    }
+
     if (req.method !== "GET" && req.method !== "HEAD") {
       sendJson(res, 405, { error: "Method not allowed." });
       return;
@@ -45,13 +55,7 @@ server.listen(port, () => {
 });
 
 async function handleReviewOpportunity(req, res) {
-  if (!process.env.OPENAI_API_KEY) {
-    sendJson(res, 500, {
-      error: "OPENAI_API_KEY is not set. Copy .env.example to .env and add your OpenAI API key.",
-    });
-    return;
-  }
-
+  const aiMode = getAIMode(process.env);
   const body = await readJsonBody(req);
   const jobRecord = body.job || {};
 
@@ -60,12 +64,25 @@ async function handleReviewOpportunity(req, res) {
     return;
   }
 
-  const analysis = await analyzeJobWithAI(jobRecord, body.profile || {}, {
+  const analysis = await analyzeJob(jobRecord, body.profile || {}, {
     apiKey: process.env.OPENAI_API_KEY,
     model: process.env.OPENAI_MODEL || "gpt-5.5",
+    env: process.env,
   });
 
-  sendJson(res, 200, { analysis });
+  sendJson(res, 200, {
+    analysis,
+    aiMode,
+    aiTestMode: isAITestModeEnabled(process.env),
+  });
+}
+
+function handleAIDebug(req, res) {
+  sendJson(res, 200, {
+    aiMode: getAIMode(process.env),
+    aiTestMode: isAITestModeEnabled(process.env),
+    latestRequest: getLatestAIRequest(),
+  });
 }
 
 function serveStaticFile(pathname, res, headOnly) {

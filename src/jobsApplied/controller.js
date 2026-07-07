@@ -22,7 +22,7 @@ const DASHBOARD_STATUSES = [
   "Offer",
   "Rejected",
 ];
-const FIT_RECOMMENDATIONS = ["Apply", "Maybe", "Skip"];
+const JOBS_FIT_RECOMMENDATIONS = ["Apply", "Maybe", "Skip"];
 
 let selectedJobId = "";
 
@@ -275,6 +275,7 @@ async function reviewOpportunityWithAIForForm(button) {
       }),
     });
     const payload = await response.json().catch(() => ({}));
+    window.dispatchEvent(new CustomEvent("nextmove:ai-debug-updated"));
 
     if (!response.ok) {
       throw new Error(payload.error || "Opportunity review could not be completed.");
@@ -1353,7 +1354,7 @@ function validateFitReviewInput(score, recommendation) {
     return "Fit score must be a number from 0 to 100.";
   }
 
-  if (!FIT_RECOMMENDATIONS.includes(recommendation)) {
+  if (!JOBS_FIT_RECOMMENDATIONS.includes(recommendation)) {
     return "Choose Apply, Maybe, or Skip for the fit recommendation.";
   }
 
@@ -1396,7 +1397,7 @@ function statusOptions(selectedStatus) {
 }
 
 function fitRecommendationOptions(selectedRecommendation) {
-  const options = FIT_RECOMMENDATIONS.map((recommendation) => {
+  const options = JOBS_FIT_RECOMMENDATIONS.map((recommendation) => {
     const selected = recommendation === selectedRecommendation ? " selected" : "";
     return `<option value="${escapeAttribute(recommendation)}"${selected}>${escapeHtml(recommendation)}</option>`;
   }).join("");
