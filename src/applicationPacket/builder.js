@@ -85,7 +85,7 @@ function buildPacketResumeEmphasis(careerVault, relevanceSignals) {
   });
 
   if (!emphasis.length) {
-    emphasis.push("Use the strongest documented Career Vault skills and accomplishments; do not add unsupported claims.");
+    emphasis.push("Use the strongest documented Professional Experience skills and accomplishments; do not add unsupported claims.");
   }
 
   return emphasis;
@@ -154,7 +154,7 @@ function formatPacketRole(role = {}) {
     return `${title} at ${company}`;
   }
 
-  return title || company || "a documented Career Vault role";
+  return title || company || "a documented Professional Experience role";
 }
 
 window.RightForMeApplicationPacketBuilder = {

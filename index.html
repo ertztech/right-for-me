@@ -8,68 +8,84 @@
   </head>
   <body>
     <main class="shell">
-      <section class="intro">
-        <p class="eyebrow">NextMove v0.2</p>
-        <h1>Your guided career operating system.</h1>
-        <p class="lede">Evaluate opportunities, organize your evidence, build application materials, and keep your next move clear.</p>
-      </section>
+      <header class="app-header">
+        <a class="brand-lockup" href="#/jobs/dashboard" aria-label="NextMove Dashboard">
+          <span class="brand-mark" aria-hidden="true">N</span>
+          <span>
+            <strong>NextMove</strong>
+            <small>Career command center</small>
+          </span>
+        </a>
 
-      <nav class="primary-flow-nav" aria-label="Primary workflow">
-        <a href="#/jobs/dashboard">Dashboard</a>
-        <a href="#/jobs/opportunity">Opportunity Review</a>
-        <a href="#/jobs/studio">Application Studio</a>
-        <a href="#/jobs/tracker">Tracker</a>
-        <a href="#profile-story-bank">Profile / Story Bank</a>
-        <a href="#/jobs/settings">Settings</a>
-      </nav>
+        <nav class="primary-flow-nav" aria-label="Primary workflow">
+          <a href="#/jobs/dashboard" data-jobs-route-link="dashboard">Dashboard</a>
+          <a href="#/jobs/opportunity" data-jobs-route-link="opportunity">Opportunity Review</a>
+          <a href="#/jobs/studio" data-jobs-route-link="studio">Application Studio</a>
+          <a href="#/jobs/tracker" data-jobs-route-link="tracker">Tracker</a>
+          <a href="#professional-experience">Professional Experience</a>
+          <a href="#/jobs/settings" data-jobs-route-link="settings">Settings</a>
+        </nav>
+      </header>
 
       <section class="vault-panel" aria-label="Jobs Applied Workflow">
-        <div class="panel-header">
-          <div>
-            <p class="eyebrow">NextMove Workspace</p>
-            <h2>Guided Application Pipeline</h2>
-          </div>
-
-          <div class="jobs-nav" aria-label="Jobs Applied pages">
-            <a class="secondary-button nav-link-button" href="#/jobs/dashboard" data-jobs-route-link="dashboard">Dashboard</a>
-            <a class="secondary-button nav-link-button" href="#/jobs/opportunity" data-jobs-route-link="opportunity">Opportunity Review</a>
-            <a class="secondary-button nav-link-button" href="#/jobs/studio" data-jobs-route-link="studio">Application Studio</a>
-            <a class="secondary-button nav-link-button" href="#/jobs/tracker" data-jobs-route-link="tracker">Tracker</a>
-            <a class="secondary-button nav-link-button" href="#/jobs/settings" data-jobs-route-link="settings">Settings</a>
-          </div>
-        </div>
-
         <section data-jobs-page="dashboard">
-          <div class="panel-header compact-header">
+          <div class="dashboard-hero">
             <div>
-              <h2>Dashboard</h2>
-              <p class="support-copy">Your career command center for opportunities, momentum, and the next useful action.</p>
+              <p class="eyebrow">Start Here</p>
+              <h2>Know your next move.</h2>
+              <p class="support-copy">Build stronger application packets, track your opportunities, and keep the next best action obvious.</p>
             </div>
-            <a class="nav-link-button primary-dashboard-action" href="#/jobs/opportunity">Add or Paste Job Posting</a>
+            <div id="jobs-next-actions" class="dashboard-hero-actions"></div>
           </div>
 
-          <div class="score-grid" id="jobs-status-summary"></div>
-
-          <div class="two-column">
-            <div class="section-block dashboard-action-panel">
-              <h2>Recommended Next Action</h2>
-              <div id="jobs-next-actions"></div>
+          <section class="dashboard-summary-section" aria-label="Job search summary">
+            <div class="dashboard-section-heading">
+              <p class="eyebrow">Compact Summary</p>
+              <h2>Job search snapshot</h2>
             </div>
+            <div class="dashboard-metrics" id="jobs-status-summary"></div>
+          </section>
 
-            <div class="section-block">
-              <h2>Recent Jobs</h2>
-              <div id="recent-jobs-list" class="job-card-list"></div>
+          <section class="dashboard-recent-panel" aria-label="Recent work">
+            <div class="dashboard-section-heading dashboard-section-heading-row">
+              <div>
+                <p class="eyebrow">Recent Work</p>
+                <h2>Recent opportunities</h2>
+              </div>
+              <a class="small-button nav-link-button" href="#/jobs/tracker">View Tracker</a>
             </div>
-          </div>
+            <div id="recent-jobs-list" class="job-card-list dashboard-recent-list"></div>
+          </section>
 
-          <div class="section-block">
-            <h2>Demo Data</h2>
-            <p class="support-copy">Load realistic local sample jobs when you want to test the workflow quickly.</p>
-            <div class="button-row">
-              <button type="button" class="secondary-button" data-load-demo-data>Load Sample Data</button>
-              <button type="button" class="secondary-button" data-clear-demo-data>Clear Demo Data</button>
+          <section class="dashboard-workspaces" aria-label="Workspace links">
+            <div class="dashboard-section-heading">
+              <p class="eyebrow">Workspaces</p>
+              <h2>Where to keep working</h2>
             </div>
-          </div>
+            <div class="dashboard-workspace-grid">
+              <a href="#/jobs/opportunity">
+                <span>Opportunity Review</span>
+                <small>Paste, structure, and decide.</small>
+              </a>
+              <a href="#/jobs/studio" data-selected-job-route="studio">
+                <span>Application Studio</span>
+                <small>Resume, cover letter, notes.</small>
+              </a>
+              <a href="#/jobs/tracker">
+                <span>Tracker</span>
+                <small>Status and follow-up.</small>
+              </a>
+              <a href="#professional-experience">
+                <span>Professional Experience</span>
+                <small>Achievements, skills, and work stories.</small>
+              </a>
+              <a href="#/jobs/settings">
+                <span>Settings / Demo Data</span>
+                <small>Local testing controls.</small>
+              </a>
+            </div>
+          </section>
+
         </section>
 
         <section data-jobs-page="opportunity" class="hidden">
@@ -77,7 +93,7 @@
             <div class="panel-header compact-header">
               <div>
                 <h2>Opportunity Review</h2>
-                <p class="support-copy">Capture the posting, structure the role, and decide Apply, Maybe, or Skip.</p>
+                <p class="support-copy">Paste a job posting to assess fit, extract key requirements, and identify how to position your experience.</p>
               </div>
               <a class="secondary-button nav-link-button" href="#/jobs/studio" data-selected-job-route="studio">Open Application Studio</a>
             </div>
@@ -214,7 +230,7 @@
             <div class="panel-header compact-header">
               <div>
                 <h2>Application Studio</h2>
-                <p class="support-copy">Shape the resume draft, cover letter draft, and packet notes in one focused workspace.</p>
+                <p class="support-copy">Build and review the resume, cover letter, notes, and readiness checklist for one selected opportunity.</p>
               </div>
               <a class="secondary-button nav-link-button" href="#/jobs/opportunity" data-selected-job-route="opportunity">Back to Opportunity Review</a>
             </div>
@@ -224,7 +240,8 @@
 
         <section data-jobs-page="tracker" class="hidden">
           <div class="section-block first-section">
-            <h2>Application Tracker</h2>
+            <h2>Tracker</h2>
+            <p class="support-copy">Track application status, follow-ups, dates, and pipeline movement.</p>
             <div id="application-tracker-list"></div>
           </div>
         </section>
@@ -232,11 +249,11 @@
         <section data-jobs-page="settings" class="hidden">
           <div class="section-block first-section">
             <h2>Settings</h2>
-            <p class="empty-copy">Future preferences for storage, exports, reminders, and workflow defaults will live here. For now, keep moving through one clear next action.</p>
+            <p class="empty-copy">Future preferences for storage, exports, reminders, and workflow defaults will live here. Demo and local testing controls live here so Dashboard can stay focused on orientation and next actions.</p>
           </div>
           <div class="section-block">
-            <h2>Demo Data</h2>
-            <p class="support-copy">Use sample opportunities and a demo Profile / Story Bank to test Dashboard, Tracker, Opportunity Review, and Application Studio.</p>
+            <h2>Demo Data / Local Testing</h2>
+            <p class="support-copy">Use sample opportunities and a demo Professional Experience profile to test Dashboard, Tracker, Opportunity Review, and Application Studio.</p>
             <div class="button-row">
               <button type="button" class="secondary-button" data-load-demo-data>Load Sample Data</button>
               <button type="button" class="secondary-button" data-clear-demo-data>Clear Demo Data</button>
@@ -247,14 +264,16 @@
         <p id="jobs-applied-status" class="status-message"></p>
       </section>
 
-      <section class="vault-panel" id="profile-story-bank" aria-label="Profile and Story Bank Editor">
+      <section class="vault-panel" id="profile-story-bank" aria-label="Professional Experience Editor">
+        <span id="professional-experience"></span>
         <div class="panel-header">
           <div>
-            <p class="eyebrow">Profile / Story Bank</p>
-            <h2>Professional Evidence</h2>
+            <p class="eyebrow">Professional Experience</p>
+            <h2>Your background and work examples</h2>
+            <p class="support-copy">Capture your background, strengths, accomplishments, and work examples so NextMove can tailor resumes, cover letters, and interview prep.</p>
           </div>
           <div class="button-row">
-            <button type="button" id="save-vault">Save Story Bank</button>
+            <button type="button" id="save-vault">Save Experience</button>
             <button type="button" id="export-vault" class="secondary-button">Export JSON</button>
           </div>
         </div>
@@ -262,19 +281,19 @@
         <div class="form-grid">
           <label>
             Name
-            <input id="vault-name" type="text" placeholder="Mike Ertz">
+            <input id="vault-name" type="text" placeholder="Example: Jordan Lee">
           </label>
           <label>
             Location
-            <input id="vault-location" type="text" placeholder="Port Washington, WI">
+            <input id="vault-location" type="text" placeholder="Example: Chicago, IL">
           </label>
           <label>
             Email
-            <input id="vault-email" type="email" placeholder="name@email.com">
+            <input id="vault-email" type="email" placeholder="name@example.com">
           </label>
           <label>
             Phone
-            <input id="vault-phone" type="text" placeholder="262.416.4360">
+            <input id="vault-phone" type="text" placeholder="Example: 555-010-1234">
           </label>
         </div>
 
@@ -283,24 +302,24 @@
           <div class="form-grid">
             <label>
               Company
-              <input id="role-company" type="text" placeholder="Renaissance Learning">
+              <input id="role-company" type="text" placeholder="Example: Acme Health">
             </label>
             <label>
               Title
-              <input id="role-title" type="text" placeholder="Enterprise Agile Coach">
+              <input id="role-title" type="text" placeholder="Example: Product Operations Manager">
             </label>
             <label>
               Start Date
-              <input id="role-start" type="text" placeholder="2025-06">
+              <input id="role-start" type="text" placeholder="Example: 2022-01">
             </label>
             <label>
               End Date
-              <input id="role-end" type="text" placeholder="2026-07">
+              <input id="role-end" type="text" placeholder="Example: Present">
             </label>
           </div>
           <label>
             Summary
-            <textarea id="role-summary-input" placeholder="Briefly describe the role..."></textarea>
+            <textarea id="role-summary-input" placeholder="Describe the role, scope, responsibilities, and measurable impact..."></textarea>
           </label>
           <button type="button" id="add-role">Add Role</button>
           <ul id="roles-list"></ul>
@@ -309,21 +328,21 @@
         <div class="three-column">
           <div class="section-block">
             <h2>Skills</h2>
-            <input id="skill-input" type="text" placeholder="Change Management">
+            <input id="skill-input" type="text" placeholder="Example: Stakeholder communication">
             <button type="button" id="add-skill">Add Skill</button>
             <ul id="skills-list"></ul>
           </div>
 
           <div class="section-block">
             <h2>Tools</h2>
-            <input id="tool-input" type="text" placeholder="Jira">
+            <input id="tool-input" type="text" placeholder="Example: Project management platform">
             <button type="button" id="add-tool">Add Tool</button>
             <ul id="tools-list"></ul>
           </div>
 
           <div class="section-block">
             <h2>Accomplishments</h2>
-            <input id="accomplishment-input" type="text" placeholder="Led value stream transformation across 17 teams">
+            <input id="accomplishment-input" type="text" placeholder="Example: Improved team planning rhythm and reduced delivery risk.">
             <button type="button" id="add-accomplishment">Add Accomplishment</button>
             <ul id="accomplishments-list"></ul>
           </div>
@@ -431,7 +450,7 @@
             Your background
             <span>Resume text, project notes, skills, or experience. Optional, but better with it.</span>
           </label>
-          <textarea id="candidate-background" placeholder="Paste your resume or notes here..."></textarea>
+          <textarea id="candidate-background" placeholder="Describe a project, achievement, or challenge you want the AI to consider..."></textarea>
 
           <button type="submit">Analyze role</button>
         </form>

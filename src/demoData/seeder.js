@@ -50,9 +50,9 @@
   function createSampleProfile() {
     return {
       person: {
-        name: "Mike Thompson",
+        name: "Alex Morgan",
         location: "Milwaukee, WI",
-        email: "mike.thompson@example.com",
+        email: "alex.morgan@example.com",
         phone: "414-555-0138",
       },
       roles: [
@@ -128,7 +128,7 @@
       sourcePostingText: "Atlas Components is hiring an Agile Delivery Transformation Lead to guide manufacturing transformation, operating metrics, leader coaching, change management, Power BI reporting, Jira portfolio rhythms, and cross-functional execution.",
       fitAnalysis: fitAnalysis(88, "Apply", [
         "Strong match on transformation, operations, metrics, and change leadership.",
-        "Profile / Story Bank includes manufacturing and Power BI evidence.",
+        "Professional Experience includes manufacturing and Power BI evidence.",
       ], [
         "Prepare a concise Six Sigma certification answer if asked.",
       ], [
@@ -304,7 +304,7 @@
         "Built reporting rhythms that made operational bottlenecks and follow-up actions visible.",
         "Coached leaders through process change while keeping work grounded in measurable outcomes.",
       ],
-      markdownContent: `# Mike Thompson\n\nMilwaukee, WI | mike.thompson@example.com | 414-555-0138\n\n## Professional Summary\nOperations and transformation leader with experience in change management, metrics, stakeholder communication, and practical delivery improvement. Tailored for ${company} using demo Profile / Story Bank evidence only.\n\n## Skills & Tools\n- Operations transformation\n- Change management\n- Stakeholder communication\n- Power BI\n- Jira\n\n## Selected Accomplishments\n- Improved delivery cadence by 30% by redesigning weekly operating reviews.\n- Built Power BI dashboards that helped leaders identify bottlenecks and follow-up actions.\n`,
+      markdownContent: `# Alex Morgan\n\nMilwaukee, WI | alex.morgan@example.com | 414-555-0138\n\n## Professional Summary\nOperations and transformation leader with experience in change management, metrics, stakeholder communication, and practical delivery improvement. Tailored for ${company} using demo Professional Experience evidence only.\n\n## Skills & Tools\n- Operations transformation\n- Change management\n- Stakeholder communication\n- Power BI\n- Jira\n\n## Selected Accomplishments\n- Improved delivery cadence by 30% by redesigning weekly operating reviews.\n- Built Power BI dashboards that helped leaders identify bottlenecks and follow-up actions.\n`,
       markdownPreview: "",
       generatedAt: "2026-07-03T12:00:00.000Z",
       promptVersion: "demo-data-v1",
@@ -315,7 +315,7 @@
 
   function coverLetterDraft(company, roleTitle) {
     return {
-      coverLetterContent: `Dear ${company} team,\n\nI am interested in the ${roleTitle} role because it connects directly to my work leading transformation, improving operating rhythms, and helping teams turn metrics into practical action. My background includes change management, stakeholder communication, Power BI reporting, and cross-functional delivery improvement.\n\nI would welcome the chance to discuss how this experience could support ${company}'s goals.\n\nSincerely,\nMike Thompson`,
+      coverLetterContent: `Dear ${company} team,\n\nI am interested in the ${roleTitle} role because it connects directly to my work leading transformation, improving operating rhythms, and helping teams turn metrics into practical action. My background includes change management, stakeholder communication, Power BI reporting, and cross-functional delivery improvement.\n\nI would welcome the chance to discuss how this experience could support ${company}'s goals.\n\nSincerely,\nAlex Morgan`,
       draftText: "",
       toneNote: "Warm, friendly, confident, and practical.",
       generatedAt: "2026-07-03T12:00:00.000Z",

@@ -59,7 +59,7 @@ assert.ok(studioHtml.includes("Atlas Components"));
 assert.ok(studioHtml.includes("Job Posting Text"));
 assert.ok(studioHtml.includes("Atlas Components is hiring"));
 assert.ok(studioHtml.includes("Strong match on transformation"));
-assert.ok(studioHtml.includes("Mike Thompson"));
+assert.ok(studioHtml.includes("Alex Morgan"));
 assert.ok(studioHtml.includes("Dear Atlas Components team"));
 assert.ok(studioHtml.includes("Copy Resume Draft"));
 assert.ok(studioHtml.includes("Copy Cover Letter Draft"));

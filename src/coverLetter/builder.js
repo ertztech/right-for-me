@@ -27,7 +27,7 @@ function buildOpening(evidence) {
   const strengths = formatList([...evidence.skills, ...evidence.tools].slice(0, 4));
 
   if (strengths) {
-    return `I am excited to apply for this opportunity. The role connects well with Career Vault evidence around ${strengths}, and I would welcome the chance to bring that experience to your team.`;
+    return `I am excited to apply for this opportunity. The role connects well with Professional Experience evidence around ${strengths}, and I would welcome the chance to bring that experience to your team.`;
   }
 
   return "I am excited to apply for this opportunity. I would welcome the chance to bring my documented experience, curiosity, and steady follow-through to your team.";
@@ -44,7 +44,7 @@ function buildBody(evidence) {
   if (skillsParagraph) paragraphs.push(skillsParagraph);
 
   if (!paragraphs.length) {
-    paragraphs.push("My Career Vault is still growing, but I am interested in roles where I can contribute thoughtfully, learn quickly, and communicate clearly.");
+    paragraphs.push("My Professional Experience profile is still growing, but I am interested in roles where I can contribute thoughtfully, learn quickly, and communicate clearly.");
   }
 
   return paragraphs;
@@ -60,11 +60,11 @@ function buildRoleParagraph(roles) {
   const summary = String(role.summary || "").trim();
 
   if (heading && summary) {
-    return `In my work as ${heading}, my Career Vault summary notes: ${sentenceFragment(summary)}`;
+    return `In my work as ${heading}, my Professional Experience summary notes: ${sentenceFragment(summary)}`;
   }
 
   if (heading) {
-    return `My Career Vault includes experience as ${heading}, which I would be glad to connect to the needs of this role in more detail.`;
+    return `My Professional Experience includes experience as ${heading}, which I would be glad to connect to the needs of this role in more detail.`;
   }
 
   return summary ? `My documented experience includes this summary: ${sentenceFragment(summary)}` : "";

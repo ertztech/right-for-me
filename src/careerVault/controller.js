@@ -29,7 +29,7 @@ function initializeCareerVaultController(vaultStore) {
     RightForMeCareerVaultView.renderVaultLists(vault, lists, removeItem);
   }
 
-  function persist(message = "Career Vault saved.") {
+  function persist(message = "Professional Experience saved.") {
     updatePersonFromForm();
     vaultStore.saveVault();
     RightForMeCareerVaultView.setVaultStatus(status, message);
@@ -104,7 +104,7 @@ function initializeCareerVaultController(vaultStore) {
   }
 
   function exportVault() {
-    persist("Career Vault exported.");
+    persist("Professional Experience exported.");
 
     const vault = vaultStore.getVault();
     const blob = new Blob([JSON.stringify(vault, null, 2)], {

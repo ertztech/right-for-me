@@ -24,13 +24,13 @@ function buildSummary(careerVault) {
   const sentences = [];
 
   if (!roles.length && !skills.length && !tools.length && !accomplishments.length) {
-    return "Professional summary will become more specific as roles, skills, tools, and accomplishments are added to the Career Vault.";
+    return "Professional summary will become more specific as roles, skills, tools, and accomplishments are added to Professional Experience.";
   }
 
   if (roles.length) {
     sentences.push(roleSummarySentence(roles));
   } else {
-    sentences.push("Professional with experience documented in the Career Vault.");
+    sentences.push("Professional with experience documented in Professional Experience.");
   }
 
   const domainAreas = representedDomains(careerVault);
@@ -40,7 +40,7 @@ function buildSummary(careerVault) {
   }
 
   if (hasLeadershipExperience(careerVault)) {
-    sentences.push("Career Vault includes leadership experience through documented roles, skills, or accomplishments.");
+    sentences.push("Professional Experience includes leadership experience through documented roles, skills, or accomplishments.");
   }
 
   if (accomplishments.length) {
