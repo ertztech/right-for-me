@@ -1,47 +1,48 @@
-# Product Vision
+# NextMove Product Vision
 
-## The Problem
+## Mission
 
-Job seekers often self-reject from roles that could be healthy stretch opportunities. They see a long list of requirements, compare it against their own experience, and assume a missing keyword means they do not belong.
+Help people confidently pursue better careers by understanding each opportunity and generating everything needed to apply well.
 
-At the same time, some roles really are not the right fit yet. A good product should help people tell the difference.
+## Vision
 
-## The Opportunity
+NextMove is an AI-powered job application operating system.
 
-RightForMe helps people evaluate roles with more nuance:
+It is not primarily a resume builder. The resume is one output of a larger workflow.
 
-- What does this job really require?
-- Where do I already have evidence?
-- Where would this stretch me?
-- Is that stretch realistic?
-- How should I position myself if I apply?
+## Core Workflow
 
-The goal is not to inflate confidence. The goal is to build honest confidence.
+Profile ? Add Opportunity ? AI Analysis ? Create Packet ? Apply ? Track Progress
 
-## The Core User Promise
+## Core Product Model
 
-RightForMe helps job seekers decide which opportunities are worth pursuing and communicate why they are credible candidates.
+### Profile
 
-## The Product Wedge
+The user's reusable source of truth.
 
-Start with a single workflow:
+Includes work history, skills, accomplishments, projects, metrics, stories, preferences, and base resume information.
 
-> Paste a job description, paste your background, and get a fit/stretch recommendation.
+### Opportunity
 
-From there, the product can expand into resumes, cover letters, interview prep, LinkedIn optimization, portfolio feedback, networking suggestions, and career strategy.
+A saved job posting or role the user is considering.
 
-## Long-Term Direction
+### Opportunity Workspace
 
-RightForMe can become an AI career strategy companion:
+The job-specific workspace where analysis, drafts, notes, status, and packet work come together.
 
-- Opportunity evaluation
-- Resume positioning
-- Cover letter drafting
-- Interview preparation
-- Skill gap planning
-- Networking strategy
-- Portfolio critique
-- Salary negotiation preparation
-- Career path exploration
+### Application Packet
 
-The resume is not the product. It is one output of a deeper system.
+Generated outputs for a specific opportunity.
+
+May include a tailored resume, cover letter, application answers, interview prep, follow-up messages, or structured application data.
+
+## Product Principles
+
+- Simplicity over feature count.
+- The user should enter information once.
+- Reuse saved data whenever possible.
+- AI should remove repetitive work.
+- Every screen should answer: What do I do next?
+- The dashboard is a launchpad, not a report.
+- Opportunities are the center of the application workflow.
+- Profile is the source of truth.
