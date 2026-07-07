@@ -29,7 +29,7 @@ function initializeCareerVaultController(vaultStore) {
     RightForMeCareerVaultView.renderVaultLists(vault, lists, removeItem);
   }
 
-  function persist(message = "Career Vault saved.") {
+  function persist(message = "Professional Experience saved.") {
     updatePersonFromForm();
     vaultStore.saveVault();
     RightForMeCareerVaultView.setVaultStatus(status, message);
@@ -44,6 +44,10 @@ function initializeCareerVaultController(vaultStore) {
       email: vaultFields.email.value.trim(),
       phone: vaultFields.phone.value.trim(),
     };
+  }
+
+  function syncFromForm() {
+    updatePersonFromForm();
   }
 
   function addRole() {
@@ -100,7 +104,7 @@ function initializeCareerVaultController(vaultStore) {
   }
 
   function exportVault() {
-    persist("Career Vault exported.");
+    persist("Professional Experience exported.");
 
     const vault = vaultStore.getVault();
     const blob = new Blob([JSON.stringify(vault, null, 2)], {
@@ -125,6 +129,11 @@ function initializeCareerVaultController(vaultStore) {
   document.querySelector("#add-accomplishment").addEventListener("click", () => addSimpleItem("accomplishments", "#accomplishment-input"));
 
   render();
+
+  return {
+    render,
+    syncFromForm,
+  };
 }
 
 window.RightForMeCareerVaultController = {

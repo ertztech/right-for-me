@@ -15,6 +15,21 @@ function initializeApplicationPacketController() {
   }
 
   function generateApplicationPacket() {
+    const feedback = NextMoveActionFeedback.createActionFeedback({
+      button: generateButton,
+      statusNode: status,
+      workingText: "Generating...",
+      successText: "Application packet generated.",
+      failureText: "Application packet could not be generated.",
+    });
+
+    return feedback.run(() => ({
+      ...generateApplicationPacketNow(),
+      message: "Application packet generated.",
+    }));
+  }
+
+  function generateApplicationPacketNow() {
     RightForMeCareerVault.saveVault();
 
     const packet = RightForMeApplicationPacketBuilder.buildApplicationPacket(
@@ -46,7 +61,7 @@ function initializeApplicationPacketController() {
   function currentOrGeneratedNotes() {
     return notesPreview.value.trim()
       ? notesPreview.value
-      : generateApplicationPacket().notesMarkdown;
+      : generateApplicationPacketNow().notesMarkdown;
   }
 
   async function copyApplicationNotes() {

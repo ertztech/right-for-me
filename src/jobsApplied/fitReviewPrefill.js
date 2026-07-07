@@ -89,7 +89,7 @@
     }
 
     if (Array.isArray(job.technologies) && job.technologies.length) {
-      strengths.push(`Named tools to compare against the Story Bank: ${job.technologies.slice(0, 4).join(", ")}.`);
+      strengths.push(`Named tools to compare against Professional Experience: ${job.technologies.slice(0, 4).join(", ")}.`);
     }
 
     return unique(strengths);
@@ -100,7 +100,7 @@
     const requiredSkills = Array.isArray(job.requiredSkills) ? job.requiredSkills : [];
 
     if (requiredSkills.length >= 6) {
-      gaps.push("Many required skills are listed; review each one against real Story Bank evidence.");
+      gaps.push("Many required skills are listed; review each one against real Professional Experience evidence.");
     }
 
     if (job.yearsExperience) {
@@ -177,7 +177,7 @@
 
   function suggestedPositioning(job, strengths, gaps, recommendation) {
     const role = [job.company, job.roleTitle].filter(Boolean).join(" - ") || "this role";
-    const lead = strengths[0] || "Lead with verified Story Bank evidence, not generic claims.";
+    const lead = strengths[0] || "Lead with verified Professional Experience evidence, not generic claims.";
     const caution = gaps[0] ? ` Prepare for this gap: ${gaps[0]}` : "";
 
     if (recommendation === "Apply") {

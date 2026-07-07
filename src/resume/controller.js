@@ -12,7 +12,28 @@ function initializeResumeController() {
   }
 
   function generateResumeMarkdown() {
+    const feedback = NextMoveActionFeedback.createActionFeedback({
+      button: generateResumeButton,
+      statusNode: resumeStatus,
+      workingText: "Generating...",
+      successText: "Resume generated.",
+      failureText: "Resume could not be generated.",
+    });
+
+    feedback.run(() => {
+      const markdown = generateResumeMarkdownNow();
+      return { markdown, message: "Resume generated." };
+    });
+  }
+
+  function generateResumeMarkdownNow() {
     RightForMeCareerVault.saveVault();
+
+    if (globalThis.RightForMeJobsAppliedController?.selectedJob?.()) {
+      const result = RightForMeJobsAppliedController.generateResumeForSelectedJob();
+      resumePreview.value = result.markdown;
+      return result.markdown;
+    }
 
     const resume = RightForMeResumeBuilder.buildResume(
       RightForMeCareerVault.getVault()
@@ -28,7 +49,7 @@ function initializeResumeController() {
   function currentOrGeneratedMarkdown() {
     return resumePreview.value.trim()
       ? resumePreview.value
-      : generateResumeMarkdown();
+      : generateResumeMarkdownNow();
   }
 
   async function copyResume() {

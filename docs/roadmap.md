@@ -109,6 +109,12 @@ NextMove is organizing the app around six primary experience areas:
 
 Job Intelligence v1 adds optional structured posting fields to job records, including responsibilities, required skills, preferred skills, technologies/tools, leadership expectations, certifications, and years of experience. These fields are manually editable now, with local rule-based extraction available as a first-pass helper from pasted posting text. Job Intelligence can also generate a local first-pass Fit Review with score, Apply/Maybe/Skip recommendation, strengths, gaps, concerns, and suggested positioning. Future AI extraction can improve quality and context, but the app should continue to support manual editing and should not require live AI calls.
 
+## Resume Generation MVP and Action Feedback
+
+Application Studio now supports a first resume-generation workflow for saved opportunities. The MVP uses selected job details, structured Job Intelligence, Fit Review, Profile / Story Bank evidence, background notes, and existing application information to generate a deterministic local resume draft. The draft is saved back to the job record in browser localStorage so it survives refreshes.
+
+The reusable action feedback helper gives important actions a shared idle, working, success, and failure pattern. Future work should apply it to additional saves and generation flows as they become more interactive. Future AI resume generation should call a local backend endpoint, keep provider keys server-side, validate structured output, and preserve user-approved edits.
+
 ## Not Yet
 
 These ideas may matter later, but they are intentionally out of scope for now:
