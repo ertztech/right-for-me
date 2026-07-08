@@ -972,7 +972,7 @@ function renderDashboard(jobs) {
 function renderJobDetail(job) {
   const node = document.querySelector("#job-detail-content");
   if (!job) {
-    node.innerHTML = emptyMessage("No opportunity selected yet. Start with Opportunity Review to analyze a posting before building an application packet.");
+    node.innerHTML = emptyMessage("No opportunity selected yet. Start with Opportunity Review to analyze a posting before building an application packet in Application Studio.");
     return;
   }
 
@@ -1227,7 +1227,7 @@ function renderApplicationStudio(job) {
 
   if (!job) {
     node.innerHTML = `
-      ${emptyMessage("Save an opportunity before creating an application packet.")}
+      ${emptyMessage("Save an opportunity before opening Application Studio for a specific application packet.")}
       <div class="button-row">
         <a class="secondary-button nav-link-button" href="#/jobs/opportunity">Add Opportunity</a>
         <button type="button" class="secondary-button" data-load-demo-data>Load Sample Data</button>
@@ -1241,43 +1241,61 @@ function renderApplicationStudio(job) {
   node.innerHTML = `
     <div class="studio-hero">
       <div class="studio-hero-main">
-        <p class="eyebrow">Create Packet</p>
-        <h2>${escapeHtml(job.roleTitle)}</h2>
+        <p class="eyebrow">Application Packet Workspace</p>
+        <h2>Application Studio for ${escapeHtml(job.roleTitle)}</h2>
         <p>${escapeHtml(job.company)} | ${escapeHtml(formatValue(job.location))} | ${escapeHtml(formatValue(job.workArrangement))}</p>
+        <p class="support-copy">Prepare the application packet for this opportunity here. Use Opportunity Review to analyze the role, use Application Studio to draft and review materials, and use Tracker to manage status and follow-up.</p>
       </div>
       <div class="studio-hero-status">
-        <span>Status</span>
+        <span>Packet Readiness</span>
         ${statusBadge(job.status)}
         <p>${escapeHtml(readinessSummaryText(readiness))}</p>
       </div>
     </div>
 
+    <div class="workspace-boundary-grid">
+      <section class="workspace-boundary-card">
+        <h2>Opportunity Review</h2>
+        <p>Analyze the posting, capture requirements, and decide how to position your experience.</p>
+      </section>
+      <section class="workspace-boundary-card workspace-boundary-card-active">
+        <h2>Application Studio</h2>
+        <p>Prepare this opportunity's application packet: resume draft, cover letter draft, notes, and readiness review.</p>
+      </section>
+      <section class="workspace-boundary-card">
+        <h2>Tracker</h2>
+        <p>Manage pipeline status, dates applied, follow-up timing, and ongoing progress after preparation.</p>
+      </section>
+    </div>
+
     <div class="studio-action-bar">
-      <button type="button" class="secondary-button" data-review-saved-opportunity="${escapeAttribute(job.id)}">Analyze Fit</button>
+      <button type="button" class="secondary-button" data-review-saved-opportunity="${escapeAttribute(job.id)}">Refresh Fit Review</button>
       <button type="button" class="secondary-button" data-generate-resume-draft="${escapeAttribute(job.id)}">Generate Resume Draft</button>
       <button type="button" class="secondary-button" data-generate-cover-letter-draft="${escapeAttribute(job.id)}">Generate Cover Letter Draft</button>
-      <a class="secondary-button nav-link-button" href="#/jobs/opportunity/${escapeAttribute(job.id)}">Opportunity Review</a>
-      <a class="secondary-button nav-link-button" href="#/jobs/tracker">Open Tracker</a>
+      <a class="secondary-button nav-link-button" href="#/jobs/opportunity/${escapeAttribute(job.id)}">Go to Opportunity Review</a>
+      <a class="secondary-button nav-link-button" href="#/jobs/tracker">Go to Tracker</a>
     </div>
 
     <div class="studio-grid active-workspace-grid">
       <section class="studio-card studio-card-primary">
-        <h2>Active Opportunity Workspace</h2>
+        <h2>Selected Opportunity Snapshot</h2>
+        <p class="support-copy">Keep the core opportunity details visible while you prepare packet materials for this one role.</p>
         ${jobDetailsSnapshotBlock(job)}
         ${applicationStudioStatusForm(job)}
       </section>
 
       <section class="studio-card studio-card-primary">
         <div>
-          <h2>Packet Readiness</h2>
-          <p class="support-copy">${escapeHtml(readinessSummaryText(readiness))}</p>
+          <h2>Application Packet Readiness</h2>
+          <p class="support-copy">${escapeHtml(readinessSummaryText(readiness))}. Review the items below before you treat this packet as ready to use.</p>
         </div>
         ${readinessMeterBlock(readiness)}
         ${readinessChecklistBlock(job, readiness)}
       </section>
 
       <section class="studio-card">
-        <h2>Status and Next Step</h2>
+        <h2>Packet Status</h2>
+        <p class="support-copy">This card summarizes packet preparation. Use Tracker for pipeline movement and follow-up management.</p>
         ${packetStatusGrid(job)}
       </section>
     </div>
@@ -1285,22 +1303,26 @@ function renderApplicationStudio(job) {
     <div class="two-column">
       <section class="studio-card">
         <h2>Fit Review</h2>
+        <p class="support-copy">Carry forward the saved recommendation and positioning notes from Opportunity Review while you prepare materials here.</p>
         ${fitReviewWorkspaceBlock(job)}
       </section>
       <section class="studio-card">
-        <h2>Opportunity Snapshot</h2>
+        <h2>Saved Posting Snapshot</h2>
+        <p class="support-copy">Use the saved job posting for packet context. Return to Opportunity Review if the posting details need more work.</p>
         ${postingSummaryBlock(job)}
       </section>
     </div>
 
     <details class="studio-card studio-disclosure">
       <summary>Job Intelligence</summary>
+      <p class="support-copy">Reference the saved requirements here while drafting the packet. Edit or enrich them in Opportunity Review.</p>
       ${jobIntelligenceWorkspaceBlock(job)}
     </details>
 
     <div class="two-column">
       <section class="studio-card">
         <h2>Resume Draft</h2>
+        <p class="support-copy">Prepare the resume draft you want to use for this application packet.</p>
         ${draftPreviewBlock("Resume Content", resumeDraftText(job), "No resume draft yet. Generate a resume or save markdown content here when ready.")}
         <div class="button-row">
           <button type="button" class="secondary-button" data-copy-packet-draft="resume" data-job-id="${escapeAttribute(job.id)}">Copy Resume Draft</button>
@@ -1309,6 +1331,7 @@ function renderApplicationStudio(job) {
       </section>
       <section class="studio-card">
         <h2>Cover Letter Draft</h2>
+        <p class="support-copy">Prepare the cover letter draft for this specific opportunity.</p>
         ${draftPreviewBlock("Cover Letter Content", coverLetterDraftText(job), "No cover letter draft yet. Save draft content here when ready.")}
         <div class="button-row">
           <button type="button" class="secondary-button" data-copy-packet-draft="cover-letter" data-job-id="${escapeAttribute(job.id)}">Copy Cover Letter Draft</button>
@@ -1317,7 +1340,8 @@ function renderApplicationStudio(job) {
       </section>
     </div>
     <section class="studio-card">
-      <h2>Notes and Follow-up</h2>
+      <h2>Packet Notes</h2>
+      <p class="support-copy">Capture application-specific notes, proof points, and reminders for this packet. Use Tracker for broader pipeline follow-up management.</p>
       ${placeholderBlock("Follow-up Date", formatValue(job.followUpDate))}
       ${packetNotesEditorBlock(job)}
     </section>
@@ -1344,10 +1368,11 @@ function applicationStudioStatusForm(job) {
         </label>
       </div>
       <label>
-        Packet / Follow-up Notes
+        Packet Notes
         <textarea name="notes" rows="4">${escapeHtml(job.notes || "")}</textarea>
       </label>
-      <button type="submit">Update Status and Notes</button>
+      <p class="helper-copy">Use this form for packet context and quick status updates. Tracker remains the main workspace for pipeline movement and follow-up timing.</p>
+      <button type="submit">Save Packet Status</button>
     </form>
   `;
 }
@@ -1361,9 +1386,9 @@ function applicationPacketReadiness(job) {
     readinessItem("Fit review available", hasFitAnalysis(job), "Save an Apply, Maybe, or Skip fit review."),
     readinessItem("Resume draft available", hasResumeDraft(job), "Generate or save a tailored resume draft."),
     readinessItem("Cover letter draft available", hasCoverLetterDraft(job), "Save a cover letter draft."),
-    readinessItem("Notes added", Boolean(cleanValue(job.notes)), "Add packet notes or follow-up context."),
+    readinessItem("Packet notes added", Boolean(cleanValue(job.notes)), "Add packet notes or application context."),
     readinessItem("Status selected", Boolean(cleanValue(job.status)), "Choose a current application status."),
-    readinessItem("Follow-up details added", Boolean(cleanValue(job.followUpDate)), "Add a follow-up date when useful."),
+    readinessItem("Follow-up details added", Boolean(cleanValue(job.followUpDate)), "Add a follow-up date when useful, or manage it later in Tracker."),
     readinessItem("Resume reviewed", Boolean(checklist.resumeReviewed), "Review the resume draft before using it.", "resumeReviewed"),
     readinessItem("Cover letter reviewed", Boolean(checklist.coverLetterReviewed), "Review the cover letter draft before using it.", "coverLetterReviewed"),
     readinessItem("Application submitted", Boolean(checklist.applicationSubmitted || submittedByStatus), "Mark this when the application is submitted.", "applicationSubmitted"),

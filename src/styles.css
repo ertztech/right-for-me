@@ -848,6 +848,37 @@ button[data-clear-demo-data]:hover {
   min-height: 40px;
 }
 
+.workspace-boundary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.workspace-boundary-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: var(--space-3);
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: var(--shadow-sm);
+}
+
+.workspace-boundary-card h2 {
+  margin-bottom: var(--space-1);
+  font-size: 0.98rem;
+}
+
+.workspace-boundary-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.workspace-boundary-card-active {
+  border-color: rgba(15, 118, 110, 0.24);
+  background: linear-gradient(180deg, var(--surface-strong), #fff);
+}
+
 .studio-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
@@ -1267,6 +1298,7 @@ ul {
   .dashboard-hero,
   .dashboard-recent-list,
   .dashboard-workspace-grid,
+  .workspace-boundary-grid,
   .studio-grid,
   .studio-hero,
   .two-column,
