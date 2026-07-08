@@ -80,7 +80,7 @@
     });
 
     if (!bullets.length) {
-      bullets.push("Add specific accomplishments to Professional Experience to strengthen this resume draft.");
+      bullets.push("Add specific accomplishments to Profile to strengthen this resume draft.");
     }
 
     return uniqueCleanList(bullets).slice(0, 8);

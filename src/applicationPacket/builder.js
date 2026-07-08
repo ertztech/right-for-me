@@ -85,7 +85,7 @@ function buildPacketResumeEmphasis(careerVault, relevanceSignals) {
   });
 
   if (!emphasis.length) {
-    emphasis.push("Use the strongest documented Professional Experience skills and accomplishments; do not add unsupported claims.");
+    emphasis.push("Use the strongest documented Profile skills and accomplishments; do not add unsupported claims.");
   }
 
   return emphasis;
@@ -130,6 +130,9 @@ function packetVaultTerms(careerVault) {
       role.summary,
     ]),
     ...(careerVault.accomplishments || []),
+    ...(careerVault.metrics || []),
+    ...(careerVault.projects || []),
+    ...(careerVault.stories || []),
   ]
     .join(" ")
     .split(/\s+/)
@@ -154,7 +157,7 @@ function formatPacketRole(role = {}) {
     return `${title} at ${company}`;
   }
 
-  return title || company || "a documented Professional Experience role";
+  return title || company || "a documented Profile role";
 }
 
 window.RightForMeApplicationPacketBuilder = {

@@ -509,7 +509,7 @@ function generateResumeForJob(jobId = selectedJobId) {
 
   RightForMeCareerVault.saveVault();
   if (!hasCareerVaultBaseData(RightForMeCareerVault.getVault())) {
-    throw new Error("Add your base resume or Professional Experience details before generating a tailored resume.");
+    throw new Error("Add Profile details before generating a tailored resume.");
   }
 
   const resumeDraft = NextMoveResumeGenerator.generateResumeDraft({
@@ -553,7 +553,7 @@ function generateCoverLetterForJob(jobId = selectedJobId) {
   RightForMeCareerVault.saveVault();
   const careerVault = RightForMeCareerVault.getVault();
   if (!hasCareerVaultBaseData(careerVault)) {
-    throw new Error("Add your base resume or Professional Experience details before generating a cover letter.");
+    throw new Error("Add Profile details before generating a cover letter.");
   }
 
   if (!window.RightForMeCoverLetterBuilder || !window.RightForMeCoverLetterRenderer) {
@@ -616,7 +616,7 @@ async function loadDemoData(button) {
 
     return {
       ...result,
-      message: `Loaded ${result.jobsAdded} sample jobs.${result.vaultSeeded ? " Demo Professional Experience profile added." : " Existing Professional Experience preserved."}`,
+      message: `Loaded ${result.jobsAdded} sample jobs.${result.vaultSeeded ? " Demo Profile added." : " Existing Profile preserved."}`,
     };
   });
 }
@@ -637,7 +637,7 @@ async function clearDemoData(button) {
 
     return {
       ...result,
-      message: `Cleared ${result.jobsRemoved} demo jobs.${result.vaultCleared ? " Demo Professional Experience profile cleared." : " Real Professional Experience preserved."}`,
+      message: `Cleared ${result.jobsRemoved} demo jobs.${result.vaultCleared ? " Demo Profile cleared." : " Real Profile preserved."}`,
     };
   });
 }
@@ -1128,9 +1128,9 @@ function renderResumeBuilder(job) {
   const resumeDraft = job.resumeDraft || {};
   const markdownContent = resumeDraft.markdownContent || resumeDraft.markdownPreview || job.resumeVersionPath || "";
   document.querySelector("#jobs-resume-placeholder").innerHTML = `
-    ${placeholderBlock("Tailored Summary", resumeDraft.tailoredSummary || "A tailored summary grounded in your Professional Experience will appear here.")}
+    ${placeholderBlock("Tailored Summary", resumeDraft.tailoredSummary || "A tailored summary grounded in your Profile will appear here.")}
     ${placeholderBlock("Tailored Skills", listOrPlaceholder(resumeDraft.tailoredSkills, "Tailored skills will appear here."))}
-    ${placeholderBlock("Tailored Experience Bullets", listOrPlaceholder(resumeDraft.tailoredExperienceBullets, "Experience bullets grounded in your Professional Experience will appear here."))}
+    ${placeholderBlock("Tailored Experience Bullets", listOrPlaceholder(resumeDraft.tailoredExperienceBullets, "Experience bullets grounded in your Profile will appear here."))}
     ${placeholderBlock("Markdown Preview", markdownContent || "Markdown resume preview will appear here when generated or saved.")}
     ${aiMetadataBlock(resumeDraft)}
     <div class="section-block">
@@ -1227,7 +1227,7 @@ function renderApplicationStudio(job) {
 
   if (!job) {
     node.innerHTML = `
-      ${emptyMessage("Save an opportunity before opening Application Studio to prepare the application packet.")}
+      ${emptyMessage("Save an opportunity before creating an application packet.")}
       <div class="button-row">
         <a class="secondary-button nav-link-button" href="#/jobs/opportunity">Add Opportunity</a>
         <button type="button" class="secondary-button" data-load-demo-data>Load Sample Data</button>
@@ -1241,7 +1241,7 @@ function renderApplicationStudio(job) {
   node.innerHTML = `
     <div class="studio-hero">
       <div class="studio-hero-main">
-        <p class="eyebrow">Application Studio</p>
+        <p class="eyebrow">Create Packet</p>
         <h2>${escapeHtml(job.roleTitle)}</h2>
         <p>${escapeHtml(job.company)} | ${escapeHtml(formatValue(job.location))} | ${escapeHtml(formatValue(job.workArrangement))}</p>
       </div>
@@ -1787,7 +1787,7 @@ function recommendedNextAction(jobs) {
       "Application packet",
       `Complete the packet for ${incompleteApplyPacketJob.roleTitle}.`,
       "This role has an Apply recommendation and still needs a saved resume draft or cover letter draft.",
-      "Open Application Studio",
+      "Create Packet",
       incompleteApplyPacketJob,
       "studio"
     );
@@ -1810,7 +1810,7 @@ function recommendedNextAction(jobs) {
       "Application packet",
       `Build the packet for ${applyRecommendationJob.roleTitle}.`,
       "This role has an Apply recommendation. Pull the tailored resume, cover letter, and notes together.",
-      "Open Application Studio",
+      "Create Packet",
       applyRecommendationJob,
       "studio"
     );

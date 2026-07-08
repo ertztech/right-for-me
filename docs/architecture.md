@@ -6,7 +6,7 @@ RightForMe is organized around feature folders. Each feature owns its own logic 
 
 ### `src/careerVault/`
 
-Owns the Career Vault experience: collecting, saving, loading, and exporting the professional story data that powers the rest of the product.
+Owns the Profile experience: collecting, saving, loading, and exporting the reusable professional data that powers the rest of the product. The internal module is still named `careerVault` to avoid unnecessary churn, but user-facing language should say Profile.
 
 ### `src/resume/`
 

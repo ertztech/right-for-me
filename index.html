@@ -20,9 +20,9 @@
         <nav class="primary-flow-nav" aria-label="Primary workflow">
           <a href="#/jobs/dashboard" data-jobs-route-link="dashboard">Dashboard</a>
           <a href="#/jobs/opportunity" data-jobs-route-link="opportunity">Opportunity Review</a>
-          <a href="#/jobs/studio" data-jobs-route-link="studio">Application Studio</a>
+          <a href="#/jobs/studio" data-jobs-route-link="studio">Create Packet</a>
           <a href="#/jobs/tracker" data-jobs-route-link="tracker">Tracker</a>
-          <a href="#professional-experience">Professional Experience</a>
+          <a href="#profile">Profile</a>
           <a href="#/jobs/settings" data-jobs-route-link="settings">Settings</a>
         </nav>
       </header>
@@ -68,16 +68,16 @@
                 <small>Paste, structure, and decide.</small>
               </a>
               <a href="#/jobs/studio" data-selected-job-route="studio">
-                <span>Application Studio</span>
+                <span>Create Packet</span>
                 <small>Resume, cover letter, notes.</small>
               </a>
               <a href="#/jobs/tracker">
                 <span>Tracker</span>
                 <small>Status and follow-up.</small>
               </a>
-              <a href="#professional-experience">
-                <span>Professional Experience</span>
-                <small>Achievements, skills, and work stories.</small>
+              <a href="#profile">
+                <span>Profile</span>
+                <small>Reusable background, proof, and preferences.</small>
               </a>
               <a href="#/jobs/settings">
                 <span>Settings / Demo Data</span>
@@ -95,7 +95,7 @@
                 <h2>Opportunity Review</h2>
                 <p class="support-copy">Paste a job posting to assess fit, extract key requirements, and identify how to position your experience.</p>
               </div>
-              <a class="secondary-button nav-link-button" href="#/jobs/studio" data-selected-job-route="studio">Open Application Studio</a>
+              <a class="secondary-button nav-link-button" href="#/jobs/studio" data-selected-job-route="studio">Create Packet</a>
             </div>
             <form id="add-job-form" class="input-panel flat-panel">
               <div class="form-grid">
@@ -189,7 +189,7 @@
               </div>
               <div class="button-row">
                 <a class="secondary-button nav-link-button" href="#/jobs/opportunity" data-selected-job-route="opportunity">Opportunity Review</a>
-                <a class="secondary-button nav-link-button" href="#/jobs/studio" data-selected-job-route="studio">Application Studio</a>
+                <a class="secondary-button nav-link-button" href="#/jobs/studio" data-selected-job-route="studio">Create Packet</a>
                 <a class="secondary-button nav-link-button" href="#/jobs/tracker">Tracker</a>
               </div>
             </div>
@@ -229,7 +229,7 @@
           <div class="section-block first-section">
             <div class="panel-header compact-header">
               <div>
-                <h2>Application Studio</h2>
+                <h2>Create Packet</h2>
                 <p class="support-copy">Build and review the resume, cover letter, notes, and readiness checklist for one selected opportunity.</p>
               </div>
               <a class="secondary-button nav-link-button" href="#/jobs/opportunity" data-selected-job-route="opportunity">Back to Opportunity Review</a>
@@ -253,7 +253,7 @@
           </div>
           <div class="section-block">
             <h2>Demo Data / Local Testing</h2>
-            <p class="support-copy">Use sample opportunities and a demo Professional Experience profile to test Dashboard, Tracker, Opportunity Review, and Application Studio.</p>
+            <p class="support-copy">Use sample opportunities and a demo Profile to test Dashboard, Tracker, Opportunity Review, and Create Packet.</p>
             <div class="button-row">
               <button type="button" class="secondary-button" data-load-demo-data>Load Sample Data</button>
               <button type="button" class="secondary-button" data-clear-demo-data>Clear Demo Data</button>
@@ -264,18 +264,26 @@
         <p id="jobs-applied-status" class="status-message"></p>
       </section>
 
-      <section class="vault-panel" id="profile-story-bank" aria-label="Professional Experience Editor">
+      <section class="vault-panel" id="profile" aria-label="Profile Editor">
         <span id="professional-experience"></span>
         <div class="panel-header">
           <div>
-            <p class="eyebrow">Professional Experience</p>
-            <h2>Your background and work examples</h2>
-            <p class="support-copy">Capture your background, strengths, accomplishments, and work examples so NextMove can tailor resumes, cover letters, and interview prep.</p>
+            <p class="eyebrow">Profile</p>
+            <h2>Your reusable career knowledge base</h2>
+            <p class="support-copy">Enter professional information once so NextMove can reuse it for opportunities, fit analysis, resumes, cover letters, and packets.</p>
           </div>
           <div class="button-row">
-            <button type="button" id="save-vault">Save Experience</button>
+            <button type="button" id="save-vault">Save Profile</button>
             <button type="button" id="export-vault" class="secondary-button">Export JSON</button>
           </div>
+        </div>
+
+        <div class="section-block first-section">
+          <h2>Professional Summary</h2>
+          <label>
+            Summary
+            <textarea id="profile-summary" class="profile-compact-textarea" placeholder="A reusable summary of your scope, strengths, domains, and the kind of impact you want future materials to emphasize."></textarea>
+          </label>
         </div>
 
         <div class="form-grid">
@@ -345,6 +353,52 @@
             <input id="accomplishment-input" type="text" placeholder="Example: Improved team planning rhythm and reduced delivery risk.">
             <button type="button" id="add-accomplishment">Add Accomplishment</button>
             <ul id="accomplishments-list"></ul>
+          </div>
+        </div>
+
+        <div class="three-column">
+          <div class="section-block">
+            <h2>Metrics</h2>
+            <input id="metric-input" type="text" placeholder="Example: Reduced cycle time by 18%.">
+            <button type="button" id="add-metric">Add Metric</button>
+            <ul id="metrics-list"></ul>
+          </div>
+
+          <div class="section-block">
+            <h2>Projects</h2>
+            <input id="project-input" type="text" placeholder="Example: Led CRM migration readiness plan.">
+            <button type="button" id="add-project">Add Project</button>
+            <ul id="projects-list"></ul>
+          </div>
+
+          <div class="section-block">
+            <h2>Stories</h2>
+            <input id="story-input" type="text" placeholder="Example: Turned an ambiguous stakeholder concern into a clear rollout plan.">
+            <button type="button" id="add-story">Add Story</button>
+            <ul id="stories-list"></ul>
+          </div>
+        </div>
+
+        <div class="three-column">
+          <div class="section-block">
+            <h2>Education</h2>
+            <input id="education-input" type="text" placeholder="Example: B.A. Communications, Example University">
+            <button type="button" id="add-education">Add Education</button>
+            <ul id="education-list"></ul>
+          </div>
+
+          <div class="section-block">
+            <h2>Certifications</h2>
+            <input id="certification-input" type="text" placeholder="Example: Certified ScrumMaster">
+            <button type="button" id="add-certification">Add Certification</button>
+            <ul id="certifications-list"></ul>
+          </div>
+
+          <div class="section-block">
+            <h2>Career Preferences</h2>
+            <input id="career-preference-input" type="text" placeholder="Example: Hybrid product operations roles in mission-driven teams.">
+            <button type="button" id="add-career-preference">Add Preference</button>
+            <ul id="career-preferences-list"></ul>
           </div>
         </div>
 

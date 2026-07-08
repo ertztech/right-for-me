@@ -59,8 +59,17 @@ function matchCareerVault(jobDescription, careerVault) {
     skills: scoreList(careerVault.skills, normalizedJob, jobTokens),
     tools: scoreList(careerVault.tools, normalizedJob, jobTokens),
     roles: scoreRoles(careerVault.roles, normalizedJob, jobTokens),
-    accomplishments: scoreList(careerVault.accomplishments, normalizedJob, jobTokens),
+    accomplishments: scoreList(profileEvidence(careerVault), normalizedJob, jobTokens),
   };
+}
+
+function profileEvidence(careerVault = {}) {
+  return [
+    ...(careerVault.accomplishments || []),
+    ...(careerVault.metrics || []),
+    ...(careerVault.projects || []),
+    ...(careerVault.stories || []),
+  ];
 }
 
 function scoreList(items = [], jobText, jobTokens) {

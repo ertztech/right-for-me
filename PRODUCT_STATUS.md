@@ -13,7 +13,7 @@ The product is meant to help a user answer two practical questions:
 1. Is this opportunity right for me?
 2. How do I show that I am right for it using real evidence?
 
-NextMove should keep recommendations honest, grounded in the Professional Experience, and useful for deciding the next action.
+NextMove should keep recommendations honest, grounded in the Profile, and useful for deciding the next action.
 
 ## Current Product Phase
 
@@ -25,9 +25,9 @@ The current product is a local-first prototype with browser localStorage persist
 
 - Dashboard
 - Opportunity Review
-- Application Studio
+- Create Packet
 - Tracker
-- Professional Experience
+- Profile
 - Settings
 - Demo / Local Testing Support
 
@@ -35,9 +35,9 @@ The current product is a local-first prototype with browser localStorage persist
 
 - Dashboard: command center for orientation, compact progress, recent work, and the next best action.
 - Opportunity Review: analyze job postings, assess fit, extract requirements, and clarify positioning.
-- Application Studio: prepare one selected opportunity's application packet, including resume, cover letter, notes, and readiness.
+- Create Packet: prepare one selected opportunity's application packet, including resume, cover letter, notes, and readiness.
 - Tracker: manage pipeline status, dates, follow-ups, and application movement.
-- Professional Experience: maintain background, achievements, skills, tools, and work stories used by generated materials.
+- Profile: maintain reusable background, achievements, skills, tools, metrics, projects, work stories, education, certifications, and career preferences used by generated materials.
 - Settings: manage demo data and local testing options.
 
 ## Completed Capabilities
@@ -48,17 +48,17 @@ The current product is a local-first prototype with browser localStorage persist
 - Local rule-based Job Intelligence extraction from pasted posting text.
 - Fit Review support with fit score, Apply / Maybe / Skip recommendation, strengths, gaps, concerns, suggested positioning, and approval state.
 - Optional live AI Opportunity Review through the local Node server when `OPENAI_API_KEY` is configured.
-- Application Studio as a selected-opportunity packet workspace for reviewing job details, readiness checklist, status, follow-up fields, job intelligence, fit review, resume drafts, cover letter drafts, and packet notes.
-- Deterministic local resume generation from the selected opportunity, Job Intelligence, Fit Review, Professional Experience, background notes, and existing application information.
-- Cover letter generation and editable cover letter draft support grounded in Professional Experience data and the job posting.
+- Create Packet as a selected-opportunity workspace for reviewing job details, readiness checklist, status, follow-up fields, job intelligence, fit review, resume drafts, cover letter drafts, and packet notes.
+- Deterministic local resume generation from the selected opportunity, Job Intelligence, Fit Review, Profile, background notes, and existing application information.
+- Cover letter generation and editable cover letter draft support grounded in Profile data and the job posting.
 - Application packet notes and markdown preview helpers for resume, cover letter, and application notes.
 - Tracker view with application status updates and follow-up visibility.
-- Professional Experience support including person fields, roles, skills, tools, accomplishments, saving, loading, and export.
+- Profile support including person fields, professional summary, roles, skills, tools, accomplishments, metrics, projects, stories, education, certifications, career preferences, saving, loading, and export.
 - Demo / Local Testing Support with a Dashboard `Load Sample Data` start option when no jobs exist, plus `Load Sample Data` and `Clear Demo Data` controls in Settings.
-- Demo data seeding for three realistic fictional target-role opportunities, sample Professional Experience evidence, posting text, job intelligence, fit review, resume drafts, cover letter drafts, interview prep, and follow-up fields.
+- Demo data seeding for three realistic fictional target-role opportunities, sample Profile evidence, posting text, job intelligence, fit review, resume drafts, cover letter drafts, interview prep, and follow-up fields.
 - Demo data clearing that removes only demo-created records where possible and preserves non-demo user data.
-- Visual Design System v1 with a stronger modern SaaS shell, shared CSS tokens, restrained NextMove surfaces, button states, form styling, status badges, focus states, and polished Dashboard / Tracker / Application Studio cards.
-- localStorage-based persistence for browser job records and Professional Experience data.
+- Visual Design System v1 with a stronger modern SaaS shell, shared CSS tokens, restrained NextMove surfaces, button states, form styling, status badges, focus states, and polished Dashboard / Tracker / Create Packet cards.
+- localStorage-based persistence for browser job records and Profile data.
 - Reusable action feedback for important buttons with working, success, and failure states.
 - Automated helper tests for job intelligence extraction, fit review prefilling, AI output validation, resume generation, action feedback, and demo data seeding.
 
@@ -66,21 +66,21 @@ The current product is a local-first prototype with browser localStorage persist
 
 Make NextMove easier to test, demo, and extend locally.
 
-The demo data seeder is part of this outcome. It gives developers and product owners a fast way to load realistic records, verify Dashboard and Tracker behavior, open seeded records in Opportunity Review and Application Studio, and clear demo records without destroying real local data.
+The demo data seeder is part of this outcome. It gives developers and product owners a fast way to load realistic records, verify Dashboard and Tracker behavior, open seeded records in Opportunity Review and Create Packet, and clear demo records without destroying real local data.
 
 ## Recommended Next Outcomes
 
 1. Improve application workflow completeness.
    Make the saved-job path feel more complete from Opportunity Review through applied status, follow-up, and next action.
 
-2. Strengthen Application Studio.
+2. Strengthen Create Packet.
    Continue improving packet readiness, draft review ergonomics, and handoff from generated content into submitted applications.
 
 3. Improve AI coaching and recommendations.
-   Expand recommendation quality for fit, positioning, interview prep, and next actions while keeping outputs grounded in Professional Experience evidence.
+   Expand recommendation quality for fit, positioning, interview prep, and next actions while keeping outputs grounded in Profile evidence.
 
 4. Add import/export or backup support.
-   Give local-first users a safe way to move or back up job records and Professional Experience data before cloud persistence exists.
+   Give local-first users a safe way to move or back up job records and Profile data before cloud persistence exists.
 
 5. Prepare for hosted/public beta.
    Stabilize the local workflow, clarify setup, review UX gaps, and identify what must change before public hosting.
@@ -124,15 +124,15 @@ PR titles should describe the outcome in plain language, such as:
 
 - `Add demo data seeder for local testing`
 - `Add product status and roadmap source of truth`
-- `Polish Application Studio seeded-record experience`
+- `Polish Create Packet seeded-record experience`
 
 ## Next Suggested Issue
 
-Improve Application Studio seeded-record experience.
+Improve Create Packet seeded-record experience.
 
 Suggested scope:
 
-- Make seeded records easy to open directly from Dashboard, Tracker, and Application Studio.
+- Make seeded records easy to open directly from Dashboard, Tracker, and Create Packet.
 - Ensure seeded resume and cover letter drafts are immediately visible and clearly editable.
 - Clarify packet readiness for seeded records with saved drafts, fit review, and follow-up notes.
 - Verify action buttons behave consistently when a seeded record is selected.

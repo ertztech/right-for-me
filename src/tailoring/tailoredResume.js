@@ -4,13 +4,19 @@ function buildTailoredResume(careerVault, relevanceSignals) {
     skills: prioritizeList(careerVault.skills, relevanceSignals.skills),
     tools: prioritizeList(careerVault.tools, relevanceSignals.tools),
     roles: prioritizeRoles(careerVault.roles, relevanceSignals.roles),
-    accomplishments: prioritizeList(
-      careerVault.accomplishments,
-      relevanceSignals.accomplishments
-    ),
+    accomplishments: prioritizeList(profileEvidence(careerVault), relevanceSignals.accomplishments),
   };
 
   return RightForMeResumeBuilder.buildResume(tailoredVault);
+}
+
+function profileEvidence(careerVault = {}) {
+  return [
+    ...(careerVault.accomplishments || []),
+    ...(careerVault.metrics || []),
+    ...(careerVault.projects || []),
+    ...(careerVault.stories || []),
+  ];
 }
 
 function prioritizeList(items = [], signals = []) {
