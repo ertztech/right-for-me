@@ -74,6 +74,22 @@ Longer term, the dedicated board-builder repo can become the reusable home for:
 
 When that happens, RightForMe should keep the product-specific template and docs, while the shared implementation lives in board-builder.
 
+## Approved Proposal Handoff
+
+Planning artifacts in `.ertztech` may produce proposed Trello changes, but they do not execute Trello updates automatically.
+
+Use this handoff rule:
+
+1. Product Owner creates a proposal artifact.
+2. A human explicitly approves it.
+3. Only then may someone apply the change manually or by using the existing tooling in `tools/trello/`.
+
+Current tooling notes:
+
+- `tools/trello/board_builder.py` is best suited for approved board-template setup or template-driven updates.
+- `tools/trello/trello.py` is the existing API client and should be reused if approved Trello execution support expands later.
+- Do not add a second Trello execution path from `.ertztech` planning docs.
+
 ## Card Rule
 
 Every buildable Trello card should include:

@@ -10,6 +10,7 @@ Focus:
 - Ambiguous instructions
 - Build/test commands
 - Safe, small commits
+- Handoff completeness
 
 Do:
 - Identify what Codex needs before coding.
@@ -17,6 +18,7 @@ Do:
 - Recommend the smallest implementation path.
 - List likely files to inspect or modify.
 - Produce a clean implementation brief.
+- Pressure-test the implementation package before coding starts.
 
 Do not:
 - Redefine product value.
@@ -29,5 +31,6 @@ Output:
 - Likely files affected
 - Clarifying assumptions
 - Suggested task split
+- Handoff gaps
 - Codex-ready prompt
 - Commands to run after changes

@@ -3,6 +3,9 @@
 Purpose:
 Turn a messy list of ideas, bugs, and goals into a realistic, sized development plan.
 
+Status:
+Useful when a sprint-style pass helps, but `implementation-planning.md` is the preferred workflow for the founder + ChatGPT + Codex operating flow.
+
 Referenced roles:
 - ../agents/facilitator-orchestrator.md
 - ../agents/product-owner.md
@@ -20,19 +23,20 @@ Process:
 4. Engineering Manager checks sequencing, PR size, and handoff quality.
 5. Implementation Engineer checks whether Codex can execute the task cleanly.
 6. QA identifies test cases, edge cases, and acceptance gaps.
-7. Delivery Coach sizes the work and checks predictability.
+7. Delivery Coach estimates implementation complexity and checks predictability.
 8. Facilitator summarizes agreements, disagreements, tradeoffs, assumptions, and recommendations.
 
 Rules:
 - Keep scope small.
 - Prefer 1 to 3 issues per cycle.
-- Split anything larger than 5 points.
+- Split anything estimated as `XL`.
 - Flag unclear work instead of pretending it is ready.
 - Do not send Codex vague work.
 - Produce a Codex-ready prompt only for approved, ready work.
 - Keep unresolved disagreements visible.
 - Use the Parking Lot for worthwhile topics that do not belong in the current sprint decision.
 - Add a Not My Job section when someone tries to pull unrelated work into planning.
+- Prefer implementation complexity over story points.
 
 ## Scope Control
 
@@ -47,9 +51,9 @@ Before approving a combined issue, answer:
 - Can the work be tested with one clear QA checklist?
 - Can the PR be reviewed in under 15 minutes?
 - Can the work be reverted safely?
-- Is there a clear “no behavior changes” constraint?
+- Is there a clear "no behavior changes" constraint?
 
-If the answer to two or more is “no,” recommend splitting the work.
+If the answer to two or more is "no," recommend splitting the work.
 
 ### Safe Combined Issue Rules
 
@@ -79,7 +83,7 @@ Required Output:
 4. Agreements
 5. Disagreements
 6. Selected work
-7. Sizing and confidence
+7. Implementation complexity and confidence
 8. Assumptions
 9. Risks and dependencies
 10. Decision-required items
