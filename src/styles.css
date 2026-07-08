@@ -338,6 +338,10 @@ textarea {
   min-height: 110px;
 }
 
+.profile-compact-textarea {
+  min-height: 132px;
+}
+
 input:focus,
 textarea:focus,
 select:focus {

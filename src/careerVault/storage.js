@@ -7,10 +7,17 @@ const defaultVault = {
     email: "",
     phone: "",
   },
+  professionalSummary: "",
   roles: [],
   skills: [],
   tools: [],
   accomplishments: [],
+  metrics: [],
+  projects: [],
+  stories: [],
+  education: [],
+  certifications: [],
+  careerPreferences: [],
 };
 
 function createDefaultVault() {
@@ -25,21 +32,47 @@ function loadVault() {
   }
 
   try {
-    return {
-      ...createDefaultVault(),
-      ...JSON.parse(saved),
-    };
+    return normalizeVault(JSON.parse(saved));
   } catch {
     return createDefaultVault();
   }
 }
 
 function saveVault(vault) {
-  localStorage.setItem(VAULT_STORAGE_KEY, JSON.stringify(vault, null, 2));
+  localStorage.setItem(VAULT_STORAGE_KEY, JSON.stringify(normalizeVault(vault), null, 2));
+}
+
+function normalizeVault(vault = {}) {
+  const base = createDefaultVault();
+
+  return {
+    ...base,
+    ...vault,
+    person: {
+      ...base.person,
+      ...(vault.person || {}),
+    },
+    roles: normalizeArray(vault.roles),
+    skills: normalizeArray(vault.skills),
+    tools: normalizeArray(vault.tools),
+    accomplishments: normalizeArray(vault.accomplishments),
+    metrics: normalizeArray(vault.metrics),
+    projects: normalizeArray(vault.projects),
+    stories: normalizeArray(vault.stories),
+    education: normalizeArray(vault.education),
+    certifications: normalizeArray(vault.certifications),
+    careerPreferences: normalizeArray(vault.careerPreferences),
+    professionalSummary: String(vault.professionalSummary || ""),
+  };
+}
+
+function normalizeArray(value) {
+  return Array.isArray(value) ? value : [];
 }
 
 window.RightForMeCareerVaultStorage = {
   loadVault,
   saveVault,
   createDefaultVault,
+  normalizeVault,
 };

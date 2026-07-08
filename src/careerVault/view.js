@@ -3,6 +3,7 @@ function populateVaultForm(vault, vaultFields) {
   vaultFields.location.value = vault.person.location || "";
   vaultFields.email.value = vault.person.email || "";
   vaultFields.phone.value = vault.person.phone || "";
+  vaultFields.professionalSummary.value = vault.professionalSummary || "";
 }
 
 function renderVaultLists(vault, lists, onRemove) {
@@ -10,6 +11,12 @@ function renderVaultLists(vault, lists, onRemove) {
   renderSimpleList(vault.skills, lists.skills, "skills", onRemove);
   renderSimpleList(vault.tools, lists.tools, "tools", onRemove);
   renderSimpleList(vault.accomplishments, lists.accomplishments, "accomplishments", onRemove);
+  renderSimpleList(vault.metrics, lists.metrics, "metrics", onRemove);
+  renderSimpleList(vault.projects, lists.projects, "projects", onRemove);
+  renderSimpleList(vault.stories, lists.stories, "stories", onRemove);
+  renderSimpleList(vault.education, lists.education, "education", onRemove);
+  renderSimpleList(vault.certifications, lists.certifications, "certifications", onRemove);
+  renderSimpleList(vault.careerPreferences, lists.careerPreferences, "careerPreferences", onRemove);
 }
 
 function renderRoles(roles, node, onRemove) {

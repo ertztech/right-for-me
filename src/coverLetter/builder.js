@@ -19,7 +19,12 @@ function buildEvidence(careerVault, relevanceSignals) {
     skills: prioritizeValues(relevanceSignals.skills).slice(0, 3),
     tools: prioritizeValues(relevanceSignals.tools).slice(0, 2),
     roles: prioritizeRoles(careerVault.roles, relevanceSignals.roles).slice(0, 2),
-    accomplishments: prioritizeValues(relevanceSignals.accomplishments).slice(0, 3),
+    accomplishments: [
+      ...prioritizeValues(relevanceSignals.accomplishments),
+      ...(careerVault.metrics || []),
+      ...(careerVault.projects || []),
+      ...(careerVault.stories || []),
+    ].slice(0, 3),
   };
 }
 
@@ -27,7 +32,7 @@ function buildOpening(evidence) {
   const strengths = formatList([...evidence.skills, ...evidence.tools].slice(0, 4));
 
   if (strengths) {
-    return `I am excited to apply for this opportunity. The role connects well with Professional Experience evidence around ${strengths}, and I would welcome the chance to bring that experience to your team.`;
+    return `I am excited to apply for this opportunity. The role connects well with Profile evidence around ${strengths}, and I would welcome the chance to bring that experience to your team.`;
   }
 
   return "I am excited to apply for this opportunity. I would welcome the chance to bring my documented experience, curiosity, and steady follow-through to your team.";
@@ -44,7 +49,7 @@ function buildBody(evidence) {
   if (skillsParagraph) paragraphs.push(skillsParagraph);
 
   if (!paragraphs.length) {
-    paragraphs.push("My Professional Experience profile is still growing, but I am interested in roles where I can contribute thoughtfully, learn quickly, and communicate clearly.");
+    paragraphs.push("My Profile is still growing, but I am interested in roles where I can contribute thoughtfully, learn quickly, and communicate clearly.");
   }
 
   return paragraphs;
@@ -60,11 +65,11 @@ function buildRoleParagraph(roles) {
   const summary = String(role.summary || "").trim();
 
   if (heading && summary) {
-    return `In my work as ${heading}, my Professional Experience summary notes: ${sentenceFragment(summary)}`;
+    return `In my work as ${heading}, my Profile notes: ${sentenceFragment(summary)}`;
   }
 
   if (heading) {
-    return `My Professional Experience includes experience as ${heading}, which I would be glad to connect to the needs of this role in more detail.`;
+    return `My Profile includes experience as ${heading}, which I would be glad to connect to the needs of this role in more detail.`;
   }
 
   return summary ? `My documented experience includes this summary: ${sentenceFragment(summary)}` : "";

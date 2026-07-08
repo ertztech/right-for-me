@@ -12,25 +12,37 @@ function buildResume(careerVault) {
     skills: careerVault.skills || [],
     tools: careerVault.tools || [],
     experience: careerVault.roles || [],
-    accomplishments: careerVault.accomplishments || [],
+    accomplishments: [
+      ...(careerVault.accomplishments || []),
+      ...(careerVault.metrics || []),
+      ...(careerVault.projects || []),
+    ],
   };
 }
 
 function buildSummary(careerVault) {
+  if (String(careerVault.professionalSummary || "").trim()) {
+    return careerVault.professionalSummary.trim();
+  }
+
   const roles = careerVault.roles || [];
   const skills = uniqueCleanList(careerVault.skills);
   const tools = uniqueCleanList(careerVault.tools);
-  const accomplishments = uniqueCleanList(careerVault.accomplishments);
+  const accomplishments = uniqueCleanList([
+    ...(careerVault.accomplishments || []),
+    ...(careerVault.metrics || []),
+    ...(careerVault.projects || []),
+  ]);
   const sentences = [];
 
   if (!roles.length && !skills.length && !tools.length && !accomplishments.length) {
-    return "Professional summary will become more specific as roles, skills, tools, and accomplishments are added to Professional Experience.";
+    return "Professional summary will become more specific as roles, skills, tools, and accomplishments are added to Profile.";
   }
 
   if (roles.length) {
     sentences.push(roleSummarySentence(roles));
   } else {
-    sentences.push("Professional with experience documented in Professional Experience.");
+    sentences.push("Professional with experience documented in Profile.");
   }
 
   const domainAreas = representedDomains(careerVault);
@@ -40,7 +52,7 @@ function buildSummary(careerVault) {
   }
 
   if (hasLeadershipExperience(careerVault)) {
-    sentences.push("Professional Experience includes leadership experience through documented roles, skills, or accomplishments.");
+    sentences.push("Profile includes leadership experience through documented roles, skills, or accomplishments.");
   }
 
   if (accomplishments.length) {
@@ -92,6 +104,9 @@ function representedDomains(careerVault) {
     ...(careerVault.skills || []),
     ...(careerVault.tools || []),
     ...(careerVault.accomplishments || []),
+    ...(careerVault.metrics || []),
+    ...(careerVault.projects || []),
+    ...(careerVault.stories || []),
   ].join(" ").toLowerCase();
 
   const domains = [
@@ -125,6 +140,9 @@ function hasLeadershipExperience(careerVault) {
     ]),
     ...(careerVault.skills || []),
     ...(careerVault.accomplishments || []),
+    ...(careerVault.metrics || []),
+    ...(careerVault.projects || []),
+    ...(careerVault.stories || []),
   ].join(" ").toLowerCase();
 
   return leadershipTerms.some((term) => text.includes(term));

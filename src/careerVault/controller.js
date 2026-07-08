@@ -4,6 +4,7 @@ function initializeCareerVaultController(vaultStore) {
     location: document.querySelector("#vault-location"),
     email: document.querySelector("#vault-email"),
     phone: document.querySelector("#vault-phone"),
+    professionalSummary: document.querySelector("#profile-summary"),
   };
 
   const roleFields = {
@@ -19,6 +20,12 @@ function initializeCareerVaultController(vaultStore) {
     skills: document.querySelector("#skills-list"),
     tools: document.querySelector("#tools-list"),
     accomplishments: document.querySelector("#accomplishments-list"),
+    metrics: document.querySelector("#metrics-list"),
+    projects: document.querySelector("#projects-list"),
+    stories: document.querySelector("#stories-list"),
+    education: document.querySelector("#education-list"),
+    certifications: document.querySelector("#certifications-list"),
+    careerPreferences: document.querySelector("#career-preferences-list"),
   };
 
   const status = document.querySelector("#vault-status");
@@ -29,7 +36,7 @@ function initializeCareerVaultController(vaultStore) {
     RightForMeCareerVaultView.renderVaultLists(vault, lists, removeItem);
   }
 
-  function persist(message = "Professional Experience saved.") {
+  function persist(message = "Profile saved.") {
     updatePersonFromForm();
     vaultStore.saveVault();
     RightForMeCareerVaultView.setVaultStatus(status, message);
@@ -44,6 +51,7 @@ function initializeCareerVaultController(vaultStore) {
       email: vaultFields.email.value.trim(),
       phone: vaultFields.phone.value.trim(),
     };
+    vault.professionalSummary = vaultFields.professionalSummary.value.trim();
   }
 
   function syncFromForm() {
@@ -104,7 +112,7 @@ function initializeCareerVaultController(vaultStore) {
   }
 
   function exportVault() {
-    persist("Professional Experience exported.");
+    persist("Profile exported.");
 
     const vault = vaultStore.getVault();
     const blob = new Blob([JSON.stringify(vault, null, 2)], {
@@ -115,7 +123,7 @@ function initializeCareerVaultController(vaultStore) {
     const link = document.createElement("a");
 
     link.href = url;
-    link.download = "career-vault.json";
+    link.download = "nextmove-profile.json";
     link.click();
 
     URL.revokeObjectURL(url);
@@ -127,6 +135,12 @@ function initializeCareerVaultController(vaultStore) {
   document.querySelector("#add-skill").addEventListener("click", () => addSimpleItem("skills", "#skill-input"));
   document.querySelector("#add-tool").addEventListener("click", () => addSimpleItem("tools", "#tool-input"));
   document.querySelector("#add-accomplishment").addEventListener("click", () => addSimpleItem("accomplishments", "#accomplishment-input"));
+  document.querySelector("#add-metric").addEventListener("click", () => addSimpleItem("metrics", "#metric-input"));
+  document.querySelector("#add-project").addEventListener("click", () => addSimpleItem("projects", "#project-input"));
+  document.querySelector("#add-story").addEventListener("click", () => addSimpleItem("stories", "#story-input"));
+  document.querySelector("#add-education").addEventListener("click", () => addSimpleItem("education", "#education-input"));
+  document.querySelector("#add-certification").addEventListener("click", () => addSimpleItem("certifications", "#certification-input"));
+  document.querySelector("#add-career-preference").addEventListener("click", () => addSimpleItem("careerPreferences", "#career-preference-input"));
 
   render();
 
