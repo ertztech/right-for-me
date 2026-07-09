@@ -1088,20 +1088,39 @@ function renderCareerJourneyChapterOneInteraction() {
 }
 
 function renderCareerJourneyReflectionState(response) {
+  const chapterTwoPreview = renderCareerJourneyChapterTwoPreview();
+
   if (!response) {
     return `
-      <div class="journey-confirmation-card" aria-live="polite">
-        <strong>Reflection saved for this session</strong>
-        <p>You can keep going when you are ready. Chapter 1 is now in motion, even if you are still finding the words.</p>
+      <div class="journey-confirmation-stack">
+        <div class="journey-confirmation-card" aria-live="polite">
+          <strong>Reflection saved for this session</strong>
+          <p>You can keep going when you are ready. Chapter 1 is now in motion, even if you are still finding the words.</p>
+        </div>
+        ${chapterTwoPreview}
       </div>
     `;
   }
 
   return `
-    <div class="journey-confirmation-card" aria-live="polite">
-      <strong>Reflection saved for this session</strong>
-      <p>Your current focus:</p>
-      <blockquote class="journey-reflection-echo">${escapeHtml(response)}</blockquote>
+    <div class="journey-confirmation-stack">
+      <div class="journey-confirmation-card" aria-live="polite">
+        <strong>Reflection saved for this session</strong>
+        <p>Your current focus:</p>
+        <blockquote class="journey-reflection-echo">${escapeHtml(response)}</blockquote>
+      </div>
+      ${chapterTwoPreview}
+    </div>
+  `;
+}
+
+function renderCareerJourneyChapterTwoPreview() {
+  return `
+    <div class="journey-chapter-preview-card" aria-label="Chapter 2 preview">
+      <small>Next up: Chapter 2</small>
+      <h4>Your Career Timeline</h4>
+      <p>When you are ready, we'll walk through the roles, projects, and seasons that shaped your work. You do not need perfect dates yet. We are just starting to put the story in order.</p>
+      <button type="button" class="secondary-button" disabled aria-disabled="true">Chapter 2 coming next</button>
     </div>
   `;
 }
