@@ -948,6 +948,12 @@ button[data-clear-demo-data]:hover {
   margin-bottom: 6px;
 }
 
+.journey-confirmation-stack {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
 .journey-reflection-echo {
   border-left: 3px solid rgba(15, 118, 110, 0.3);
   margin: var(--space-2) 0 0;
@@ -955,6 +961,38 @@ button[data-clear-demo-data]:hover {
   color: var(--ink-soft);
   font-size: 0.98rem;
   line-height: 1.55;
+}
+
+.journey-chapter-preview-card {
+  border: 1px solid rgba(15, 118, 110, 0.16);
+  border-radius: var(--radius);
+  padding: var(--space-3);
+  background: linear-gradient(180deg, rgba(248, 251, 249, 0.98), #fff);
+  box-shadow: var(--shadow-sm);
+  animation: journey-reveal 220ms ease-out;
+}
+
+.journey-chapter-preview-card small {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--green);
+  font-size: 0.78rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.journey-chapter-preview-card h4 {
+  margin: 0 0 8px;
+}
+
+.journey-chapter-preview-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.journey-chapter-preview-card button {
+  margin-top: var(--space-3);
 }
 
 @keyframes journey-reveal {
@@ -971,7 +1009,8 @@ button[data-clear-demo-data]:hover {
 
 @media (prefers-reduced-motion: reduce) {
   .journey-placeholder,
-  .journey-confirmation-card {
+  .journey-confirmation-card,
+  .journey-chapter-preview-card {
     animation: none;
   }
 }
