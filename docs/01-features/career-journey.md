@@ -49,6 +49,17 @@ This sequence is directional for planning and should stay flexible until the fir
 
 Motion is a reward for progress, not decoration. It should reinforce chapter completion, orientation, and confidence rather than add noise.
 
+## Voice And Tone
+
+Career Journey messaging should feel calm, encouraging, and human.
+
+- It should acknowledge progress without pressure.
+- It should help users feel safe, understood, and in motion, even when their answers are imperfect or incomplete.
+
+Tone example to preserve:
+
+> Reflection saved for this session. You can keep going when you are ready. Chapter 1 is now in motion, even if you are still finding the words.
+
 ## Relationship To Career Brain
 
 Career Journey collects and shapes information through the guided experience. Career Brain owns the durable career data that survives beyond any single session or UI flow. Career Journey should help the user create clarity; Career Brain should preserve the result as reusable source-of-truth material.
