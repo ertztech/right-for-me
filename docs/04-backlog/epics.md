@@ -4,9 +4,9 @@ Status options: `Idea`, `Discovery`, `Planning`, `Ready for Issue`, `Active`, `D
 
 | Epic | Status | Notes |
 | --- | --- | --- |
-| Developer Experience Foundation | Active | Repo-first operating system, workflows, and documentation structure. |
+| Developer Experience Foundation | Done | Repo-first operating system, workflows, and documentation structure. |
 | Career Journey | Planning | Interview-first, chapter-based experience definition. |
-| Career Brain | Discovery | Reusable source of truth for stories, evidence, and preferences. |
+| Career Brain | Planning | Reusable source of truth for stories, evidence, and preferences, now being planned as a dependency for Career Journey. |
 | Dashboard | Idea | Launchpad for next actions and active opportunities. |
 | Opportunity Review | Idea | Intake, fit analysis, and honest apply or skip decisions. |
 | Application Studio | Idea | Opportunity-specific outputs and positioning assets. |
