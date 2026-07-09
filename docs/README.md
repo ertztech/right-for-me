@@ -9,6 +9,7 @@ This folder is the repo-first source of truth for product planning, backlog, arc
 - Read [Product Operating System](03-process/product-operating-system.md) for how the team works.
 - Use [Facilitator Guide](03-process/facilitator-guide.md) when running planning or review sessions.
 - Draft handoffs with [Implementation Package Template](03-process/implementation-package-template.md).
+- Run retros with [Implementation Retro](03-process/implementation-retro.md).
 - Run operational workflows from [.ertztech/workflows](../.ertztech/workflows).
 
 ## Documentation Map
@@ -23,7 +24,7 @@ This folder is the repo-first source of truth for product planning, backlog, arc
 
 Planning lives in this repo. The normal path is:
 
-Idea -> Repo Backlog -> Implementation Planning -> Implementation Package -> GitHub Issue -> Codex -> Implementation Review -> Merge -> Docs and Backlog Updated
+Idea -> Repo Backlog -> Backlog Review -> Implementation Planning -> Implementation Package -> GitHub Issue -> Codex -> Implementation Review -> PR -> Merge -> Implementation Retro -> Backlog / Docs / Process Updates
 
 ## Legacy And Supporting Docs
 
@@ -39,4 +40,4 @@ These docs still contain useful detail and should be referenced as supporting ma
 
 ## ChatGPT Kickoffs
 
-For reusable session prompts, start in [Process Docs](03-process/README.md).
+For reusable planning, review, and retro session prompts, start in [Process Docs](03-process/README.md).

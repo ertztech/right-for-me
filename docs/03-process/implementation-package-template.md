@@ -21,6 +21,14 @@ Use this template to create the required implementation handoff before opening a
 
 ## Role Perspectives
 
+- Product Owner:
+- Architect:
+- Engineering Manager:
+- Software Engineer:
+- QA:
+- Delivery Coach / Facilitator:
+- Founder:
+
 ## Documentation Updates Required
 
 ## Architecture Notes
@@ -56,6 +64,12 @@ Use this template to create the required implementation handoff before opening a
 - [ ] Handoff context is complete
 - [ ] Acceptance criteria are clear
 - [ ] Out-of-scope items are explicit
+
+### Software Engineer Review
+- [ ] Implementation approach fits existing code patterns
+- [ ] File/module boundaries are reasonable
+- [ ] Testability has been considered
+- [ ] No unnecessary code complexity is being introduced
 
 ### QA Review
 - [ ] Acceptance criteria are testable

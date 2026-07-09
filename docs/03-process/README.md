@@ -12,6 +12,7 @@ This section is the human-readable operating layer for how planning turns into i
 - [Product Operating System](product-operating-system.md)
 - [Facilitator Guide](facilitator-guide.md)
 - [Implementation Package Template](implementation-package-template.md)
+- [Implementation Retro](implementation-retro.md)
 - [Workflow Improvements](workflow-improvements.md)
 
 ## ChatGPT Session Kickoffs
@@ -32,6 +33,7 @@ Use the team roles:
 - Product Owner
 - Architect
 - Engineering Manager
+- Software Engineer
 - QA
 - Delivery Coach
 
@@ -57,8 +59,37 @@ Use the team roles:
 - Product Owner
 - Architect
 - Engineering Manager
+- Software Engineer
 - QA
 - Delivery Coach
 
 Decide whether this is ready to merge, needs changes, or should create follow-up backlog items.
+```
+
+### Implementation Retro Kickoff
+
+```md
+We are running an Implementation Retro for NextMove.
+
+Use the workflow in .ertztech/workflows/implementation-retro.md.
+
+Also use docs/03-process/facilitator-guide.md to keep the session on track.
+
+Inputs:
+- Implementation Package:
+- GitHub Issue / PR:
+- Codex results:
+- Implementation Review notes:
+- Test results:
+- Merge outcome:
+
+Use the team roles:
+- Product Owner
+- Architect
+- Engineering Manager
+- Software Engineer
+- QA
+- Delivery Coach
+
+Identify what went well, what caused friction, and what should become backlog, technical debt, parking lot, or process improvement items.
 ```
