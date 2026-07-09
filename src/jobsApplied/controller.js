@@ -54,6 +54,8 @@ const CAREER_JOURNEY_CHAPTERS = [
 
 let selectedJobId = "";
 let careerJourneyStarted = false;
+let careerJourneyChapterOneResponse = "";
+let careerJourneyChapterOneSubmitted = false;
 
 function initializeJobsAppliedController() {
   const addJobForm = document.querySelector("#add-job-form");
@@ -1040,14 +1042,7 @@ function renderCareerJourney() {
           <span class="status-badge status-reviewing">${escapeHtml(progressLabel)}</span>
         </div>
         <p class="support-copy">${escapeHtml(currentChapter.description)}</p>
-        <div class="journey-placeholder">
-          <h4>Guided reflection placeholder</h4>
-          <p>This shell reserves space for the future guided conversation. In v1, the experience stays intentionally lightweight and uses local state only.</p>
-          <div class="journey-reflection-prompt">
-            <strong>Reflection prompt</strong>
-            <p>What feels most true about where you are in your career right now, and what do you want your next move to honor?</p>
-          </div>
-        </div>
+        ${renderCareerJourneyChapterOneInteraction()}
       </article>
       <aside class="journey-sidebar">
         <article class="journey-card">
@@ -1062,6 +1057,52 @@ function renderCareerJourney() {
         </article>
       </aside>
     </section>
+  `;
+}
+
+function renderCareerJourneyChapterOneInteraction() {
+  const submittedResponse = cleanValue(careerJourneyChapterOneResponse);
+  const actionLabel = careerJourneyChapterOneSubmitted ? "Update Reflection" : "Continue";
+
+  return `
+    <div class="journey-placeholder journey-placeholder-active">
+      <h4>Chapter 1 reflection</h4>
+      <p>This first interaction keeps the experience conversational and lightweight. Your response stays only in this current session for now.</p>
+      <form class="journey-reflection-form" data-career-journey-form>
+        <label class="journey-reflection-label">
+          What brings you to NextMove right now?
+          <textarea
+            name="chapterOneResponse"
+            class="journey-reflection-input"
+            rows="5"
+            placeholder="You might describe a transition, a question you are trying to answer, or the kind of next move you want to make."
+          >${escapeHtml(careerJourneyChapterOneResponse)}</textarea>
+        </label>
+        <div class="journey-action-row">
+          <button type="submit">${escapeHtml(actionLabel)}</button>
+        </div>
+      </form>
+      ${careerJourneyChapterOneSubmitted ? renderCareerJourneyReflectionState(submittedResponse) : ""}
+    </div>
+  `;
+}
+
+function renderCareerJourneyReflectionState(response) {
+  if (!response) {
+    return `
+      <div class="journey-confirmation-card" aria-live="polite">
+        <strong>Reflection saved for this session</strong>
+        <p>You can keep going when you are ready. Chapter 1 is now in motion, even if you are still finding the words.</p>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="journey-confirmation-card" aria-live="polite">
+      <strong>Reflection saved for this session</strong>
+      <p>Your current focus:</p>
+      <blockquote class="journey-reflection-echo">${escapeHtml(response)}</blockquote>
+    </div>
   `;
 }
 
@@ -1081,15 +1122,38 @@ function renderCareerJourneyChapterCard(chapter) {
 function bindCareerJourneyActions() {
   const journeyButton = document.querySelector("[data-start-career-journey]");
   if (!journeyButton || journeyButton.dataset.bound === "true") {
+  } else {
+    journeyButton.dataset.bound = "true";
+    journeyButton.addEventListener("click", () => {
+      careerJourneyStarted = true;
+      renderCareerJourney();
+      bindCareerJourneyActions();
+      setJobsStatus("Career Journey started. Chapter 1 is ready for guided reflection.", "success");
+    });
+  }
+
+  const journeyForm = document.querySelector("[data-career-journey-form]");
+  if (!journeyForm || journeyForm.dataset.bound === "true") {
     return;
   }
 
-  journeyButton.dataset.bound = "true";
-  journeyButton.addEventListener("click", () => {
+  journeyForm.dataset.bound = "true";
+  journeyForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    const response = cleanValue(journeyForm.elements.chapterOneResponse?.value);
     careerJourneyStarted = true;
+    careerJourneyChapterOneResponse = response;
+    careerJourneyChapterOneSubmitted = true;
+
     renderCareerJourney();
     bindCareerJourneyActions();
-    setJobsStatus("Career Journey started. Chapter 1 is ready for guided reflection.", "success");
+    setJobsStatus(
+      response
+        ? "Chapter 1 reflection captured for this session."
+        : "Chapter 1 reflection saved with an empty response. You can add more when you are ready.",
+      "success"
+    );
   });
 }
 
