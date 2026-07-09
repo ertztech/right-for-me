@@ -10,6 +10,7 @@ Status options: `Idea`, `Discovery`, `Planning`, `Ready for Issue`, `Active`, `D
 | Dashboard | Idea | Launchpad for next actions and active opportunities. |
 | Opportunity Review | Idea | Intake, fit analysis, and honest apply or skip decisions. |
 | Application Studio | Idea | Opportunity-specific outputs and positioning assets. |
+| Public Release Readiness | Idea | Future planning area for moving from local-only use toward public availability. |
 | AI Career Guide | Idea | Long-term coaching and decision support direction. |
 | Generated Outputs | Discovery | Resume, cover letter, interview prep, and related assets. |
 | Interview Prep | Idea | Support interview readiness from saved evidence. |

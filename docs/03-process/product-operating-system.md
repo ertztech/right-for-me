@@ -12,7 +12,7 @@ Repo docs are the source of truth for product planning, backlog, architecture, p
 
 ## Operating Flow
 
-Idea -> Repo Backlog -> Implementation Planning -> Implementation Package Drafted -> Pre-Implementation Review inside the package -> Implementation Package Approved -> GitHub Issue Finalized -> Codex Implementation -> Implementation Review -> Merge -> Docs and Backlog Updated
+Idea -> Repo Backlog -> Backlog Review -> Implementation Planning -> Implementation Package Drafted -> Pre-Implementation Review inside the package -> Implementation Package Approved -> GitHub Issue Finalized -> Codex Implementation -> Implementation Review -> PR -> Merge -> Implementation Retro -> Backlog / Docs / Process Updates
 
 ## Working Rules
 
@@ -26,6 +26,26 @@ Idea -> Repo Backlog -> Implementation Planning -> Implementation Package Drafte
 - Process improvements belong in the repo backlog, not in ad hoc chat memory.
 - [.ertztech/workflows](../../.ertztech/workflows) remains the operational workflow location and should stay aligned with these docs.
 - Codex should not receive implementation work until the Implementation Package has passed Pre-Implementation Review.
+- All changes go through a pull request before merging to `main`.
+- Small changes get small pull requests.
+- Large changes should be split before pull request review.
+- No direct merges to `main` unless it is an emergency recovery situation.
+
+## Standard Roles
+
+- Product Owner
+- Architect
+- Engineering Manager
+- Software Engineer
+- QA
+- Delivery Coach / Facilitator
+- Founder
+
+Role distinction:
+
+- Engineering Manager handles scope, sequencing, delivery risk, and Codex-sized work.
+- Software Engineer handles implementation approach, file and module boundaries, code maintainability, and testability.
+- Architect handles system direction, coupling, long-term structure, and ADR needs.
 
 ## What Each Step Means
 
@@ -36,6 +56,10 @@ Capture the concept without forcing implementation detail too early.
 ### Repo Backlog
 
 Record the work in `docs/04-backlog` so it is discoverable, status-based, and easy to revisit.
+
+### Backlog Review
+
+Confirm the work is mature enough to move from repo backlog into implementation planning.
 
 ### Implementation Planning
 
@@ -63,7 +87,15 @@ Execute the issue on a focused branch using the package as the handoff source.
 
 ### Implementation Review
 
-Measure what worked, what changed, and whether the planning system needs adjustment.
+Measure what worked, what changed, and whether the pull request is ready or needs changes before merge.
+
+### PR
+
+Review the implementation through a pull request before it reaches `main`.
+
+### Implementation Retro
+
+After merge, run a retro to convert lessons into process improvements, technical debt, parking lot items, and backlog updates.
 
 ### Merge And Update
 

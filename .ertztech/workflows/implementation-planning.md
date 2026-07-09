@@ -11,6 +11,7 @@ Referenced roles:
 - ../agents/product-owner.md
 - ../agents/architect.md
 - ../agents/engineering-manager.md
+- ../agents/software-engineer.md
 - ../agents/implementation-engineer.md
 - ../agents/qa.md
 - ../agents/delivery-coach.md
@@ -23,19 +24,31 @@ When to use:
 - Backlog refinement reduced the main uncertainty.
 - The founder wants a Codex-ready handoff, not another abstract planning pass.
 
+Session Control:
+- Session type
+- Workflow source
+- Support docs
+- Expected output
+- Current step
+- Decisions needed
+- Parking lot
+- Docs/backlog impacted
+
 Process:
-1. Facilitator confirms the work belongs in implementation planning.
-2. Product Owner drafts the implementation package and confirms the relevant repo docs.
-3. Architect checks technical approach, boundaries, reuse risks, and whether an ADR is needed.
-4. Engineering Manager checks sequencing, package size, reviewability, and whether the work is truly near-term.
-5. Implementation Engineer pressure-tests the Codex handoff, file-level clarity, and whether Codex can work without chat history.
-6. QA validates acceptance criteria, failure paths, definition of done, and the test checklist.
-7. Delivery Coach estimates implementation complexity, expected sessions, and likely review effort.
-8. Facilitator runs a Documentation and Traceability checkpoint.
-9. Facilitator walks the team through the Pre-Implementation Review section inside the Implementation Package.
-10. Facilitator summarizes agreements, disagreements, tradeoffs, assumptions, confidence, founder decisions, and decision-required items.
-11. Human approves, adjusts, or rejects the package.
-12. Only after package approval are the GitHub Issue and Codex prompt finalized.
+1. Facilitator makes the current workflow step visible and confirms the session stays inside implementation planning.
+2. Facilitator confirms the work belongs in implementation planning.
+3. Product Owner drafts the implementation package and confirms the relevant repo docs.
+4. Architect checks technical approach, boundaries, reuse risks, and whether an ADR is needed.
+5. Engineering Manager checks sequencing, package size, reviewability, and whether the work is truly near-term.
+6. Software Engineer checks implementation approach, file/module boundaries, maintainability, and testability.
+7. Implementation Engineer pressure-tests the Codex handoff, file-level clarity, and whether Codex can work without chat history.
+8. QA validates acceptance criteria, failure paths, definition of done, and the test checklist.
+9. Delivery Coach estimates implementation complexity, expected sessions, and likely review effort.
+10. Facilitator runs a Documentation and Traceability checkpoint.
+11. Facilitator walks the team through the Pre-Implementation Review section inside the Implementation Package.
+12. Facilitator summarizes agreements, disagreements, tradeoffs, assumptions, confidence, founder decisions, parking lot items, and decision-required items.
+13. Human approves, adjusts, or rejects the package.
+14. Only after package approval are the GitHub Issue and Codex prompt finalized.
 
 Rules:
 - Prefer one clean implementation package over broad planning output.
@@ -71,4 +84,5 @@ Required Output:
 8. Confidence
 9. Founder decisions
 10. Decision-required items
-11. Approved next step
+11. Parking lot items
+12. Approved next step
