@@ -52,12 +52,12 @@ savedJob = seededJob;
 context.renderApplicationStudio(seededJob);
 
 const studioHtml = nodes.get("#application-studio-content").innerHTML;
-assert.ok(studioHtml.includes("Active Opportunity Workspace"));
+assert.ok(studioHtml.includes("Application Studio for Agile Delivery Transformation Lead"));
 assert.ok(studioHtml.includes("Packet Readiness"));
 assert.ok(studioHtml.includes("11 of 12 complete"));
 assert.ok(studioHtml.includes("Agile Delivery Transformation Lead"));
 assert.ok(studioHtml.includes("Atlas Components"));
-assert.ok(studioHtml.includes("Analyze Fit"));
+assert.ok(studioHtml.includes("Refresh Fit Review"));
 assert.ok(studioHtml.includes("Generate Resume Draft"));
 assert.ok(studioHtml.includes("Generate Cover Letter Draft"));
 assert.ok(studioHtml.includes("Job Posting Text"));
@@ -67,7 +67,7 @@ assert.ok(studioHtml.includes("Alex Morgan"));
 assert.ok(studioHtml.includes("Dear Atlas Components team"));
 assert.ok(studioHtml.includes("Copy Resume Draft"));
 assert.ok(studioHtml.includes("Copy Cover Letter Draft"));
-assert.ok(studioHtml.includes("Update Status and Notes"));
+assert.ok(studioHtml.includes("Save Packet Status"));
 assert.ok(studioHtml.includes("Resume reviewed"));
 assert.ok(studioHtml.includes("Application submitted"));
 
