@@ -19,6 +19,7 @@
 
         <nav class="primary-flow-nav" aria-label="Primary workflow">
           <a href="#/jobs/dashboard" data-jobs-route-link="dashboard">Dashboard</a>
+          <a href="#/jobs/journey" data-jobs-route-link="journey">Career Journey</a>
           <a href="#/jobs/opportunity" data-jobs-route-link="opportunity">Opportunity Review</a>
           <a href="#/jobs/studio" data-jobs-route-link="studio">Application Studio</a>
           <a href="#/jobs/tracker" data-jobs-route-link="tracker">Tracker</a>
@@ -63,6 +64,10 @@
               <h2>Where to keep working</h2>
             </div>
             <div class="dashboard-workspace-grid">
+              <a href="#/jobs/journey">
+                <span>Career Journey</span>
+                <small>Guided chapters to uncover your story.</small>
+              </a>
               <a href="#/jobs/opportunity">
                 <span>Opportunity Review</span>
                 <small>Paste, structure, and decide.</small>
@@ -86,6 +91,19 @@
             </div>
           </section>
 
+        </section>
+
+        <section data-jobs-page="journey" class="hidden">
+          <div class="section-block first-section">
+            <div class="panel-header compact-header">
+              <div>
+                <h2>Career Journey</h2>
+                <p class="support-copy">Begin a guided, chapter-based experience that helps you uncover and organize your professional story before you build application outputs.</p>
+              </div>
+              <a class="secondary-button nav-link-button" href="#profile">Open Profile</a>
+            </div>
+            <div id="career-journey-content"></div>
+          </div>
         </section>
 
         <section data-jobs-page="opportunity" class="hidden">

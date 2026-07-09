@@ -23,8 +23,37 @@ const DASHBOARD_STATUSES = [
   "Rejected",
 ];
 const JOBS_FIT_RECOMMENDATIONS = ["Apply", "Maybe", "Skip"];
+const CAREER_JOURNEY_CHAPTERS = [
+  {
+    number: 1,
+    title: "Where You Are Today",
+    description: "Start with your current direction, what feels true about this season, and what you want NextMove to understand first.",
+    current: true,
+  },
+  {
+    number: 2,
+    title: "Roles And Experiences",
+    description: "Map the roles, responsibilities, and patterns that shaped how you work.",
+  },
+  {
+    number: 3,
+    title: "Achievements And Evidence",
+    description: "Surface proof, outcomes, and signals that make your story more concrete.",
+  },
+  {
+    number: 4,
+    title: "Stories And Themes",
+    description: "Notice the stories and themes that connect your experience into a stronger narrative.",
+  },
+  {
+    number: 5,
+    title: "Direction And Readiness",
+    description: "Turn what you surfaced into a clearer sense of next moves and application readiness.",
+  },
+];
 
 let selectedJobId = "";
+let careerJourneyStarted = false;
 
 function initializeJobsAppliedController() {
   const addJobForm = document.querySelector("#add-job-form");
@@ -948,11 +977,13 @@ function showJobsPage(pageName) {
   });
 
   updateSelectedJobLinks();
+  bindCareerJourneyActions();
   document.querySelector(`[data-jobs-page="${pageName}"]`)?.scrollIntoView({ block: "start" });
 }
 
 function renderJobsAppliedViews(jobs) {
   renderDashboard(jobs);
+  renderCareerJourney();
   renderOpportunityReview(currentJob(jobs));
   renderJobDetail(currentJob(jobs));
   renderFitAnalysis(currentJob(jobs));
@@ -967,6 +998,99 @@ function renderDashboard(jobs) {
   renderDashboardSummary("#jobs-status-summary", jobs);
   renderJobCards("#recent-jobs-list", recentJobs(jobs));
   renderNextActions(jobs);
+}
+
+function renderCareerJourney() {
+  const node = document.querySelector("#career-journey-content");
+  if (!node) {
+    return;
+  }
+
+  const currentChapter = CAREER_JOURNEY_CHAPTERS.find((chapter) => chapter.current) || CAREER_JOURNEY_CHAPTERS[0];
+  const actionLabel = careerJourneyStarted ? "Continue Journey" : "Start Journey";
+  const progressLabel = `Chapter ${currentChapter.number} of ${CAREER_JOURNEY_CHAPTERS.length}`;
+  const heroCopy = careerJourneyStarted
+    ? "Pick up where you left off with a calm chapter-based workspace designed to help you shape your story before you turn it into outputs."
+    : "Start with a guided experience that helps you reflect on where you are today before you jump into resumes, packets, or interview prep.";
+
+  node.innerHTML = `
+    <section class="journey-hero">
+      <div class="journey-hero-main">
+        <p class="eyebrow">Interview-First Start</p>
+        <h2>Build your story before you build your materials.</h2>
+        <p class="support-copy">${escapeHtml(heroCopy)}</p>
+        <div class="journey-action-row">
+          <button type="button" data-start-career-journey>${escapeHtml(actionLabel)}</button>
+          <a class="secondary-button nav-link-button" href="#profile">Review Profile</a>
+        </div>
+      </div>
+      <aside class="journey-progress-card" aria-label="Career Journey progress">
+        <span>${escapeHtml(progressLabel)}</span>
+        <strong>${escapeHtml(currentChapter.title)}</strong>
+        <p>${careerJourneyStarted ? "Journey in progress." : "Journey not started yet."}</p>
+      </aside>
+    </section>
+    <section class="journey-layout">
+      <article class="journey-card journey-card-primary">
+        <div class="journey-card-header">
+          <div>
+            <p class="eyebrow">Current Chapter</p>
+            <h3>Chapter ${currentChapter.number}: ${escapeHtml(currentChapter.title)}</h3>
+          </div>
+          <span class="status-badge status-reviewing">${escapeHtml(progressLabel)}</span>
+        </div>
+        <p class="support-copy">${escapeHtml(currentChapter.description)}</p>
+        <div class="journey-placeholder">
+          <h4>Guided reflection placeholder</h4>
+          <p>This shell reserves space for the future guided conversation. In v1, the experience stays intentionally lightweight and uses local state only.</p>
+          <div class="journey-reflection-prompt">
+            <strong>Reflection prompt</strong>
+            <p>What feels most true about where you are in your career right now, and what do you want your next move to honor?</p>
+          </div>
+        </div>
+      </article>
+      <aside class="journey-sidebar">
+        <article class="journey-card">
+          <p class="eyebrow">Chapter Map</p>
+          <div class="journey-chapter-list">
+            ${CAREER_JOURNEY_CHAPTERS.map(renderCareerJourneyChapterCard).join("")}
+          </div>
+        </article>
+        <article class="journey-card">
+          <p class="eyebrow">Experience Layer</p>
+          <p class="support-copy">Career Journey is the guided experience layer. Career Brain comes later as the durable source of truth behind the story you uncover here.</p>
+        </article>
+      </aside>
+    </section>
+  `;
+}
+
+function renderCareerJourneyChapterCard(chapter) {
+  const chapterStateClass = chapter.current ? "journey-chapter-card-active" : "journey-chapter-card-upcoming";
+  const chapterStateLabel = chapter.current ? "Current chapter" : "Upcoming";
+
+  return `
+    <div class="journey-chapter-card ${chapterStateClass}">
+      <small>${escapeHtml(chapterStateLabel)}</small>
+      <h4>Chapter ${chapter.number}: ${escapeHtml(chapter.title)}</h4>
+      <p>${escapeHtml(chapter.description)}</p>
+    </div>
+  `;
+}
+
+function bindCareerJourneyActions() {
+  const journeyButton = document.querySelector("[data-start-career-journey]");
+  if (!journeyButton || journeyButton.dataset.bound === "true") {
+    return;
+  }
+
+  journeyButton.dataset.bound = "true";
+  journeyButton.addEventListener("click", () => {
+    careerJourneyStarted = true;
+    renderCareerJourney();
+    bindCareerJourneyActions();
+    setJobsStatus("Career Journey started. Chapter 1 is ready for guided reflection.", "success");
+  });
 }
 
 function renderJobDetail(job) {
@@ -2339,6 +2463,7 @@ function jobsPageAlias(page) {
 function knownJobsPage(page) {
   return [
     "dashboard",
+    "journey",
     "opportunity",
     "add",
     "detail",
