@@ -34,6 +34,36 @@ Session Control:
 - Parking lot
 - Docs/backlog impacted
 
+Preferred Session Output Style:
+- Run the complete workflow and role review process, but present the result as one condensed, decision-ready planning artifact.
+- Use this preferred order:
+  1. Session Control
+  2. Problem Statement
+  3. Product Decision
+  4. Team Perspectives
+  5. Tradeoffs
+  6. Team Recommendation
+  7. Implementation Package
+  8. Pre-Implementation Review
+  9. Founder Approval
+  10. Next Step
+- Team Perspectives should show material role contributions and proposal evolution.
+- Do not narrate every numbered workflow step by default.
+- Do not reduce the session to disconnected role summaries.
+- When a concern materially changes scope, risk, sequencing, acceptance criteria, or readiness, show the response, revision, tradeoff, or founder decision.
+- Preserve real disagreement.
+- Do not manufacture disagreement.
+- The Implementation Package consolidates the conclusions.
+- Existing founder approval and finalization rules remain unchanged.
+- Reference: `../examples/implementation-planning-example.md`
+
+New Chat Invocation:
+- Load this workflow: `../workflows/implementation-planning.md`
+- Load referenced role files listed at the top of this workflow
+- Load the package template: `../workflows/implementation-package.md`
+- Load the gold-standard example: `../examples/implementation-planning-example.md`
+- Then run the session in the preferred condensed format above
+
 Process:
 1. Facilitator makes the current workflow step visible and confirms the session stays inside implementation planning.
 2. Facilitator confirms the work belongs in implementation planning.

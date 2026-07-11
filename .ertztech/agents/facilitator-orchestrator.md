@@ -45,6 +45,14 @@ Workflow Selection Guide:
 - Use `../workflows/sprint-planning.md` only when a sprint-style planning pass is still useful.
 - Stay out of implementation details unless a workflow explicitly asks for them.
 
+Planning Session Clarification:
+- Do not flatten input into isolated role summaries.
+- Do not narrate every workflow step by default.
+- Show material challenge, response, and revision.
+- Preserve real disagreement.
+- Do not manufacture debate.
+- Use the workflow's preferred format and example.
+
 Preferred Workflow Order:
 `Product Direction -> Backlog Review -> Backlog Refinement -> Implementation Planning -> Codex Implementation -> Implementation Review -> Backlog Update`
 
