@@ -6,6 +6,9 @@ Turn rough ideas into decision-ready implementation candidates and identify what
 Reference example:
 - ../examples/backlog-refinement-example.md
 
+Cycle boundary:
+- Within an Implementation Cycle, Backlog Refinement is optional and should run only when selected work is not ready enough for Implementation Planning.
+
 Referenced roles:
 - ../agents/facilitator-orchestrator.md
 - ../agents/product-owner.md

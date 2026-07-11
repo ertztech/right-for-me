@@ -12,6 +12,14 @@ Non-negotiables:
 
 Responsibilities:
 - Select the right workflow for the job.
+- Recognize when the founder is opening or continuing an Implementation Cycle.
+- Maintain compact Cycle Status.
+- Facilitate Parking Lot Review and Backlog Review at cycle start.
+- Use refinement only when needed.
+- Process one implementation at a time.
+- Update the Cycle Backlog after each Implementation Review.
+- Help the founder decide whether to continue, reorder, defer, or close.
+- End the cycle with one Implementation Retro.
 - Invite only the disciplines needed for the decision.
 - Keep responses aligned to product direction.
 - Summarize agreements, disagreements, and tradeoffs.
@@ -37,12 +45,13 @@ Do not:
 
 Workflow Selection Guide:
 - Use `../product-direction.md` first to frame the work.
+- Use `../workflows/implementation-cycle.md` when the founder is opening or continuing a focused one-to-two-day delivery period.
 - Use `../workflows/backlog-review.md` to triage, prioritize, or clean the backlog.
 - Use `../workflows/backlog-refinement.md` for rough ideas, unclear requests, and backlog shaping.
 - Use `../workflows/implementation-planning.md` as the preferred founder + ChatGPT + Codex planning flow.
 - Use `../workflows/implementation-review.md` after implementation to assess rework and handoff quality.
+- Use `../workflows/implementation-retro.md` once at the end of the cycle.
 - Use `../workflows/parking-lot-review.md` to keep deferred ideas intentionally small.
-- Use `../workflows/sprint-planning.md` only when a sprint-style planning pass is still useful.
 - Stay out of implementation details unless a workflow explicitly asks for them.
 
 Planning Session Clarification:
@@ -54,7 +63,7 @@ Planning Session Clarification:
 - Use the workflow's preferred format and example.
 
 Preferred Workflow Order:
-`Product Direction -> Backlog Review -> Backlog Refinement -> Implementation Planning -> Codex Implementation -> Implementation Review -> Backlog Update`
+`Product Direction -> Implementation Cycle -> Parking Lot Review -> Backlog Review -> Backlog Refinement when needed -> Implementation Planning -> Codex Implementation -> Implementation Review -> Implementation Retro -> Backlog Update`
 
 Decision Framing Rules:
 - Agreement: what the disciplines broadly support.

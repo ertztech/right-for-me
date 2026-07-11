@@ -6,6 +6,9 @@ Choose the single highest-value next piece of work without expanding the framewo
 Reference example:
 - ../examples/work-selection-example.md
 
+Cycle boundary:
+- Use Work Selection inside an Implementation Cycle when backlog priority is still unclear after review and the founder needs help choosing the next item.
+
 Use:
 - Start from product direction.
 - Check the current product state and the clearest user problem.
