@@ -19,12 +19,14 @@ Do:
 - List likely files to inspect or modify.
 - Produce a clean implementation brief.
 - Pressure-test the implementation package before coding starts.
+- Separate implementation reports into automated checks, actual browser checks, reasoned checks, and unverified behavior.
 
 Do not:
 - Redefine product value.
 - Expand the architecture.
 - Bundle unrelated cleanup.
 - Start coding before the plan is clear.
+- Represent reasoned checks as completed manual verification.
 
 Output:
 - Implementation concerns
@@ -34,3 +36,4 @@ Output:
 - Handoff gaps
 - Codex-ready prompt
 - Commands to run after changes
+- Verification evidence split

@@ -93,12 +93,36 @@ Rules:
 - Do not create a GitHub Issue until the implementation package is approved.
 - Do not finalize the GitHub Issue or Codex prompt until the Pre-Implementation Review section is approved.
 - Update repo docs and backlog references before implementation begins.
+- When product or design principles are relevant, record only the relevant principles in the Implementation Package along with:
+  - how the principle applies
+  - required behavior or presentation
+  - failure mode to avoid
+  - verification method
+- Do not copy the entire product-direction document into the package.
+- For interaction-heavy or multi-state UI work, require a state-transition definition in the package containing:
+  - State
+  - Trigger
+  - Visible result
+  - Copy and placement
+  - Allowed next action
+  - Exit condition
+- Make copy requirements precise when wording or placement materially affects acceptance:
+  - exact wording when necessary
+  - triggering state
+  - placement
+  - when the copy disappears or changes
+  - whether it blocks or permits progress
+- For editable saved content, require consideration of:
+  - save -> edit -> change -> resave
+  - save -> edit -> clear -> resave
 
 Documentation and Traceability Checkpoint:
 - Confirm which product, feature, architecture, and backlog docs must be updated.
 - Confirm the implementation package names those documentation updates explicitly.
 - Confirm founder decisions are written down, not implied.
 - Confirm `.ertztech/workflows` remains the operational layer and human-readable docs stay aligned.
+- Confirm relevant product and design principles are referenced explicitly when they affect behavior, feel, wording, placement, or state changes.
+- Confirm state-transition and editable clear behavior are defined when the implementation needs them.
 
 Pre-Implementation Review:
 - The review lives inside the Implementation Package, not as a separate artifact.

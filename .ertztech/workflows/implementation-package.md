@@ -31,6 +31,36 @@ Template:
 
 ## Known Risks
 
+## Relevant Product Or Design Principles
+- Principle
+- How it applies
+- Required behavior or presentation
+- Failure mode to avoid
+- Verification method
+
+Include only the principles relevant to this implementation. Reference authoritative principles rather than copying the full product-direction document.
+
+## State Transitions
+- Required for interaction-heavy or multi-state UI work.
+- For each relevant state, record:
+  - State
+  - Trigger
+  - Visible result
+  - Copy and placement
+  - Allowed next action
+  - Exit condition
+
+## Copy Requirements
+- Exact wording when necessary
+- Triggering state
+- Placement
+- When the copy disappears or changes
+- Whether it blocks or permits progress
+
+## Editable Saved Content Behavior
+- Record save -> edit -> change -> resave when relevant.
+- Record save -> edit -> clear -> resave when relevant.
+
 ## Files Likely Affected
 
 ## GitHub Issue Text
