@@ -6,6 +6,9 @@ Turn a completed implementation cycle into durable improvements for process, bac
 Status:
 Run after a pull request is merged.
 
+Cycle boundary:
+- Implementation Retro runs once at the end of an Implementation Cycle, not after every individual implementation.
+
 Referenced roles:
 - ../agents/facilitator-orchestrator.md
 - ../agents/product-owner.md

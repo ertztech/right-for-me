@@ -6,6 +6,9 @@ Keep the backlog clean, prioritized, and small enough that the next important wo
 Reference example:
 - ../examples/backlog-review-example.md
 
+Cycle boundary:
+- Implementation Cycle uses Backlog Review after Parking Lot Review to prioritize candidate work for the Cycle Backlog.
+
 Referenced roles:
 - ../agents/facilitator-orchestrator.md
 - ../agents/product-owner.md

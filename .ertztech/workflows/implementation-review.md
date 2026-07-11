@@ -3,6 +3,9 @@
 Purpose:
 Measure handoff quality, implementation effort, and rework so the framework improves from real work.
 
+Cycle boundary:
+- Implementation Review happens after each individual implementation inside an Implementation Cycle and remains implementation-specific.
+
 Referenced roles:
 - ../agents/facilitator-orchestrator.md
 - ../agents/product-owner.md

@@ -6,6 +6,9 @@ Turn approved, refined work into a small implementation package that Codex can e
 Status:
 Preferred workflow for the founder + ChatGPT + Codex delivery flow.
 
+Cycle boundary:
+- Implementation Planning prepares one implementation inside an Implementation Cycle. It does not coordinate the full cycle backlog or multi-item delivery period.
+
 Referenced roles:
 - ../agents/facilitator-orchestrator.md
 - ../agents/product-owner.md

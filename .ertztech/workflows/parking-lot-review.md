@@ -6,6 +6,9 @@ Keep the parking lot intentionally small and useful.
 Reference example:
 - ../examples/parking-lot-review-example.md
 
+Cycle boundary:
+- Implementation Cycle normally starts with Parking Lot Review so deferred ideas are intentionally promoted, kept, archived, or discarded before backlog prioritization begins.
+
 Referenced roles:
 - ../agents/facilitator-orchestrator.md
 - ../agents/product-owner.md
