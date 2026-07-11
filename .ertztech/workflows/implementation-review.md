@@ -39,6 +39,16 @@ Rules:
 - All changes go through a pull request before merging to `main`.
 - Review decides whether the pull request is ready, needs changes, or needs follow-up items.
 - Implementation Retro happens after merge, not instead of review.
+- Verification evidence must be classified as:
+  - Automated verification
+  - Verified in the running browser
+  - Reasoned from implementation only
+  - Not verified
+- Reasoned verification does not satisfy a manual acceptance criterion.
+- Automated checks do not prove visual or interaction behavior unless the test directly covers it.
+- Interaction-heavy reviews remain provisional until required browser paths are actually performed.
+- Founder-visible acceptance testing may still be required when the experience depends on product feel, wording, placement, or state transitions.
+- The final review should identify which acceptance criteria were actually observed and which remain unverified.
 
 Metrics:
 - Estimated implementation complexity
@@ -50,6 +60,13 @@ Metrics:
 - Rework category
 - Handoff completeness
 - Overall implementation quality
+
+Product And Design Principles Review:
+- Principle
+- Followed?
+- Observed evidence
+- Deviation
+- Founder decision required?
 
 Rework Categories:
 - Planning gap
@@ -68,10 +85,13 @@ Required Output:
 3. Metric summary
 4. Rework summary
 5. Rework category
-6. Handoff quality assessment
-7. Pull request decision: ready, needs changes, or follow-up items
-8. Agreements
-9. Disagreements
-10. Recommended framework adjustment
-11. Backlog update recommendation
-12. Retro handoff note
+6. Verification evidence classification
+7. Acceptance criteria observed vs unverified
+8. Product and design principles review
+9. Handoff quality assessment
+10. Pull request decision: ready, needs changes, or follow-up items
+11. Agreements
+12. Disagreements
+13. Recommended framework adjustment
+14. Backlog update recommendation
+15. Retro handoff note

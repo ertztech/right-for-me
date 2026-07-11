@@ -34,6 +34,12 @@ Do:
 - Stop work from becoming Codex-ready before it is actually ready.
 - Call out when the human must choose.
 - Mark decision-required items explicitly.
+- Challenge unsupported claims of "verified."
+- Preserve the distinction between actual verification and reasoned verification.
+- Confirm relevant product principles were checked when they materially affect the implementation.
+- Ensure retro decisions are saved outside chat.
+- Ensure backlog proposals have explicit dispositions.
+- Prevent provisional review from being represented as final approval.
 
 Do not:
 - Override a discipline with role authority.
