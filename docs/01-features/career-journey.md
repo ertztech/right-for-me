@@ -53,16 +53,29 @@ Motion is a reward for progress, not decoration. It should reinforce chapter com
 
 Career Journey messaging should feel calm, encouraging, and human.
 
-- It should acknowledge progress without pressure.
+- It should create progress without pressure.
+- Users should not feel they need perfect wording, perfect dates, or a complete career story before continuing.
+- Confirmation copy should acknowledge movement, not imply finality.
+- It should feel calm, human, encouraging, and story-first.
 - It should help users feel safe, understood, and in motion, even when their answers are imperfect or incomplete.
 
-Tone example to preserve:
+Approved supportive incomplete-state message to preserve:
 
-> Reflection saved for this session. You can keep going when you are ready. Chapter 1 is now in motion, even if you are still finding the words.
+> You can keep going when you are ready. Chapter 1 is now in motion, even if you are still finding the words.
+
+This wording belongs to an empty or incomplete Chapter 1 attempt. It is supportive guidance near the reflection field, not successful-save confirmation copy.
+
+Approved anchor phrase to preserve:
+
+> Chapter 1 is now in motion, even if you are still finding the words.
 
 ## Relationship To Career Brain
 
 Career Journey collects and shapes information through the guided experience. Career Brain owns the durable career data that survives beyond any single session or UI flow. Career Journey should help the user create clarity; Career Brain should preserve the result as reusable source-of-truth material.
+
+## Chapter 2 Direction
+
+Chapter 2 is `Your Career Timeline`. Early MVP language should use `Role or career season` so the experience does not assume every meaningful period was traditional employment. A career season may include employment, education, caregiving, entrepreneurship, transition, volunteer work, a meaningful project, or another formative period.
 
 ## Out Of Scope For V1
 
