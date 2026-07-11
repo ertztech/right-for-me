@@ -3,6 +3,9 @@
 Purpose:
 Keep the backlog clean, prioritized, and small enough that the next important work is visible.
 
+Reference example:
+- ../examples/backlog-review-example.md
+
 Referenced roles:
 - ../agents/facilitator-orchestrator.md
 - ../agents/product-owner.md

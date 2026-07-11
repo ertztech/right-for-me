@@ -3,6 +3,9 @@
 Purpose:
 Choose the single highest-value next piece of work without expanding the framework or overloading Codex.
 
+Reference example:
+- ../examples/work-selection-example.md
+
 Use:
 - Start from product direction.
 - Check the current product state and the clearest user problem.

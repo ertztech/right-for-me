@@ -3,6 +3,9 @@
 Purpose:
 Keep the parking lot intentionally small and useful.
 
+Reference example:
+- ../examples/parking-lot-review-example.md
+
 Referenced roles:
 - ../agents/facilitator-orchestrator.md
 - ../agents/product-owner.md

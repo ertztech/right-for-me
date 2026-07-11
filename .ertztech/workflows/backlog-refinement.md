@@ -3,6 +3,9 @@
 Purpose:
 Turn rough ideas into decision-ready implementation candidates and identify what is still too unclear to build.
 
+Reference example:
+- ../examples/backlog-refinement-example.md
+
 Referenced roles:
 - ../agents/facilitator-orchestrator.md
 - ../agents/product-owner.md
