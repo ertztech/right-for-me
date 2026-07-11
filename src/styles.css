@@ -899,6 +899,18 @@ button[data-clear-demo-data]:hover {
     linear-gradient(180deg, rgba(223, 243, 238, 0.9), #fff);
 }
 
+.journey-chapter-card-ready {
+  border-color: rgba(154, 103, 0, 0.22);
+  background:
+    linear-gradient(180deg, rgba(255, 241, 210, 0.92), #fff);
+}
+
+.journey-chapter-card-complete {
+  border-color: rgba(35, 98, 77, 0.24);
+  background:
+    linear-gradient(180deg, rgba(223, 243, 238, 0.96), #fff);
+}
+
 .journey-placeholder {
   border: 1px dashed rgba(15, 118, 110, 0.28);
   border-radius: var(--radius);
@@ -926,6 +938,16 @@ button[data-clear-demo-data]:hover {
 .journey-reflection-input {
   min-height: 148px;
   background: rgba(255, 255, 255, 0.98);
+}
+
+.journey-reflection-input-compact {
+  min-height: 110px;
+}
+
+.journey-inline-validation {
+  color: var(--red);
+  font-size: 0.88rem;
+  font-weight: 700;
 }
 
 .journey-reflection-prompt {
@@ -993,6 +1015,37 @@ button[data-clear-demo-data]:hover {
 
 .journey-chapter-preview-card button {
   margin-top: var(--space-3);
+}
+
+.journey-chapter-preview-card input {
+  background: rgba(255, 255, 255, 0.98);
+}
+
+.journey-summary-card {
+  display: grid;
+  gap: var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  margin-top: var(--space-3);
+  padding: var(--space-3);
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.journey-summary-card strong {
+  font-size: 1.05rem;
+}
+
+.journey-summary-card p {
+  margin: 0;
+}
+
+.journey-summary-card span {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 850;
+  text-transform: uppercase;
 }
 
 @keyframes journey-reveal {

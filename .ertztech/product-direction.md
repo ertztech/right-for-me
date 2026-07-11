@@ -8,6 +8,7 @@ Keep planning grounded in why NextMove exists and what matters right now.
 - NextMove helps people choose the right opportunity and improve their odds of getting an interview.
 - AI informs judgment. The user owns the final application decision.
 - Honest confidence is better than inflated confidence.
+- Career Journey should encourage imperfect progress rather than demand polished answers.
 - Keep the product lightweight, practical, and explainable.
 - Add framework complexity only when real work exposes a planning gap.
 - Prefer focused workflow improvements over broad platform expansion.
