@@ -37,8 +37,8 @@ const CAREER_JOURNEY_CHAPTERS = [
   },
   {
     number: 3,
-    title: "Achievements And Evidence",
-    description: "Surface proof, outcomes, and signals that make your story more concrete.",
+    title: "Moments That Mattered",
+    description: "Slow down around one meaningful work moment and notice what it may already reveal about how you work.",
   },
   {
     number: 4,
@@ -62,6 +62,9 @@ let careerJourneyChapterTwoStarted = false;
 let careerJourneyChapterTwoEditing = false;
 let careerJourneyChapterTwoValidation = "";
 let careerJourneyChapterTwoEntry = emptyCareerJourneyChapterTwoEntry();
+let careerJourneyChapterThree = emptyCareerJourneyChapterThreeState();
+let careerJourneyVoiceSession = null;
+let careerJourneyMomentIdCounter = 0;
 
 function initializeJobsAppliedController() {
   const addJobForm = document.querySelector("#add-job-form");
@@ -1048,7 +1051,7 @@ function renderCareerJourney() {
           <span class="status-badge ${journeyState.badgeClass}">${escapeHtml(journeyState.badgeLabel)}</span>
         </div>
         <p class="support-copy">${escapeHtml(journeyState.activeChapter.description)}</p>
-        ${renderCareerJourneyChapterOneInteraction()}
+        ${renderCareerJourneyActiveChapterInteraction(journeyState)}
       </article>
       <aside class="journey-sidebar">
         <article class="journey-card">
@@ -1063,6 +1066,27 @@ function renderCareerJourney() {
         </article>
       </aside>
     </section>
+  `;
+}
+
+function renderCareerJourneyActiveChapterInteraction(journeyState) {
+  if (journeyState.activeChapter.number === 1) {
+    return renderCareerJourneyChapterOneInteraction();
+  }
+
+  if (journeyState.activeChapter.number === 2) {
+    return renderCareerJourneyChapterTwoSection();
+  }
+
+  if (journeyState.activeChapter.number === 3) {
+    return renderCareerJourneyChapterThreeSection();
+  }
+
+  return `
+    <div class="journey-placeholder">
+      <h4>${escapeHtml(journeyState.activeChapter.title)}</h4>
+      <p>We have not opened this chapter yet. The next small step is still the best step.</p>
+    </div>
   `;
 }
 
@@ -1108,18 +1132,13 @@ function renderCareerJourneyChapterOneForm(actionLabel) {
 }
 
 function renderCareerJourneyChapterOneSubmittedState(response) {
-  const chapterTwoSection = renderCareerJourneyChapterTwoSection();
-
   return `
-    <div class="journey-confirmation-stack">
-      <div class="journey-confirmation-card" aria-live="polite">
-        <strong>Chapter 1 reflection</strong>
-        <blockquote class="journey-reflection-echo">${escapeHtml(response)}</blockquote>
-        <div class="journey-action-row">
-          <button type="button" class="secondary-button" data-edit-career-journey-chapter-one>Edit Reflection</button>
-        </div>
+    <div class="journey-confirmation-card" aria-live="polite">
+      <strong>Chapter 1 reflection</strong>
+      <blockquote class="journey-reflection-echo">${escapeHtml(response)}</blockquote>
+      <div class="journey-action-row">
+        <button type="button" class="secondary-button" data-edit-career-journey-chapter-one>Edit Reflection</button>
       </div>
-      ${chapterTwoSection}
     </div>
   `;
 }
@@ -1127,6 +1146,7 @@ function renderCareerJourneyChapterOneSubmittedState(response) {
 function deriveCareerJourneyState() {
   const chapterOne = CAREER_JOURNEY_CHAPTERS[0];
   const chapterTwo = CAREER_JOURNEY_CHAPTERS[1];
+  const chapterThree = CAREER_JOURNEY_CHAPTERS[2];
 
   if (!careerJourneyChapterOneSubmitted) {
     return {
@@ -1164,14 +1184,30 @@ function deriveCareerJourneyState() {
     };
   }
 
+  if (!isCareerJourneyChapterThreeComplete()) {
+    return {
+      activeChapter: chapterThree,
+      badgeClass: careerJourneyChapterThree.aiState === "loading" || isVoiceWorking(careerJourneyChapterThree.voiceState)
+        ? "status-reviewing"
+        : "status-maybe",
+      badgeLabel: isCareerJourneyChapterThreeIdle() ? `Chapter ${chapterThree.number} next` : `Chapter ${chapterThree.number} in progress`,
+      headerEyebrow: isCareerJourneyChapterThreeIdle() ? "Next Chapter" : "Current Chapter",
+      progressChapter: chapterThree.number,
+      progressMessage: isCareerJourneyChapterThreeIdle()
+        ? "Chapter 3 is available when you are ready."
+        : deriveCareerJourneyChapterThreeProgressMessage(),
+      progressTitle: chapterThree.title,
+    };
+  }
+
   return {
-    activeChapter: chapterTwo,
+    activeChapter: chapterThree,
     badgeClass: "status-apply",
-    badgeLabel: `Chapter ${chapterTwo.number} complete`,
+    badgeLabel: `Chapter ${chapterThree.number} complete`,
     headerEyebrow: "Current Progress",
-    progressChapter: chapterTwo.number,
-    progressMessage: "Chapter 2 is complete for this session.",
-    progressTitle: chapterTwo.title,
+    progressChapter: chapterThree.number,
+    progressMessage: `${careerJourneyChapterThree.savedMoments.length} ${careerJourneyChapterThree.savedMoments.length === 1 ? "moment" : "moments"} captured. Chapter 3 is complete for now.`,
+    progressTitle: chapterThree.title,
   };
 }
 
@@ -1282,6 +1318,221 @@ function renderCareerJourneyChapterTwoSummary() {
   `;
 }
 
+function renderCareerJourneyChapterThreeSection() {
+  const draft = careerJourneyChapterThree.draft;
+  const savedMoments = careerJourneyChapterThree.savedMoments;
+  const exploreDisabled = !cleanValue(draft.initialResponse) || careerJourneyChapterThree.aiState === "loading";
+  const saveDisabled = !cleanValue(draft.followUpResponse)
+    || !draft.reflection
+    || !draft.followUpQuestion
+    || !draft.possibleSignal;
+  const showSavedMoments = savedMoments.length > 0;
+  const showCoachForm = shouldRenderCareerJourneyStoryCoachForm();
+  const showMomentView = careerJourneyChapterThree.mode === "viewing";
+  const showDoneActions = showSavedMoments && careerJourneyChapterThree.aiState !== "loading" && !showCoachForm && !showMomentView;
+  const draftLabel = careerJourneyChapterThree.activeMomentId ? "Editing moment" : showSavedMoments ? "Add another moment" : "Start with one moment";
+
+  return `
+    <div class="journey-story-coach ${careerJourneyChapterThree.mode !== "idle" ? "journey-story-coach-active" : ""}">
+      ${showSavedMoments ? renderCareerJourneySavedMomentsList() : ""}
+      ${showCoachForm ? `
+        <div class="journey-story-coach-intro">
+          <p class="eyebrow">${escapeHtml(draftLabel)}</p>
+          <p class="journey-story-kicker">Some of your strongest stories may feel ordinary to you because you were the one living them. Let's slow down and look at one moment that asked something of you.</p>
+          <h4>Tell me about a moment at work that was difficult, important, or stayed with you.</h4>
+          <p>Start wherever the memory begins. It does not need to sound polished.</p>
+        </div>
+        <label class="journey-reflection-label">
+          Your moment
+          <textarea
+            name="chapterThreeInitialResponse"
+            class="journey-reflection-input"
+            rows="7"
+            placeholder="Start with the moment itself. What happened, what felt difficult, or what stayed with you afterward?"
+          >${escapeHtml(draft.initialResponse)}</textarea>
+        </label>
+        ${renderCareerJourneyVoiceControls("initialResponse", "story", "Start voice input for your story")}
+        ${renderCareerJourneyChapterThreeError()}
+        <div class="journey-action-row journey-action-row-spread">
+          <button type="button" data-career-journey-explore-story ${exploreDisabled ? "disabled" : ""}>Explore This Story</button>
+          ${hasMeaningfulCareerJourneyChapterThreeDraft() ? `<button type="button" class="secondary-button" data-career-journey-start-over>Start Over</button>` : ""}
+        </div>
+      ` : ""}
+      ${careerJourneyChapterThree.aiState === "loading" ? renderCareerJourneyChapterThreeLoading() : ""}
+      ${showMomentView ? renderCareerJourneyChapterThreeSavedCard() : ""}
+      ${showCoachForm && draft.reflection ? renderCareerJourneyReflectionCard() : ""}
+      ${showCoachForm && draft.reflection ? `
+        <div class="journey-follow-up-block">
+          <label class="journey-reflection-label">
+            What you want to add
+            <textarea
+              name="chapterThreeFollowUpResponse"
+              class="journey-reflection-input journey-reflection-input-compact"
+              rows="4"
+              placeholder="Answer the follow-up in your own words. You can type or use voice."
+            >${escapeHtml(draft.followUpResponse)}</textarea>
+          </label>
+          ${renderCareerJourneyVoiceControls("followUpResponse", "follow-up", "Start voice input for your follow-up")}
+          <div class="journey-action-row">
+            <button type="button" data-career-journey-save-moment ${saveDisabled ? "disabled" : ""}>Save This Moment</button>
+          </div>
+        </div>
+      ` : ""}
+      ${showDoneActions ? renderCareerJourneyChapterThreeNextStepPanel() : ""}
+    </div>
+  `;
+}
+
+function shouldRenderCareerJourneyStoryCoachForm() {
+  if (!hasCareerJourneyChapterThreeSavedMoment()) {
+    return true;
+  }
+
+  return ["adding", "editing", "coaching", "discovering"].includes(careerJourneyChapterThree.mode);
+}
+
+function renderCareerJourneyChapterThreeLoading() {
+  return `
+    <div class="journey-story-loading" aria-live="polite">
+      <div class="journey-story-loading-header">
+        <span class="journey-story-spinner" aria-hidden="true"></span>
+        <strong>Reflecting on your story</strong>
+      </div>
+      <p>NextMove is looking for what mattered and what may be worth exploring next.</p>
+      <blockquote class="journey-reflection-echo">${escapeHtml(careerJourneyChapterThree.draft.initialResponse)}</blockquote>
+    </div>
+  `;
+}
+
+function renderCareerJourneyReflectionCard() {
+  return `
+    <article class="journey-story-reflection-card" aria-live="polite">
+      <p class="eyebrow">What NextMove noticed</p>
+      <p>${escapeHtml(careerJourneyChapterThree.draft.reflection)}</p>
+      <div class="journey-reflection-grid">
+        <section>
+          <span>What NextMove asked</span>
+          <p>${escapeHtml(careerJourneyChapterThree.draft.followUpQuestion)}</p>
+        </section>
+        <section>
+          <span>What this may reveal</span>
+          <p>${escapeHtml(careerJourneyChapterThree.draft.possibleSignal)}</p>
+        </section>
+      </div>
+      <div class="journey-action-row">
+        <button type="button" class="secondary-button" data-career-journey-retry-story>Retry</button>
+      </div>
+    </article>
+  `;
+}
+
+function renderCareerJourneySavedMomentsList() {
+  return `
+    <article class="journey-story-saved-card" aria-live="polite">
+      <div class="journey-saved-moments-header">
+        <div>
+          <p class="eyebrow">Your Moments That Mattered</p>
+          <h4>${careerJourneyChapterThree.savedMoments.length} ${careerJourneyChapterThree.savedMoments.length === 1 ? "moment" : "moments"} captured</h4>
+        </div>
+      </div>
+      <div class="journey-moment-list">
+        ${careerJourneyChapterThree.savedMoments.map((moment) => renderCareerJourneyMomentPreview(moment)).join("")}
+      </div>
+    </article>
+  `;
+}
+
+function renderCareerJourneyMomentPreview(moment) {
+  return `
+    <article class="journey-moment-preview" data-career-journey-moment-id="${escapeAttribute(moment.id)}">
+      <p>${escapeHtml(previewText(moment.initialResponse))}</p>
+      <div class="journey-moment-preview-actions">
+        <button type="button" class="secondary-button" data-career-journey-view-moment="${escapeAttribute(moment.id)}">View Moment</button>
+        <button type="button" class="secondary-button" data-career-journey-edit-moment="${escapeAttribute(moment.id)}">Edit Moment</button>
+      </div>
+    </article>
+  `;
+}
+
+function renderCareerJourneyChapterThreeNextStepPanel() {
+  const isComplete = isCareerJourneyChapterThreeComplete();
+
+  return `
+    <article class="journey-story-next-step-panel ${isComplete ? "journey-story-next-step-panel-complete" : ""}">
+      <strong>${isComplete ? "Chapter 3 is complete for now" : `${careerJourneyChapterThree.savedMoments.length} ${careerJourneyChapterThree.savedMoments.length === 1 ? "moment" : "moments"} captured`}</strong>
+      <p>${isComplete ? "Your saved moments are still here. Adding another moment will reopen Chapter 3 until you confirm completion again." : "Do you have another moment you want to explore?"}</p>
+      <div class="journey-action-row">
+        <button type="button" class="secondary-button" data-career-journey-add-moment>Add Another Moment</button>
+        ${isComplete ? "" : `<button type="button" data-career-journey-done-for-now>I'm Done for Now</button>`}
+      </div>
+    </article>
+  `;
+}
+
+function renderCareerJourneyChapterThreeSavedCard() {
+  const moment = getActiveCareerJourneyMoment();
+  if (!moment) {
+    return "";
+  }
+
+  return `
+    <article class="journey-story-saved-card" aria-live="polite">
+      <p class="eyebrow">Saved Reflection</p>
+      <h4>Moments That Mattered</h4>
+      <div class="journey-saved-sections">
+        ${renderCareerJourneySavedSection("The moment", moment.initialResponse, "user")}
+        ${renderCareerJourneySavedSection("What NextMove noticed", moment.reflection, "ai")}
+        ${renderCareerJourneySavedSection("What NextMove asked", moment.followUpQuestion, "ai")}
+        ${renderCareerJourneySavedSection("What you added", moment.followUpResponse, "user")}
+        ${renderCareerJourneySavedSection("What this may reveal", moment.possibleSignal, "ai")}
+      </div>
+      <div class="journey-action-row">
+        <button type="button" class="secondary-button" data-career-journey-back-to-moments>Back to Moments</button>
+        <button type="button" class="secondary-button" data-career-journey-edit-moment="${escapeAttribute(moment.id)}">Edit Moment</button>
+      </div>
+    </article>
+  `;
+}
+
+function renderCareerJourneySavedSection(title, content, source) {
+  return `
+    <section class="journey-saved-section journey-saved-section-${source}">
+      <span>${escapeHtml(title)}</span>
+      <p>${escapeHtml(content)}</p>
+    </section>
+  `;
+}
+
+function renderCareerJourneyVoiceControls(fieldName, fieldLabel, startLabel) {
+  const isCurrentField = careerJourneyChapterThree.voiceTarget === fieldName;
+  const state = isCurrentField ? careerJourneyChapterThree.voiceState : "idle";
+  const message = isCurrentField ? deriveVoiceMessage(state, careerJourneyChapterThree.voiceMessage) : "Use voice if it helps. Your transcript will stay editable before anything is submitted.";
+  const stopVisible = isCurrentField && (state === "requesting" || state === "listening" || state === "processing");
+
+  return `
+    <div class="journey-voice-row">
+      <div class="journey-voice-actions">
+        <button type="button" class="secondary-button" data-career-journey-voice-start="${escapeAttribute(fieldName)}" aria-label="${escapeAttribute(startLabel)}">
+          ${state === "unsupported" ? "Voice unavailable" : `Use voice for ${escapeHtml(fieldLabel)}`}
+        </button>
+        <button type="button" class="secondary-button journey-voice-stop ${stopVisible ? "" : "hidden"}" data-career-journey-voice-stop>Stop Listening</button>
+      </div>
+      <div class="journey-voice-copy">
+        <span>Voice is optional. Typed editing stays available.</span>
+        <p class="journey-voice-status" data-career-journey-voice-status="${escapeAttribute(fieldName)}" data-voice-state="${escapeAttribute(state)}" aria-live="polite">${escapeHtml(message)}</p>
+      </div>
+    </div>
+  `;
+}
+
+function renderCareerJourneyChapterThreeError() {
+  if (!careerJourneyChapterThree.error) {
+    return "";
+  }
+
+  return `<p class="journey-inline-validation" role="alert">${escapeHtml(careerJourneyChapterThree.error)}</p>`;
+}
+
 function renderCareerJourneyChapterTwoYears() {
   const startYear = cleanValue(careerJourneyChapterTwoEntry.startYear);
   const endYear = cleanValue(careerJourneyChapterTwoEntry.endYear);
@@ -1297,6 +1548,155 @@ function hasCareerJourneyChapterTwoEntry() {
   return Boolean(cleanValue(careerJourneyChapterTwoEntry.seasonTitle));
 }
 
+function emptyCareerJourneyChapterThreeState() {
+  return {
+    savedMoments: [],
+    activeMomentId: "",
+    draft: emptyCareerJourneyChapterThreeDraft(),
+    chapterCompletionConfirmed: false,
+    voiceState: "idle",
+    voiceTarget: "",
+    voiceMessage: "",
+    aiState: "idle",
+    mode: "idle",
+    error: "",
+  };
+}
+
+function emptyCareerJourneyChapterThreeDraft() {
+  return {
+    id: "",
+    initialResponse: "",
+    reflection: "",
+    followUpQuestion: "",
+    followUpResponse: "",
+    possibleSignal: "",
+  };
+}
+
+function resetCareerJourneyChapterThree() {
+  stopCareerJourneyVoiceCapture();
+  careerJourneyChapterThree = emptyCareerJourneyChapterThreeState();
+}
+
+function hasCareerJourneyChapterThreeSavedMoment() {
+  return careerJourneyChapterThree.savedMoments.length > 0;
+}
+
+function isCareerJourneyChapterThreeComplete() {
+  return hasCareerJourneyChapterThreeSavedMoment() && careerJourneyChapterThree.chapterCompletionConfirmed;
+}
+
+function isCareerJourneyChapterThreeIdle() {
+  return !hasCareerJourneyChapterThreeSavedMoment()
+    && !hasMeaningfulCareerJourneyChapterThreeDraft()
+    && careerJourneyChapterThree.aiState === "idle";
+}
+
+function deriveCareerJourneyChapterThreeProgressMessage() {
+  if (careerJourneyChapterThree.aiState === "loading") {
+    return "Chapter 3 is exploring this story.";
+  }
+
+  if (isCareerJourneyChapterThreeComplete()) {
+    return `${careerJourneyChapterThree.savedMoments.length} ${careerJourneyChapterThree.savedMoments.length === 1 ? "moment" : "moments"} captured. Chapter 3 is complete for now.`;
+  }
+
+  if (hasCareerJourneyChapterThreeSavedMoment() && !careerJourneyChapterThree.chapterCompletionConfirmed) {
+    return `${careerJourneyChapterThree.savedMoments.length} ${careerJourneyChapterThree.savedMoments.length === 1 ? "moment" : "moments"} captured. Confirm when you're done for now.`;
+  }
+
+  if (careerJourneyChapterThree.draft.reflection) {
+    return "Chapter 3 is waiting for your follow-up and save.";
+  }
+
+  return "Chapter 3 is in progress.";
+}
+
+function getActiveCareerJourneyMoment() {
+  const id = cleanValue(careerJourneyChapterThree.activeMomentId);
+  if (!id) {
+    return null;
+  }
+
+  return careerJourneyChapterThree.savedMoments.find((moment) => moment.id === id) || null;
+}
+
+function createCareerJourneyMomentId() {
+  careerJourneyMomentIdCounter += 1;
+  return `journey_moment_${careerJourneyMomentIdCounter}`;
+}
+
+function createCareerJourneyMomentFromDraft() {
+  return {
+    id: careerJourneyChapterThree.draft.id || createCareerJourneyMomentId(),
+    initialResponse: cleanValue(careerJourneyChapterThree.draft.initialResponse),
+    reflection: cleanValue(careerJourneyChapterThree.draft.reflection),
+    followUpQuestion: cleanValue(careerJourneyChapterThree.draft.followUpQuestion),
+    followUpResponse: cleanValue(careerJourneyChapterThree.draft.followUpResponse),
+    possibleSignal: cleanValue(careerJourneyChapterThree.draft.possibleSignal),
+    savedAt: new Date().toISOString(),
+  };
+}
+
+function beginCareerJourneyNewMoment() {
+  stopCareerJourneyVoiceCapture();
+  careerJourneyChapterThree.activeMomentId = "";
+  careerJourneyChapterThree.draft = emptyCareerJourneyChapterThreeDraft();
+  careerJourneyChapterThree.aiState = "idle";
+  careerJourneyChapterThree.error = "";
+  careerJourneyChapterThree.mode = hasCareerJourneyChapterThreeSavedMoment() ? "adding" : "discovering";
+  careerJourneyChapterThree.chapterCompletionConfirmed = false;
+}
+
+function openCareerJourneyMomentById(momentId, mode = "viewing") {
+  const moment = careerJourneyChapterThree.savedMoments.find((entry) => entry.id === momentId);
+  if (!moment) {
+    return false;
+  }
+
+  stopCareerJourneyVoiceCapture();
+  careerJourneyChapterThree.activeMomentId = moment.id;
+  careerJourneyChapterThree.draft = { ...moment };
+  careerJourneyChapterThree.aiState = "idle";
+  careerJourneyChapterThree.error = "";
+  careerJourneyChapterThree.mode = mode;
+  return true;
+}
+
+function previewText(value, maxLength = 120) {
+  const text = cleanValue(value);
+  if (!text) {
+    return "Saved moment";
+  }
+
+  return text.length > maxLength ? `${text.slice(0, maxLength - 3)}...` : text;
+}
+
+function deriveVoiceMessage(state, fallbackMessage = "") {
+  if (fallbackMessage) {
+    return fallbackMessage;
+  }
+
+  const messages = {
+    idle: "Use voice if it helps. Your transcript will stay editable before anything is submitted.",
+    requesting: "Waiting for microphone permission.",
+    listening: "Listening now. You can stop whenever you want.",
+    processing: "Finishing the transcript.",
+    complete: "Transcript added. Review and edit it before you continue.",
+    denied: "Microphone permission was denied. You can keep typing instead.",
+    unsupported: "Voice input is not supported in this browser. You can keep typing instead.",
+    "no-speech": "No speech was detected. You can try again or keep typing.",
+    error: "Voice input hit an error. You can try again or keep typing.",
+  };
+
+  return messages[state] || messages.idle;
+}
+
+function isVoiceWorking(state) {
+  return ["requesting", "listening", "processing"].includes(state);
+}
+
 function emptyCareerJourneyChapterTwoEntry() {
   return {
     seasonTitle: "",
@@ -1305,6 +1705,437 @@ function emptyCareerJourneyChapterTwoEntry() {
     endYear: "",
     seasonReflection: "",
   };
+}
+
+function bindCareerJourneyChapterThreeActions() {
+  const initialField = document.querySelector('textarea[name="chapterThreeInitialResponse"]');
+  if (initialField && initialField.dataset.bound !== "true") {
+    initialField.dataset.bound = "true";
+    initialField.addEventListener("input", (event) => {
+      careerJourneyChapterThree.draft.initialResponse = event.target.value;
+      careerJourneyChapterThree.error = "";
+      if (careerJourneyChapterThree.mode === "idle" && cleanValue(careerJourneyChapterThree.draft.initialResponse)) {
+        careerJourneyChapterThree.mode = "discovering";
+        renderCareerJourney();
+        bindCareerJourneyActions();
+        return;
+      }
+      const exploreButton = document.querySelector("[data-career-journey-explore-story]");
+      if (exploreButton) {
+        exploreButton.disabled = !cleanValue(careerJourneyChapterThree.draft.initialResponse) || careerJourneyChapterThree.aiState === "loading";
+      }
+    });
+  }
+
+  const followUpField = document.querySelector('textarea[name="chapterThreeFollowUpResponse"]');
+  if (followUpField && followUpField.dataset.bound !== "true") {
+    followUpField.dataset.bound = "true";
+    followUpField.addEventListener("input", (event) => {
+      careerJourneyChapterThree.draft.followUpResponse = event.target.value;
+      careerJourneyChapterThree.error = "";
+      updateCareerJourneyChapterThreeActionAvailability();
+    });
+  }
+
+  const voiceStopButtons = document.querySelectorAll("[data-career-journey-voice-stop]");
+  voiceStopButtons.forEach((button) => {
+    if (button.dataset.bound === "true") {
+      return;
+    }
+
+    button.dataset.bound = "true";
+    button.addEventListener("click", () => {
+      stopCareerJourneyVoiceCapture("processing", "Finishing the transcript.");
+      syncCareerJourneyVoiceStatusUi();
+    });
+  });
+
+  const exploreButton = document.querySelector("[data-career-journey-explore-story]");
+  if (exploreButton && exploreButton.dataset.bound !== "true") {
+    exploreButton.dataset.bound = "true";
+    exploreButton.addEventListener("click", () => {
+      exploreCareerJourneyStory();
+    });
+  }
+
+  const retryButton = document.querySelector("[data-career-journey-retry-story]");
+  if (retryButton && retryButton.dataset.bound !== "true") {
+    retryButton.dataset.bound = "true";
+    retryButton.addEventListener("click", () => {
+      exploreCareerJourneyStory();
+    });
+  }
+
+  const saveButton = document.querySelector("[data-career-journey-save-moment]");
+  if (saveButton && saveButton.dataset.bound !== "true") {
+    saveButton.dataset.bound = "true";
+    saveButton.addEventListener("click", () => {
+      saveCareerJourneyStoryMoment();
+    });
+  }
+
+  const editButton = document.querySelector("[data-career-journey-edit-story]");
+  if (editButton && editButton.dataset.bound !== "true") {
+    editButton.dataset.bound = "true";
+    editButton.addEventListener("click", () => {
+      if (openCareerJourneyMomentById(careerJourneyChapterThree.activeMomentId, "editing")) {
+        renderCareerJourney();
+        bindCareerJourneyActions();
+        setJobsStatus("You can revise this story whenever you are ready.", "success");
+      }
+    });
+  }
+
+  const startOverButton = document.querySelector("[data-career-journey-start-over]");
+  if (startOverButton && startOverButton.dataset.bound !== "true") {
+    startOverButton.dataset.bound = "true";
+    startOverButton.addEventListener("click", () => {
+      if (!hasMeaningfulCareerJourneyChapterThreeDraft()) {
+        beginCareerJourneyNewMoment();
+        renderCareerJourney();
+        bindCareerJourneyActions();
+        setJobsStatus("Chapter 3 is ready for a new moment.", "idle");
+        return;
+      }
+
+      const confirmed = window.confirm("Clear this active Chapter 3 draft and start over? Saved moments will stay where they are.");
+      if (!confirmed) {
+        return;
+      }
+
+      beginCareerJourneyNewMoment();
+      renderCareerJourney();
+      bindCareerJourneyActions();
+      setJobsStatus("The active Chapter 3 draft was cleared. Saved moments were preserved.", "success");
+    });
+  }
+
+  const addMomentButton = document.querySelector("[data-career-journey-add-moment]");
+  if (addMomentButton && addMomentButton.dataset.bound !== "true") {
+    addMomentButton.dataset.bound = "true";
+    addMomentButton.addEventListener("click", () => {
+      beginCareerJourneyNewMoment();
+      renderCareerJourney();
+      bindCareerJourneyActions();
+      setJobsStatus("Chapter 3 is ready for another moment.", "success");
+    });
+  }
+
+  const doneButton = document.querySelector("[data-career-journey-done-for-now]");
+  if (doneButton && doneButton.dataset.bound !== "true") {
+    doneButton.dataset.bound = "true";
+    doneButton.addEventListener("click", () => {
+      if (!hasCareerJourneyChapterThreeSavedMoment()) {
+        setJobsStatus("Save at least one moment before completing Chapter 3.", "failure");
+        return;
+      }
+
+      careerJourneyChapterThree.chapterCompletionConfirmed = true;
+      careerJourneyChapterThree.mode = "saved-list";
+      careerJourneyChapterThree.error = "";
+      renderCareerJourney();
+      bindCareerJourneyActions();
+      setJobsStatus("Chapter 3 marked complete for now.", "success");
+    });
+  }
+
+  const backButton = document.querySelector("[data-career-journey-back-to-moments]");
+  if (backButton && backButton.dataset.bound !== "true") {
+    backButton.dataset.bound = "true";
+    backButton.addEventListener("click", () => {
+      careerJourneyChapterThree.mode = "saved-list";
+      careerJourneyChapterThree.error = "";
+      renderCareerJourney();
+      bindCareerJourneyActions();
+      setJobsStatus("Saved moments are ready to review.", "idle");
+    });
+  }
+
+  const viewButtons = document.querySelectorAll("[data-career-journey-view-moment]");
+  viewButtons.forEach((button) => {
+    if (button.dataset.bound === "true") {
+      return;
+    }
+
+    button.dataset.bound = "true";
+    button.addEventListener("click", () => {
+      if (openCareerJourneyMomentById(button.dataset.careerJourneyViewMoment || "", "viewing")) {
+        renderCareerJourney();
+        bindCareerJourneyActions();
+        setJobsStatus("Saved moment opened.", "idle");
+      }
+    });
+  });
+
+  const editMomentButtons = document.querySelectorAll("[data-career-journey-edit-moment]");
+  editMomentButtons.forEach((button) => {
+    if (button.dataset.bound === "true") {
+      return;
+    }
+
+    button.dataset.bound = "true";
+    button.addEventListener("click", () => {
+      if (openCareerJourneyMomentById(button.dataset.careerJourneyEditMoment || "", "editing")) {
+        careerJourneyChapterThree.chapterCompletionConfirmed = false;
+        renderCareerJourney();
+        bindCareerJourneyActions();
+        setJobsStatus("You can revise this saved moment whenever you are ready.", "success");
+      }
+    });
+  });
+
+  const voiceStartButtons = document.querySelectorAll("[data-career-journey-voice-start]");
+  voiceStartButtons.forEach((button) => {
+    if (button.dataset.bound === "true") {
+      return;
+    }
+
+    button.dataset.bound = "true";
+    button.addEventListener("click", () => {
+      startCareerJourneyVoiceCapture(button.dataset.careerJourneyVoiceStart || "");
+    });
+  });
+}
+
+function updateCareerJourneyChapterThreeActionAvailability() {
+  const saveButton = document.querySelector("[data-career-journey-save-moment]");
+  if (saveButton) {
+    saveButton.disabled = !cleanValue(careerJourneyChapterThree.draft.followUpResponse)
+      || !careerJourneyChapterThree.draft.reflection
+      || !careerJourneyChapterThree.draft.followUpQuestion
+      || !careerJourneyChapterThree.draft.possibleSignal;
+  }
+
+  const exploreButton = document.querySelector("[data-career-journey-explore-story]");
+  if (exploreButton) {
+    exploreButton.disabled = !cleanValue(careerJourneyChapterThree.draft.initialResponse) || careerJourneyChapterThree.aiState === "loading";
+  }
+}
+
+async function exploreCareerJourneyStory() {
+  const initialResponse = cleanValue(careerJourneyChapterThree.draft.initialResponse);
+  if (!initialResponse) {
+    careerJourneyChapterThree.error = "Add a real moment before you ask NextMove to explore it.";
+    careerJourneyChapterThree.mode = careerJourneyChapterThree.activeMomentId ? "editing" : "discovering";
+    renderCareerJourney();
+    bindCareerJourneyActions();
+    setJobsStatus("Tell NextMove about one moment before exploring the story.", "failure");
+    return;
+  }
+
+  careerJourneyChapterThree.error = "";
+  careerJourneyChapterThree.aiState = "loading";
+  careerJourneyChapterThree.mode = "coaching";
+  careerJourneyChapterThree.draft.reflection = "";
+  careerJourneyChapterThree.draft.followUpQuestion = "";
+  careerJourneyChapterThree.draft.possibleSignal = "";
+  renderCareerJourney();
+  bindCareerJourneyActions();
+  setJobsStatus("NextMove is exploring this story.", "working");
+
+  try {
+    const response = await fetch("/api/story-coach-reflection", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ initialResponse }),
+    });
+
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(payload.error || "Story exploration failed.");
+    }
+
+    const analysis = window.RightForMeStoryCoach.validateStoryCoachResponse(payload.analysis || {});
+    careerJourneyChapterThree.draft.initialResponse = initialResponse;
+    careerJourneyChapterThree.draft.reflection = analysis.reflection;
+    careerJourneyChapterThree.draft.followUpQuestion = analysis.followUpQuestion;
+    careerJourneyChapterThree.draft.possibleSignal = analysis.possibleSignal;
+    careerJourneyChapterThree.aiState = "success";
+    careerJourneyChapterThree.mode = careerJourneyChapterThree.activeMomentId ? "editing" : "coaching";
+    careerJourneyChapterThree.error = "";
+    renderCareerJourney();
+    bindCareerJourneyActions();
+    setJobsStatus("NextMove reflected on this moment and asked one follow-up question.", "success");
+  } catch (error) {
+    careerJourneyChapterThree.aiState = "failure";
+    careerJourneyChapterThree.mode = careerJourneyChapterThree.activeMomentId ? "editing" : "discovering";
+    careerJourneyChapterThree.error = error.message || "Story exploration failed.";
+    renderCareerJourney();
+    bindCareerJourneyActions();
+    setJobsStatus(careerJourneyChapterThree.error, "failure");
+  }
+}
+
+function saveCareerJourneyStoryMoment() {
+  const followUpResponse = cleanValue(careerJourneyChapterThree.draft.followUpResponse);
+  if (!followUpResponse) {
+    careerJourneyChapterThree.error = "Add your follow-up response before saving this moment.";
+    renderCareerJourney();
+    bindCareerJourneyActions();
+    setJobsStatus("Add your follow-up response before saving Chapter 3.", "failure");
+    return;
+  }
+
+  careerJourneyChapterThree.draft.followUpResponse = followUpResponse;
+  const savedMoment = createCareerJourneyMomentFromDraft();
+  const existingIndex = careerJourneyChapterThree.savedMoments.findIndex((moment) => moment.id === savedMoment.id);
+  if (existingIndex === -1) {
+    careerJourneyChapterThree.savedMoments = [...careerJourneyChapterThree.savedMoments, savedMoment];
+  } else {
+    careerJourneyChapterThree.savedMoments = careerJourneyChapterThree.savedMoments.map((moment) => moment.id === savedMoment.id ? savedMoment : moment);
+  }
+
+  careerJourneyChapterThree.activeMomentId = savedMoment.id;
+  careerJourneyChapterThree.draft = emptyCareerJourneyChapterThreeDraft();
+  careerJourneyChapterThree.chapterCompletionConfirmed = false;
+  careerJourneyChapterThree.mode = "saved-list";
+  careerJourneyChapterThree.error = "";
+  renderCareerJourney();
+  bindCareerJourneyActions();
+  setJobsStatus("Chapter 3 story moment saved for this session.", "success");
+}
+
+function hasMeaningfulCareerJourneyChapterThreeDraft() {
+  return [
+    careerJourneyChapterThree.draft.initialResponse,
+    careerJourneyChapterThree.draft.reflection,
+    careerJourneyChapterThree.draft.followUpQuestion,
+    careerJourneyChapterThree.draft.followUpResponse,
+    careerJourneyChapterThree.draft.possibleSignal,
+  ].some((value) => cleanValue(value));
+}
+
+function startCareerJourneyVoiceCapture(fieldName) {
+  const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!Recognition) {
+    careerJourneyChapterThree.voiceTarget = fieldName;
+    careerJourneyChapterThree.voiceState = "unsupported";
+    careerJourneyChapterThree.voiceMessage = deriveVoiceMessage("unsupported");
+    syncCareerJourneyVoiceStatusUi();
+    return;
+  }
+
+  stopCareerJourneyVoiceCapture();
+  const recognition = new Recognition();
+  let transcript = "";
+
+  recognition.lang = "en-US";
+  recognition.interimResults = true;
+  recognition.maxAlternatives = 1;
+
+  careerJourneyVoiceSession = recognition;
+  careerJourneyChapterThree.voiceTarget = fieldName;
+  careerJourneyChapterThree.voiceState = "requesting";
+  careerJourneyChapterThree.voiceMessage = deriveVoiceMessage("requesting");
+  syncCareerJourneyVoiceStatusUi();
+
+  recognition.onstart = () => {
+    careerJourneyChapterThree.voiceState = "listening";
+    careerJourneyChapterThree.voiceMessage = deriveVoiceMessage("listening");
+    syncCareerJourneyVoiceStatusUi();
+  };
+
+  recognition.onresult = (event) => {
+    transcript = Array.from(event.results || [])
+      .map((result) => result[0]?.transcript || "")
+      .join(" ")
+      .trim();
+    careerJourneyChapterThree.voiceState = "processing";
+    careerJourneyChapterThree.voiceMessage = deriveVoiceMessage("processing");
+    syncCareerJourneyVoiceStatusUi();
+  };
+
+  recognition.onerror = (event) => {
+    const errorState = event.error === "not-allowed" || event.error === "service-not-allowed"
+      ? "denied"
+      : event.error === "no-speech"
+        ? "no-speech"
+        : "error";
+    careerJourneyVoiceSession = null;
+    careerJourneyChapterThree.voiceState = errorState;
+    careerJourneyChapterThree.voiceMessage = deriveVoiceMessage(errorState);
+    syncCareerJourneyVoiceStatusUi();
+  };
+
+  recognition.onend = () => {
+    if (transcript) {
+      appendTranscriptToChapterThreeField(fieldName, transcript);
+      careerJourneyChapterThree.voiceState = "complete";
+      careerJourneyChapterThree.voiceMessage = deriveVoiceMessage("complete");
+    } else if (careerJourneyChapterThree.voiceState === "processing" || careerJourneyChapterThree.voiceState === "listening" || careerJourneyChapterThree.voiceState === "requesting") {
+      careerJourneyChapterThree.voiceState = "no-speech";
+      careerJourneyChapterThree.voiceMessage = deriveVoiceMessage("no-speech");
+    }
+
+    careerJourneyVoiceSession = null;
+    syncCareerJourneyVoiceStatusUi();
+  };
+
+  recognition.start();
+}
+
+function stopCareerJourneyVoiceCapture(nextState = "idle", message = "") {
+  if (careerJourneyVoiceSession) {
+    try {
+      careerJourneyVoiceSession.stop();
+    } catch (error) {
+      // Ignore stop races from browsers that end recognition quickly.
+    }
+  }
+
+  careerJourneyVoiceSession = null;
+  if (nextState !== "idle") {
+    careerJourneyChapterThree.voiceState = nextState;
+    careerJourneyChapterThree.voiceMessage = message || deriveVoiceMessage(nextState);
+  }
+}
+
+function appendTranscriptToChapterThreeField(fieldName, transcript) {
+  const existing = fieldName === "followUpResponse"
+    ? careerJourneyChapterThree.draft.followUpResponse
+    : careerJourneyChapterThree.draft.initialResponse;
+  const nextValue = cleanValue(existing)
+    ? `${String(existing).trimEnd()} ${transcript}`.trim()
+    : transcript;
+
+  if (fieldName === "followUpResponse") {
+    careerJourneyChapterThree.draft.followUpResponse = nextValue;
+  } else {
+    careerJourneyChapterThree.draft.initialResponse = nextValue;
+    if (careerJourneyChapterThree.mode === "idle" && cleanValue(nextValue)) {
+      careerJourneyChapterThree.mode = "discovering";
+      renderCareerJourney();
+      bindCareerJourneyActions();
+      return;
+    }
+  }
+
+  const selector = fieldName === "followUpResponse"
+    ? 'textarea[name="chapterThreeFollowUpResponse"]'
+    : 'textarea[name="chapterThreeInitialResponse"]';
+  const field = document.querySelector(selector);
+  if (field) {
+    field.value = nextValue;
+  }
+  updateCareerJourneyChapterThreeActionAvailability();
+}
+
+function syncCareerJourneyVoiceStatusUi() {
+  const target = cleanValue(careerJourneyChapterThree.voiceTarget);
+  const statusNode = document.querySelector(`[data-career-journey-voice-status="${target}"]`) || document.querySelector(".journey-voice-status");
+  if (statusNode) {
+    statusNode.textContent = deriveVoiceMessage(careerJourneyChapterThree.voiceState, careerJourneyChapterThree.voiceMessage);
+    statusNode.dataset.voiceState = careerJourneyChapterThree.voiceState;
+  }
+
+  const stopButtons = document.querySelectorAll("[data-career-journey-voice-stop]");
+  stopButtons.forEach((button) => {
+    const shouldShow = isVoiceWorking(careerJourneyChapterThree.voiceState);
+    button.classList?.toggle("hidden", !shouldShow);
+  });
+  updateCareerJourneyChapterThreeActionAvailability();
 }
 
 function renderCareerJourneyChapterCard(chapter, journeyState) {
@@ -1333,11 +2164,27 @@ function deriveCareerJourneyChapterMeta(chapter, journeyState) {
       return { className: "journey-chapter-card-upcoming", label: "Upcoming" };
     }
 
-    if (journeyState.badgeLabel.includes("complete")) {
+    if (hasCareerJourneyChapterTwoEntry() && !careerJourneyChapterTwoEditing) {
       return { className: "journey-chapter-card-complete", label: "Complete" };
     }
 
-    if (journeyState.badgeLabel.includes("in progress")) {
+    if (careerJourneyChapterTwoStarted) {
+      return { className: "journey-chapter-card-active", label: "In progress" };
+    }
+
+    return { className: "journey-chapter-card-ready", label: "Available next" };
+  }
+
+  if (chapter.number === 3) {
+    if (!hasCareerJourneyChapterTwoEntry()) {
+      return { className: "journey-chapter-card-upcoming", label: "Upcoming" };
+    }
+
+    if (isCareerJourneyChapterThreeComplete()) {
+      return { className: "journey-chapter-card-complete", label: "Complete" };
+    }
+
+    if (!isCareerJourneyChapterThreeIdle() || journeyState.badgeLabel.includes("in progress")) {
       return { className: "journey-chapter-card-active", label: "In progress" };
     }
 
@@ -1433,24 +2280,37 @@ function bindCareerJourneyActions() {
   }
 
   const chapterTwoForm = document.querySelector("[data-career-journey-chapter-two-form]");
-  if (!chapterTwoForm || chapterTwoForm.dataset.bound === "true") {
-    return;
-  }
+  if (chapterTwoForm && chapterTwoForm.dataset.bound !== "true") {
+    chapterTwoForm.dataset.bound = "true";
+    chapterTwoForm.addEventListener("submit", (event) => {
+      event.preventDefault();
 
-  chapterTwoForm.dataset.bound = "true";
-  chapterTwoForm.addEventListener("submit", (event) => {
-    event.preventDefault();
+      const seasonTitle = cleanValue(chapterTwoForm.elements.seasonTitle?.value);
+      const organization = cleanValue(chapterTwoForm.elements.organization?.value);
+      const startYear = cleanValue(chapterTwoForm.elements.startYear?.value);
+      const endYear = cleanValue(chapterTwoForm.elements.endYear?.value);
+      const seasonReflection = cleanValue(chapterTwoForm.elements.seasonReflection?.value);
 
-    const seasonTitle = cleanValue(chapterTwoForm.elements.seasonTitle?.value);
-    const organization = cleanValue(chapterTwoForm.elements.organization?.value);
-    const startYear = cleanValue(chapterTwoForm.elements.startYear?.value);
-    const endYear = cleanValue(chapterTwoForm.elements.endYear?.value);
-    const seasonReflection = cleanValue(chapterTwoForm.elements.seasonReflection?.value);
+      if (!seasonTitle) {
+        careerJourneyChapterTwoStarted = true;
+        careerJourneyChapterTwoEditing = true;
+        careerJourneyChapterTwoValidation = "Role or career season is required before you continue.";
+        careerJourneyChapterTwoEntry = {
+          seasonTitle,
+          organization,
+          startYear,
+          endYear,
+          seasonReflection,
+        };
+        renderCareerJourney();
+        bindCareerJourneyActions();
+        setJobsStatus("Add a role or career season before saving Chapter 2.", "failure");
+        return;
+      }
 
-    if (!seasonTitle) {
+      careerJourneyChapterTwoValidation = "";
       careerJourneyChapterTwoStarted = true;
-      careerJourneyChapterTwoEditing = true;
-      careerJourneyChapterTwoValidation = "Role or career season is required before you continue.";
+      careerJourneyChapterTwoEditing = false;
       careerJourneyChapterTwoEntry = {
         seasonTitle,
         organization,
@@ -1458,27 +2318,18 @@ function bindCareerJourneyActions() {
         endYear,
         seasonReflection,
       };
+
+      if (careerJourneyChapterThree.mode === "idle") {
+        resetCareerJourneyChapterThree();
+      }
+
       renderCareerJourney();
       bindCareerJourneyActions();
-      setJobsStatus("Add a role or career season before saving Chapter 2.", "failure");
-      return;
-    }
+      setJobsStatus("Chapter 2 career season captured for this session.", "success");
+    });
+  }
 
-    careerJourneyChapterTwoValidation = "";
-    careerJourneyChapterTwoStarted = true;
-    careerJourneyChapterTwoEditing = false;
-    careerJourneyChapterTwoEntry = {
-      seasonTitle,
-      organization,
-      startYear,
-      endYear,
-      seasonReflection,
-    };
-
-    renderCareerJourney();
-    bindCareerJourneyActions();
-    setJobsStatus("Chapter 2 career season captured for this session.", "success");
-  });
+  bindCareerJourneyChapterThreeActions();
 }
 
 function renderJobDetail(job) {

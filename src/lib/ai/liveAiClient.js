@@ -3,6 +3,11 @@
     buildJobAnalysisPrompt,
     parseAIJobAnalysisResponse,
   } = requireJobAnalysis(root);
+  const {
+    buildStoryCoachPrompt,
+    parseStoryCoachResponse,
+    responseJsonSchema: storyCoachResponseJsonSchema,
+  } = requireStoryCoach(root);
 
   async function analyzeJob(jobRecord = {}, userProfile = {}, options = {}) {
     if (!options.apiKey) {
@@ -54,6 +59,61 @@
     return {
       rawResponse: payload,
       parsedResponse: parseAIJobAnalysisResponse(payload),
+      modelName: requestBody.model,
+      requestSummary: options.requestSummary || {},
+    };
+  }
+
+  async function analyzeStory(initialResponse = "", options = {}) {
+    if (!options.apiKey) {
+      throw new Error("OPENAI_API_KEY is required for live AI mode. Set it in .env or enable VITE_AI_TEST_MODE=true for mock analysis.");
+    }
+
+    const prompt = buildStoryCoachPrompt(initialResponse);
+    const requestBody = {
+      model: options.model || "gpt-5.5",
+      input: [
+        {
+          role: "developer",
+          content: [
+            {
+              type: "input_text",
+              text: "Return valid JSON only. Follow the requested schema and do not include markdown.",
+            },
+          ],
+        },
+        {
+          role: "user",
+          content: [
+            {
+              type: "input_text",
+              text: prompt,
+            },
+          ],
+        },
+      ],
+      text: {
+        format: storyCoachResponseJsonSchema(),
+      },
+    };
+
+    const response = await fetch("https://api.openai.com/v1/responses", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${options.apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(payload.error?.message || `OpenAI request failed with status ${response.status}.`);
+    }
+
+    return {
+      rawResponse: payload,
+      parsedResponse: parseStoryCoachResponse(payload),
       modelName: requestBody.model,
       requestSummary: options.requestSummary || {},
     };
@@ -179,8 +239,17 @@
     return rootObject.RightForMeAIJobAnalysis;
   }
 
+  function requireStoryCoach(rootObject) {
+    if (typeof require !== "undefined") {
+      return require("../../jobsApplied/storyCoach");
+    }
+
+    return rootObject.RightForMeStoryCoach;
+  }
+
   const api = {
     analyzeJob,
+    analyzeStory,
   };
 
   if (typeof module !== "undefined" && module.exports) {

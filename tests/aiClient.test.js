@@ -2,6 +2,7 @@ const assert = require("node:assert/strict");
 
 const {
   analyzeJob,
+  analyzeStory,
   getAIMode,
   isAITestModeEnabled,
 } = require("../src/lib/ai/aiClient");
@@ -67,8 +68,26 @@ async function run() {
   assert.equal(typeof debug.durationMs, "number");
 
   resetAIDebugStore();
+  const story = await analyzeStory(
+    "I stepped into a tense launch week and kept the handoffs from breaking down.",
+    { env: { VITE_AI_TEST_MODE: "true" } }
+  );
+  assert.match(story.reflection, /asked something real of you/i);
+  assert.match(story.followUpQuestion, /\?/);
+  assert.match(story.possibleSignal, /may suggest/i);
+
+  const storyDebug = getLatestAIRequest();
+  assert.equal(storyDebug.flowName, "story-coach");
+  assert.equal(storyDebug.mode, "test");
+  assert.equal(typeof storyDebug.inputSummary.promptPreview, "string");
+
+  resetAIDebugStore();
   await assert.rejects(
     () => analyzeJob({ sourcePostingText: "Posting" }, {}, { env: {} }),
+    /OPENAI_API_KEY/
+  );
+  await assert.rejects(
+    () => analyzeStory("A moment", { env: {} }),
     /OPENAI_API_KEY/
   );
   const failureDebug = getLatestAIRequest();

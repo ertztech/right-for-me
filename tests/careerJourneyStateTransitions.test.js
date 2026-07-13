@@ -82,10 +82,10 @@ function createJourneyHarness() {
     return dynamicCache.get(cacheKey);
   }
 
-  function createButton(selector) {
+  function createButton(selector, dataset = {}) {
     return {
       selector,
-      dataset: {},
+      dataset,
       disabled: false,
       handlers: {},
       addEventListener(eventName, handler) {
@@ -142,6 +142,78 @@ function createJourneyHarness() {
           : null;
       }
 
+      if (selector === "[data-career-journey-explore-story]") {
+        return html.includes("data-career-journey-explore-story")
+          ? createDynamicNode(selector, () => createButton(selector))
+          : null;
+      }
+
+      if (selector === "[data-career-journey-retry-story]") {
+        return html.includes("data-career-journey-retry-story")
+          ? createDynamicNode(selector, () => createButton(selector))
+          : null;
+      }
+
+      if (selector === "[data-career-journey-save-moment]") {
+        return html.includes("data-career-journey-save-moment")
+          ? createDynamicNode(selector, () => createButton(selector))
+          : null;
+      }
+
+      if (selector === "[data-career-journey-edit-story]") {
+        return html.includes("data-career-journey-edit-story")
+          ? createDynamicNode(selector, () => createButton(selector))
+          : null;
+      }
+
+      if (selector === "[data-career-journey-start-over]") {
+        return html.includes("data-career-journey-start-over")
+          ? createDynamicNode(selector, () => createButton(selector))
+          : null;
+      }
+
+      if (selector === "[data-career-journey-add-moment]") {
+        return html.includes("data-career-journey-add-moment")
+          ? createDynamicNode(selector, () => createButton(selector))
+          : null;
+      }
+
+      if (selector === "[data-career-journey-done-for-now]") {
+        return html.includes("data-career-journey-done-for-now")
+          ? createDynamicNode(selector, () => createButton(selector))
+          : null;
+      }
+
+      if (selector === "[data-career-journey-back-to-moments]") {
+        return html.includes("data-career-journey-back-to-moments")
+          ? createDynamicNode(selector, () => createButton(selector))
+          : null;
+      }
+
+      if (selector === '[data-career-journey-view-moment="journey_moment_1"]') {
+        return html.includes('data-career-journey-view-moment="journey_moment_1"')
+          ? createDynamicNode('[data-career-journey-view-moment]:journey_moment_1', () => createButton(selector, { careerJourneyViewMoment: "journey_moment_1" }))
+          : null;
+      }
+
+      if (selector === '[data-career-journey-view-moment="journey_moment_2"]') {
+        return html.includes('data-career-journey-view-moment="journey_moment_2"')
+          ? createDynamicNode('[data-career-journey-view-moment]:journey_moment_2', () => createButton(selector, { careerJourneyViewMoment: "journey_moment_2" }))
+          : null;
+      }
+
+      if (selector === '[data-career-journey-edit-moment="journey_moment_1"]') {
+        return html.includes('data-career-journey-edit-moment="journey_moment_1"')
+          ? createDynamicNode('[data-career-journey-edit-moment]:journey_moment_1', () => createButton(selector, { careerJourneyEditMoment: "journey_moment_1" }))
+          : null;
+      }
+
+      if (selector === '[data-career-journey-edit-moment="journey_moment_2"]') {
+        return html.includes('data-career-journey-edit-moment="journey_moment_2"')
+          ? createDynamicNode('[data-career-journey-edit-moment]:journey_moment_2', () => createButton(selector, { careerJourneyEditMoment: "journey_moment_2" }))
+          : null;
+      }
+
       if (selector === "[data-career-journey-form]") {
         if (!html.includes("data-career-journey-form")) {
           return null;
@@ -170,9 +242,52 @@ function createJourneyHarness() {
         }));
       }
 
+      if (selector === 'textarea[name="chapterThreeInitialResponse"]') {
+        if (!html.includes('name="chapterThreeInitialResponse"')) {
+          return null;
+        }
+
+        return createDynamicNode(selector, () => ({
+          selector,
+          dataset: {},
+          value: extractTextareaValue(html, "chapterThreeInitialResponse"),
+          handlers: {},
+          addEventListener(eventName, handler) {
+            this.handlers[eventName] = handler;
+          },
+          dispatchInput(value) {
+            this.value = value;
+            this.handlers.input?.({ target: this });
+          },
+        }));
+      }
+
+      if (selector === 'textarea[name="chapterThreeFollowUpResponse"]') {
+        if (!html.includes('name="chapterThreeFollowUpResponse"')) {
+          return null;
+        }
+
+        return createDynamicNode(selector, () => ({
+          selector,
+          dataset: {},
+          value: extractTextareaValue(html, "chapterThreeFollowUpResponse"),
+          handlers: {},
+          addEventListener(eventName, handler) {
+            this.handlers[eventName] = handler;
+          },
+          dispatchInput(value) {
+            this.value = value;
+            this.handlers.input?.({ target: this });
+          },
+        }));
+      }
+
       return ensureNode(selector);
     },
     querySelectorAll(selector) {
+      const journeyNode = ensureNode("#career-journey-content");
+      const html = journeyNode.innerHTML;
+
       if (selector === "[data-jobs-page]") {
         return [
           { dataset: { jobsPage: "dashboard" }, classList: { toggle() {} }, scrollIntoView() {} },
@@ -185,6 +300,20 @@ function createJourneyHarness() {
           { dataset: { jobsRouteLink: "dashboard" }, classList: { toggle() {} } },
           { dataset: { jobsRouteLink: "journey" }, classList: { toggle() {} } },
         ];
+      }
+
+      if (selector === "[data-career-journey-voice-start]") {
+        return [];
+      }
+
+      if (selector === "[data-career-journey-view-moment]") {
+        const matches = [...html.matchAll(/data-career-journey-view-moment="([^"]+)"/g)];
+        return matches.map((match) => createDynamicNode(`[data-career-journey-view-moment]:${match[1]}`, () => createButton(selector, { careerJourneyViewMoment: match[1] })));
+      }
+
+      if (selector === "[data-career-journey-edit-moment]") {
+        const matches = [...html.matchAll(/data-career-journey-edit-moment="([^"]+)"/g)];
+        return matches.map((match) => createDynamicNode(`[data-career-journey-edit-moment]:${match[1]}`, () => createButton(selector, { careerJourneyEditMoment: match[1] })));
       }
 
       return [];
@@ -204,6 +333,7 @@ function createJourneyHarness() {
         writeText: async () => {},
       },
     },
+    confirm: () => true,
     location: {
       hash: "#/jobs/journey",
     },
@@ -226,6 +356,23 @@ function createJourneyHarness() {
     RightForMeAIJobAnalysis: {
       validateAIJobAnalysis: (analysis) => analysis,
       mergeAIJobAnalysis: () => ({}),
+    },
+    RightForMeStoryCoach: {
+      validateStoryCoachResponse: (analysis) => {
+        if (!analysis || typeof analysis !== "object") {
+          throw new Error("Malformed AI response.");
+        }
+
+        if (typeof analysis.reflection !== "string" || typeof analysis.followUpQuestion !== "string" || typeof analysis.possibleSignal !== "string") {
+          throw new Error("Malformed AI response.");
+        }
+
+        if (!analysis.reflection.trim() || !analysis.followUpQuestion.trim() || !analysis.possibleSignal.trim()) {
+          throw new Error("Malformed AI response.");
+        }
+
+        return analysis;
+      },
     },
     RightForMeFitReviewPrefill: {
       generateFitReviewPrefill: () => ({}),
@@ -285,6 +432,15 @@ function createJourneyHarness() {
       form.elements.seasonReflection.value = values.seasonReflection ?? form.elements.seasonReflection.value;
       form.submit();
     },
+    input(selector, value) {
+      const node = documentStub.querySelector(selector);
+      assert.ok(node, `Expected input ${selector} to be present.`);
+      node.dispatchInput(value);
+    },
+    appendVoice(fieldName, value) {
+      context.appendTranscriptToChapterThreeField(fieldName, value);
+      context.syncCareerJourneyVoiceStatusUi();
+    },
     render() {
       context.renderCareerJourney();
       context.bindCareerJourneyActions();
@@ -296,123 +452,186 @@ function countMatches(text, needle) {
   return (text.match(new RegExp(needle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g")) || []).length;
 }
 
-const journey = createJourneyHarness();
+async function run() {
+  const journey = createJourneyHarness();
 
-journey.render();
-assert.ok(journey.journeyHtml.includes("Chapter 1 of 5"));
-assert.ok(journey.journeyHtml.includes("Journey not started yet."));
-assert.ok(journey.journeyHtml.includes("Current chapter"));
-assert.ok(journey.journeyHtml.includes("Upcoming"));
+  journey.render();
+  assert.ok(journey.journeyHtml.includes("Chapter 1 of 5"));
+  assert.ok(journey.journeyHtml.includes("Journey not started yet."));
+  assert.ok(journey.journeyHtml.includes("Current chapter"));
+  assert.ok(journey.journeyHtml.includes("Upcoming"));
 
-journey.click("[data-start-career-journey]");
-assert.equal(journey.statusNode.textContent, "Career Journey started. Chapter 1 is ready for guided reflection.");
-assert.equal(journey.statusNode.dataset.actionState, "success");
-assert.ok(journey.journeyHtml.includes("Chapter 1 is in progress."));
+  journey.click("[data-start-career-journey]");
+  assert.equal(journey.statusNode.textContent, "Career Journey started. Chapter 1 is ready for guided reflection.");
+  assert.equal(journey.statusNode.dataset.actionState, "success");
+  assert.ok(journey.journeyHtml.includes("Chapter 1 is in progress."));
 
-journey.submitChapterOne("");
-assert.equal(journey.statusNode.textContent, "You can keep going when you are ready.");
-assert.equal(journey.statusNode.dataset.actionState, "idle");
-assert.ok(journey.journeyHtml.includes("Chapter 1 is in progress."));
-assert.ok(journey.journeyHtml.includes("Chapter 1 is now in motion, even if you are still finding the words."));
-assert.ok(!journey.journeyHtml.includes("Chapter 2 preview"));
+  journey.submitChapterOne("");
+  assert.equal(journey.statusNode.textContent, "You can keep going when you are ready.");
+  assert.equal(journey.statusNode.dataset.actionState, "idle");
+  assert.ok(journey.journeyHtml.includes("Chapter 1 is in progress."));
+  assert.ok(journey.journeyHtml.includes("Chapter 1 is now in motion, even if you are still finding the words."));
+  assert.ok(!journey.journeyHtml.includes("Chapter 2 preview"));
 
-journey.submitChapterOne("   ");
-assert.equal(journey.statusNode.textContent, "You can keep going when you are ready.");
-assert.ok(journey.journeyHtml.includes("Chapter 1 is in progress."));
-assert.ok(!journey.journeyHtml.includes("<blockquote class=\"journey-reflection-echo\">"));
+  journey.submitChapterOne("   ");
+  assert.equal(journey.statusNode.textContent, "You can keep going when you are ready.");
+  assert.ok(journey.journeyHtml.includes("Chapter 1 is in progress."));
+  assert.ok(!journey.journeyHtml.includes("<blockquote class=\"journey-reflection-echo\">"));
 
-journey.submitChapterOne("I am ready to reconnect my operations work with roles that value calmer leadership.");
-assert.equal(journey.statusNode.textContent, "Chapter 1 reflection captured for this session.");
-assert.equal(journey.statusNode.dataset.actionState, "success");
-assert.ok(journey.journeyHtml.includes("Chapter 2 of 5"));
-assert.ok(journey.journeyHtml.includes("Chapter 2 is available when you are ready."));
-assert.ok(journey.journeyHtml.includes("Chapter 1 reflection"));
-assert.ok(journey.journeyHtml.includes("I am ready to reconnect my operations work with roles that value calmer leadership."));
-assert.ok(journey.journeyHtml.includes("Complete"));
-assert.ok(journey.journeyHtml.includes("Available next"));
+  journey.submitChapterOne("I am ready to reconnect my operations work with roles that value calmer leadership.");
+  assert.equal(journey.statusNode.textContent, "Chapter 1 reflection captured for this session.");
+  assert.equal(journey.statusNode.dataset.actionState, "success");
+  assert.ok(journey.journeyHtml.includes("Chapter 2 of 5"));
+  assert.ok(journey.journeyHtml.includes("Chapter 2 is available when you are ready."));
+  assert.ok(journey.journeyHtml.includes("Complete"));
+  assert.ok(journey.journeyHtml.includes("Available next"));
 
-journey.click("[data-edit-career-journey-chapter-one]");
-assert.equal(journey.statusNode.textContent, "You can revise this reflection whenever you are ready.");
-assert.ok(journey.journeyHtml.includes("Save Reflection"));
-const chapterOneEditForm = journey.context.document.querySelector("[data-career-journey-form]");
-assert.equal(
-  chapterOneEditForm.elements.chapterOneResponse.value,
-  "I am ready to reconnect my operations work with roles that value calmer leadership."
-);
+  journey.click("[data-start-career-journey-chapter-two]");
+  assert.equal(journey.statusNode.textContent, "Chapter 2 is ready for one career season.");
+  assert.ok(journey.journeyHtml.includes("Chapter 2 is in progress."));
+  assert.ok(journey.journeyHtml.includes("Role or career season"));
 
-journey.submitChapterOne("I want to tell a clearer story about change leadership and measurable delivery.");
-assert.ok(journey.journeyHtml.includes("I want to tell a clearer story about change leadership and measurable delivery."));
-assert.ok(!journey.journeyHtml.includes("I am ready to reconnect my operations work with roles that value calmer leadership."));
+  journey.submitChapterTwo({
+    seasonTitle: "   ",
+    organization: "Northwind Labs",
+    startYear: "2022",
+    endYear: "2024",
+    seasonReflection: "Built calmer systems after a volatile stretch.",
+  });
+  assert.equal(journey.statusNode.textContent, "Add a role or career season before saving Chapter 2.");
+  assert.equal(journey.statusNode.dataset.actionState, "failure");
+  assert.ok(journey.journeyHtml.includes("Role or career season is required before you continue."));
+  assert.ok(journey.journeyHtml.includes("Chapter 2 is in progress."));
 
-journey.click("[data-edit-career-journey-chapter-one]");
-journey.submitChapterOne("   ");
-assert.equal(journey.statusNode.textContent, "You can keep going when you are ready.");
-assert.ok(journey.journeyHtml.includes("Chapter 1 is in progress."));
-assert.ok(journey.journeyHtml.includes("Current chapter"));
-assert.ok(journey.journeyHtml.includes("Upcoming"));
-assert.ok(!journey.journeyHtml.includes("Available next"));
-assert.ok(!journey.journeyHtml.includes("I want to tell a clearer story about change leadership and measurable delivery."));
+  journey.submitChapterTwo({
+    seasonTitle: "Operations Lead",
+    organization: "Northwind Labs",
+    startYear: "2022",
+    endYear: "2024",
+    seasonReflection: "Built calmer systems after a volatile stretch.",
+  });
+  assert.equal(journey.statusNode.textContent, "Chapter 2 career season captured for this session.");
+  assert.equal(journey.statusNode.dataset.actionState, "success");
+  assert.ok(journey.journeyHtml.includes("Chapter 3 is available when you are ready."));
+  assert.ok(journey.journeyHtml.includes("Complete"));
+  assert.ok(journey.journeyHtml.includes("Chapter 3 next"));
+  assert.ok(journey.journeyHtml.includes("Available next"));
+  assert.ok(journey.journeyHtml.includes("Chapter 3 of 5"));
+  assert.ok(journey.journeyHtml.includes("Moments That Mattered"));
+  assert.ok(journey.journeyHtml.includes("Explore This Story"));
 
-journey.submitChapterOne("I am rebuilding momentum after a transition year.");
-assert.ok(journey.journeyHtml.includes("I am rebuilding momentum after a transition year."));
-assert.ok(!journey.journeyHtml.includes("I want to tell a clearer story about change leadership and measurable delivery."));
-assert.ok(journey.journeyHtml.includes("Chapter 2 is available when you are ready."));
+  journey.context.fetch = async (_url, options) => {
+  const body = JSON.parse(options.body);
+  if (body.initialResponse.includes("malformed")) {
+    return {
+      ok: true,
+      json: async () => ({ analysis: { reflection: "", followUpQuestion: "", possibleSignal: "" } }),
+    };
+  }
 
-journey.click("[data-start-career-journey-chapter-two]");
-assert.equal(journey.statusNode.textContent, "Chapter 2 is ready for one career season.");
-assert.ok(journey.journeyHtml.includes("Chapter 2 is in progress."));
-assert.ok(journey.journeyHtml.includes("Role or career season"));
+  return {
+    ok: true,
+    json: async () => ({
+      analysis: {
+        reflection: "This moment seems to have stayed with you because you were holding things together under pressure.",
+        followUpQuestion: "What felt most important for you to protect in that moment?",
+        possibleSignal: "This may suggest that you pay close attention to stability when stakes feel high.",
+      },
+    }),
+  };
+  };
 
-journey.submitChapterTwo({
-  seasonTitle: "   ",
-  organization: "Northwind Labs",
-  startYear: "2022",
-  endYear: "2024",
-  seasonReflection: "Built calmer systems after a volatile stretch.",
-});
-assert.equal(journey.statusNode.textContent, "Add a role or career season before saving Chapter 2.");
-assert.equal(journey.statusNode.dataset.actionState, "failure");
-assert.ok(journey.journeyHtml.includes("Role or career season is required before you continue."));
-assert.ok(journey.journeyHtml.includes("Chapter 2 is in progress."));
+  journey.appendVoice("initialResponse", "   ");
+  assert.ok(journey.journeyHtml.includes("Chapter 3 is available when you are ready."));
 
-journey.submitChapterTwo({
-  seasonTitle: "Operations Lead",
-  organization: "Northwind Labs",
-  startYear: "2022",
-  endYear: "2024",
-  seasonReflection: "Built calmer systems after a volatile stretch.",
-});
-assert.equal(journey.statusNode.textContent, "Chapter 2 career season captured for this session.");
-assert.equal(journey.statusNode.dataset.actionState, "success");
-assert.ok(journey.journeyHtml.includes("Chapter 2 is complete for this session."));
-assert.ok(journey.journeyHtml.includes("<strong>Operations Lead</strong>"));
-assert.ok(journey.journeyHtml.includes("Northwind Labs"));
-assert.ok(journey.journeyHtml.includes("2022 - 2024"));
-assert.ok(journey.journeyHtml.includes("Built calmer systems after a volatile stretch."));
-assert.ok(journey.journeyHtml.includes("Complete"));
+  journey.appendVoice("initialResponse", "I kept a launch handoff from falling apart when everyone was overloaded.");
+  assert.ok(journey.journeyHtml.includes("Chapter 3 is in progress."));
+  assert.ok(!journey.journeyHtml.includes("Chapter 3 is available when you are ready."));
+  assert.ok(!journey.journeyHtml.includes("Chapter 3 next"));
+  assert.ok(journey.journeyHtml.includes("I kept a launch handoff from falling apart when everyone was overloaded."));
+  journey.click("[data-career-journey-explore-story]");
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(journey.statusNode.textContent, "NextMove reflected on this moment and asked one follow-up question.");
+  assert.ok(journey.journeyHtml.includes("What NextMove noticed"));
+  assert.ok(journey.journeyHtml.includes("What felt most important for you to protect in that moment?"));
+  assert.ok(journey.journeyHtml.includes("What this may reveal"));
 
-journey.click("[data-edit-career-journey-chapter-two]");
-assert.equal(journey.statusNode.textContent, "You can revise this career season whenever you are ready.");
-assert.ok(journey.journeyHtml.includes("Update Career Season"));
-const chapterTwoEditForm = journey.context.document.querySelector("[data-career-journey-chapter-two-form]");
-assert.equal(chapterTwoEditForm.elements.seasonTitle.value, "Operations Lead");
-assert.equal(chapterTwoEditForm.elements.organization.value, "Northwind Labs");
-assert.equal(chapterTwoEditForm.elements.startYear.value, "2022");
-assert.equal(chapterTwoEditForm.elements.endYear.value, "2024");
-assert.equal(chapterTwoEditForm.elements.seasonReflection.value, "Built calmer systems after a volatile stretch.");
+  journey.appendVoice("followUpResponse", "I was trying to keep the customer impact from getting worse while the team regrouped.");
+  journey.click("[data-career-journey-save-moment]");
+  assert.equal(journey.statusNode.textContent, "Chapter 3 story moment saved for this session.");
+  assert.ok(journey.journeyHtml.includes("Your Moments That Mattered"));
+  assert.ok(journey.journeyHtml.includes("1 moment captured"));
+  assert.ok(journey.journeyHtml.includes("I'm Done for Now"));
+  assert.ok(!journey.journeyHtml.includes("Chapter 3 is complete for now."));
 
-journey.submitChapterTwo({
-  seasonTitle: "Career Transition",
-  organization: "",
-  startYear: "",
-  endYear: "Present",
-  seasonReflection: "",
-});
-assert.ok(journey.journeyHtml.includes("<strong>Career Transition</strong>"));
-assert.ok(!journey.journeyHtml.includes("Operations Lead"));
-assert.ok(journey.journeyHtml.includes("Present"));
-assert.ok(!journey.journeyHtml.includes("Northwind Labs"));
-assert.ok(!journey.journeyHtml.includes("What mattered about this season?"));
-assert.equal(countMatches(journey.journeyHtml, "<strong>Career Transition</strong>"), 1);
-assert.equal(journey.statusNode.textContent, "Chapter 2 career season captured for this session.");
-assert.ok(journey.journeyHtml.includes("Chapter 2 is complete for this session."));
+  journey.click('[data-career-journey-view-moment="journey_moment_1"]');
+  assert.equal(journey.statusNode.textContent, "Saved moment opened.");
+  assert.ok(journey.journeyHtml.includes("Saved Reflection"));
+  assert.ok(journey.journeyHtml.includes("What you added"));
+  assert.ok(journey.journeyHtml.includes("Back to Moments"));
+
+  journey.click("[data-career-journey-back-to-moments]");
+  assert.ok(journey.journeyHtml.includes("Your Moments That Mattered"));
+
+  journey.click("[data-career-journey-add-moment]");
+  assert.equal(journey.statusNode.textContent, "Chapter 3 is ready for another moment.");
+  assert.ok(journey.journeyHtml.includes("1 moment captured"));
+  assert.ok(journey.journeyHtml.includes("Tell me about a moment at work"));
+  assert.ok(!journey.journeyHtml.includes("Chapter 3 next"));
+
+  journey.input('textarea[name="chapterThreeInitialResponse"]', "A malformed retry should preserve what I typed.");
+  journey.click("[data-career-journey-explore-story]");
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(journey.statusNode.dataset.actionState, "failure");
+  assert.ok(journey.journeyHtml.includes("Malformed AI response."));
+  assert.ok(journey.journeyHtml.includes("A malformed retry should preserve what I typed."));
+  assert.ok(journey.journeyHtml.includes("Your Moments That Mattered"));
+
+  journey.context.fetch = async () => ({
+    ok: true,
+    json: async () => ({
+      analysis: {
+        reflection: "This second moment seems to matter because you were trying to create steadiness while uncertainty was still present.",
+        followUpQuestion: "What did you feel responsible for protecting in that second moment?",
+        possibleSignal: "This may suggest that you stay attentive to risk before it becomes visible to everyone else.",
+      },
+    }),
+  });
+
+  journey.click("[data-career-journey-explore-story]");
+  await new Promise((resolve) => setImmediate(resolve));
+  journey.input('textarea[name="chapterThreeFollowUpResponse"]', "I was trying to protect the handoff quality before it turned into customer confusion.");
+  journey.click("[data-career-journey-save-moment]");
+  assert.ok(journey.journeyHtml.includes("2 moments captured"));
+  assert.ok(journey.journeyHtml.includes('data-career-journey-view-moment="journey_moment_1"'));
+  assert.ok(journey.journeyHtml.includes('data-career-journey-view-moment="journey_moment_2"'));
+
+  journey.click('[data-career-journey-edit-moment="journey_moment_1"]');
+  assert.equal(journey.statusNode.textContent, "You can revise this saved moment whenever you are ready.");
+  assert.ok(journey.journeyHtml.includes("Save This Moment"));
+  journey.input('textarea[name="chapterThreeInitialResponse"]', "I kept a launch handoff from falling apart and rewired the escalation path.");
+  journey.click("[data-career-journey-explore-story]");
+  await new Promise((resolve) => setImmediate(resolve));
+  journey.input('textarea[name="chapterThreeFollowUpResponse"]', "I was protecting the customer handoff and the team's ability to recover quickly.");
+  journey.click("[data-career-journey-save-moment]");
+  assert.ok(journey.journeyHtml.includes("2 moments captured"));
+  assert.equal(countMatches(journey.journeyHtml, 'data-career-journey-view-moment="journey_moment_1"'), 1);
+
+  journey.click("[data-career-journey-done-for-now]");
+  assert.equal(journey.statusNode.textContent, "Chapter 3 marked complete for now.");
+  assert.ok(journey.journeyHtml.includes("Complete"));
+
+  journey.click("[data-career-journey-add-moment]");
+  assert.equal(journey.statusNode.textContent, "Chapter 3 is ready for another moment.");
+  assert.ok(journey.journeyHtml.includes("In progress"));
+
+  journey.input('textarea[name="chapterThreeInitialResponse"]', "A fresh unsaved draft should clear without touching saved moments.");
+  journey.render();
+  journey.click("[data-career-journey-start-over]");
+  assert.equal(journey.statusNode.textContent, "The active Chapter 3 draft was cleared. Saved moments were preserved.");
+  assert.ok(journey.journeyHtml.includes("2 moments captured"));
+  assert.ok(journey.journeyHtml.includes("Explore This Story"));
+  assert.ok(!journey.journeyHtml.includes("Saved Reflection"));
+}
+
+run();
