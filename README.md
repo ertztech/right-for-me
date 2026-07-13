@@ -104,6 +104,8 @@ Create Packet now includes a Resume Generation MVP. Generate Resume creates a de
 
 AI output structure and prompt templates have been added for fit analysis, tailored resume, cover letter drafts, and interview prep. Live AI opportunity review is available through a small local Node server, and it requires an OpenAI API key. Resume generation currently falls back to deterministic local generation; future AI improvements can add a backend-only resume endpoint without exposing API keys to frontend code.
 
+Career Journey Chapter 3 now uses the same local server pattern for its NextMove Story Coach reflection. The browser sends the reviewed story text to a local endpoint, the server calls OpenAI, and the browser only receives the validated structured reflection payload.
+
 The app also includes a small reusable action feedback helper. Important actions can show idle, working, success, and failure states; buttons disable while work is running and restore after completion. This keeps clicks visible without adding a notification library.
 
 ### Live AI setup
@@ -129,6 +131,8 @@ node server.js
 ```
 
 Then open `http://localhost:4173` and use Opportunity Review -> Review Opportunity after pasting a job posting. Opening `index.html` directly still works for local-only features, but live AI requires the local server so the API key stays out of the browser.
+
+Career Journey Chapter 3 also requires the local server when you click `Explore This Story`, because Story Coach reflection runs server-side for the same credential-safety reason.
 
 AI calls use the OpenAI API and may cost money through your provider account. Never commit `.env` or any real API key. `.env` is ignored by Git.
 
@@ -158,6 +162,7 @@ node tests/resumeGenerateButton.test.js
 node tests/actionFeedback.test.js
 node tests/demoDataSeeder.test.js
 node tests/applicationStudioPacket.test.js
+node tests/storyCoach.test.js
 ```
 
 ### Demo Data / Local Testing

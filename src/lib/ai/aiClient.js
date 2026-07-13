@@ -47,6 +47,52 @@
     }
   }
 
+  async function analyzeStory(initialResponse = "", options = {}) {
+    const mode = getAIMode(options.env || process.env || {});
+    const testModeEnabled = mode === "test";
+    const startedAt = Date.now();
+    const inputSummary = {
+      initialResponseCharacters: stringValue(initialResponse).length,
+      promptPreview: stringValue(initialResponse).slice(0, 280),
+    };
+    const client = testModeEnabled ? mockAiClient : liveAiClient;
+
+    try {
+      const result = await client.analyzeStory(initialResponse, {
+        apiKey: options.apiKey,
+        model: options.model,
+        requestSummary: inputSummary,
+      });
+      const durationMs = Date.now() - startedAt;
+
+      aiDebugStore.setLatestAIRequest({
+        mode,
+        testModeEnabled,
+        timestamp: new Date(startedAt).toISOString(),
+        flowName: "story-coach",
+        inputSummary,
+        rawResponse: result.rawResponse,
+        parsedResponse: result.parsedResponse,
+        durationMs,
+      });
+
+      return result.parsedResponse;
+    } catch (error) {
+      const durationMs = Date.now() - startedAt;
+      aiDebugStore.setLatestAIRequest({
+        mode,
+        testModeEnabled,
+        timestamp: new Date(startedAt).toISOString(),
+        flowName: "story-coach",
+        inputSummary,
+        errorMessage: error.message || "AI request failed.",
+        durationMs,
+      });
+
+      throw error;
+    }
+  }
+
   function getAIMode(env = {}) {
     return isTruthy(env.VITE_AI_TEST_MODE || env.AI_TEST_MODE) ? "test" : "live";
   }
@@ -104,6 +150,7 @@
 
   const api = {
     analyzeJob,
+    analyzeStory,
     buildInputSummary,
     getAIMode,
     isAITestModeEnabled,

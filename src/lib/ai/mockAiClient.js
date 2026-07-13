@@ -1,11 +1,22 @@
 (function attachMockAIClient(root) {
   const { validateAIJobAnalysis } = requireJobAnalysis(root);
+  const { validateStoryCoachResponse } = requireStoryCoach(root);
 
   async function analyzeJob(jobRecord = {}, userProfile = {}, options = {}) {
     const response = buildMockJobAnalysis(jobRecord, userProfile);
     return {
       rawResponse: JSON.stringify(response),
       parsedResponse: validateAIJobAnalysis(response),
+      modelName: "nextmove-mock-ai",
+      requestSummary: options.requestSummary || {},
+    };
+  }
+
+  async function analyzeStory(initialResponse = "", options = {}) {
+    const response = buildMockStoryCoach(initialResponse);
+    return {
+      rawResponse: JSON.stringify(response),
+      parsedResponse: validateStoryCoachResponse(response),
       modelName: "nextmove-mock-ai",
       requestSummary: options.requestSummary || {},
     };
@@ -119,6 +130,17 @@
     };
   }
 
+  function buildMockStoryCoach(initialResponse = "") {
+    const response = stringValue(initialResponse) || "You described a moment that stayed with you.";
+    const shortSource = response.length > 140 ? `${response.slice(0, 137)}...` : response;
+
+    return {
+      reflection: `You stayed with a moment that seems to matter because it asked something real of you. The detail you shared already points to what felt weighty in that experience.`,
+      followUpQuestion: "What were you paying closest attention to in that moment?",
+      possibleSignal: `This may suggest that you notice responsibility quickly when a situation feels important. Source noted: "${shortSource}"`,
+    };
+  }
+
   function inferRoleTitle(text) {
     const match = stringValue(text).match(/\b(?:manager|lead|director|specialist|analyst|coordinator|consultant)\b[^\n.]{0,80}/i);
     return match ? titleCase(match[0]) : "";
@@ -162,9 +184,19 @@
     return rootObject.RightForMeAIJobAnalysis;
   }
 
+  function requireStoryCoach(rootObject) {
+    if (typeof require !== "undefined") {
+      return require("../../jobsApplied/storyCoach");
+    }
+
+    return rootObject.RightForMeStoryCoach;
+  }
+
   const api = {
     analyzeJob,
     buildMockJobAnalysis,
+    analyzeStory,
+    buildMockStoryCoach,
   };
 
   if (typeof module !== "undefined" && module.exports) {

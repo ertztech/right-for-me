@@ -5,6 +5,7 @@ const { URL } = require("url");
 
 const {
   analyzeJob,
+  analyzeStory,
   getAIMode,
   isAITestModeEnabled,
 } = require("./src/lib/ai/aiClient");
@@ -31,6 +32,11 @@ const server = http.createServer(async (req, res) => {
 
     if (req.method === "POST" && requestUrl.pathname === "/api/review-opportunity") {
       await handleReviewOpportunity(req, res);
+      return;
+    }
+
+    if (req.method === "POST" && requestUrl.pathname === "/api/story-coach-reflection") {
+      await handleStoryCoachReflection(req, res);
       return;
     }
 
@@ -65,6 +71,29 @@ async function handleReviewOpportunity(req, res) {
   }
 
   const analysis = await analyzeJob(jobRecord, body.profile || {}, {
+    apiKey: process.env.OPENAI_API_KEY,
+    model: process.env.OPENAI_MODEL || "gpt-5.5",
+    env: process.env,
+  });
+
+  sendJson(res, 200, {
+    analysis,
+    aiMode,
+    aiTestMode: isAITestModeEnabled(process.env),
+  });
+}
+
+async function handleStoryCoachReflection(req, res) {
+  const aiMode = getAIMode(process.env);
+  const body = await readJsonBody(req);
+  const initialResponse = String(body.initialResponse || "").trim();
+
+  if (!initialResponse) {
+    sendJson(res, 400, { error: "initialResponse is required before story exploration." });
+    return;
+  }
+
+  const analysis = await analyzeStory(initialResponse, {
     apiKey: process.env.OPENAI_API_KEY,
     model: process.env.OPENAI_MODEL || "gpt-5.5",
     env: process.env,
