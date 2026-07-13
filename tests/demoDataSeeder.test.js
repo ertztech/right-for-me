@@ -69,6 +69,7 @@ assert.equal(jobs.length, 4);
 assert.equal(jobs.filter(isDemoRecord).length, 3);
 assert.equal(jobs.some((job) => job.id === "real-job-1"), true);
 assert.equal(vaultState.demoData.seededBy, "nextmove-demo-data-seeder");
+assert.ok(vaultState.roles.every((role) => role.id));
 
 loadSampleData();
 jobs = RightForMeJobsAppliedStorage.getJobApplications();

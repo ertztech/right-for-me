@@ -57,6 +57,7 @@
       },
       roles: [
         {
+          id: "demo-role-northstar-operations-transformation-lead",
           company: "Northstar Manufacturing",
           title: "Operations Transformation Lead",
           start: "2021",
@@ -65,6 +66,7 @@
           demoData: demoMarker(),
         },
         {
+          id: "demo-role-lakeview-technical-program-manager",
           company: "Lakeview Systems",
           title: "Technical Program Manager",
           start: "2018",
