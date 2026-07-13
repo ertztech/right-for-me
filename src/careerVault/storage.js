@@ -1,4 +1,5 @@
 const VAULT_STORAGE_KEY = "rightforme-career-vault";
+let roleIdCounter = 0;
 
 const defaultVault = {
   person: {
@@ -32,7 +33,12 @@ function loadVault() {
   }
 
   try {
-    return normalizeVault(JSON.parse(saved));
+    const parsed = JSON.parse(saved);
+    const normalized = normalizeVault(parsed);
+    if (JSON.stringify(parsed) !== JSON.stringify(normalized)) {
+      saveVault(normalized);
+    }
+    return normalized;
   } catch {
     return createDefaultVault();
   }
@@ -52,7 +58,7 @@ function normalizeVault(vault = {}) {
       ...base.person,
       ...(vault.person || {}),
     },
-    roles: normalizeArray(vault.roles),
+    roles: normalizeRoles(vault.roles),
     skills: normalizeArray(vault.skills),
     tools: normalizeArray(vault.tools),
     accomplishments: normalizeArray(vault.accomplishments),
@@ -70,9 +76,48 @@ function normalizeArray(value) {
   return Array.isArray(value) ? value : [];
 }
 
+function normalizeRoles(value) {
+  return normalizeArray(value).map((role) => normalizeRole(role));
+}
+
+function normalizeRole(role = {}) {
+  const normalized = {
+    id: normalizeRoleId(role.id),
+    company: String(role.company || ""),
+    title: String(role.title || ""),
+    start: String(role.start || ""),
+    end: String(role.end || ""),
+    summary: String(role.summary || ""),
+  };
+
+  Object.keys(role || {}).forEach((key) => {
+    if (!(key in normalized)) {
+      normalized[key] = role[key];
+    }
+  });
+
+  return normalized;
+}
+
+function normalizeRoleId(value) {
+  const id = String(value || "").trim();
+  return id || generateRoleId();
+}
+
+function generateRoleId() {
+  if (typeof globalThis.crypto?.randomUUID === "function") {
+    return globalThis.crypto.randomUUID();
+  }
+
+  roleIdCounter += 1;
+  return `role_${Date.now().toString(36)}_${roleIdCounter.toString(36)}`;
+}
+
 window.RightForMeCareerVaultStorage = {
   loadVault,
   saveVault,
   createDefaultVault,
   normalizeVault,
+  normalizeRole,
+  generateRoleId,
 };

@@ -22,6 +22,25 @@ Early conceptual data areas:
 - values
 - metadata
 
+Current Work History role shape in Profile:
+
+```js
+{
+  id,
+  company,
+  title,
+  start,
+  end,
+  summary
+}
+```
+
+- `id` is durable identity for saved roles.
+- New roles receive IDs automatically.
+- Older loaded roles without IDs receive a small defensive assignment and keep their existing data.
+- Editing preserves the same `id`.
+- Array order is presentation only, not identity.
+
 ## What Career Journey Owns
 
 Career Journey owns the guided experience layer that helps a user uncover, shape, and organize information. It is responsible for the chapter-based flow, progress framing, and first-time or returning-user experience patterns.

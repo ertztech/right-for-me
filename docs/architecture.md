@@ -8,6 +8,25 @@ RightForMe is organized around feature folders. Each feature owns its own logic 
 
 Owns the Profile experience: collecting, saving, loading, and exporting the reusable professional data that powers the rest of the product. The internal module is still named `careerVault` to avoid unnecessary churn, but user-facing language should say Profile.
 
+Work History roles use this durable model:
+
+```js
+{
+  id,
+  company,
+  title,
+  start,
+  end,
+  summary
+}
+```
+
+- `id` is the durable identity for saved roles.
+- New roles receive IDs through the shared storage normalization path.
+- Loaded roles missing IDs receive a small defensive ID assignment during initialization.
+- Editing preserves the existing `id`.
+- Array position is not durable identity.
+
 ### `src/resume/`
 
 Owns resume generation. The builder creates the resume model, the markdown renderer turns that model into markdown, and the controller handles the page actions.

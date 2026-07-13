@@ -1,4 +1,6 @@
 function initializeCareerVaultController(vaultStore) {
+  let editingRoleId = "";
+  let roleEditorMessage = "";
   const vaultFields = {
     name: document.querySelector("#vault-name"),
     location: document.querySelector("#vault-location"),
@@ -27,13 +29,23 @@ function initializeCareerVaultController(vaultStore) {
     certifications: document.querySelector("#certifications-list"),
     careerPreferences: document.querySelector("#career-preferences-list"),
   };
+  const roleEditor = {
+    submit: document.querySelector("#add-role"),
+    cancel: document.querySelector("#cancel-role-edit"),
+    status: document.querySelector("#role-edit-status"),
+  };
 
   const status = document.querySelector("#vault-status");
 
   function render() {
     const vault = vaultStore.getVault();
     RightForMeCareerVaultView.populateVaultForm(vault, vaultFields);
-    RightForMeCareerVaultView.renderVaultLists(vault, lists, removeItem);
+    RightForMeCareerVaultView.renderVaultLists(vault, lists, {
+      onRemove: removeItem,
+      onEditRole: enterRoleEditMode,
+      editingRoleId,
+    });
+    RightForMeCareerVaultView.renderRoleEditorState(roleEditor, editingRoleId, roleEditorMessage);
   }
 
   function persist(message = "Profile saved.") {
@@ -58,30 +70,95 @@ function initializeCareerVaultController(vaultStore) {
     updatePersonFromForm();
   }
 
-  function addRole() {
-    const vault = vaultStore.getVault();
-
-    const role = {
+  function readRoleFromForm() {
+    return {
       company: roleFields.company.value.trim(),
       title: roleFields.title.value.trim(),
       start: roleFields.start.value.trim(),
       end: roleFields.end.value.trim(),
       summary: roleFields.summary.value.trim(),
     };
+  }
 
-    if (!role.company && !role.title) {
-      RightForMeCareerVaultView.setVaultStatus(status, "Add at least a company or title before saving a role.");
+  function populateRoleForm(role = {}) {
+    roleFields.company.value = role.company || "";
+    roleFields.title.value = role.title || "";
+    roleFields.start.value = role.start || "";
+    roleFields.end.value = role.end || "";
+    roleFields.summary.value = role.summary || "";
+  }
+
+  function clearRoleForm() {
+    populateRoleForm({});
+  }
+
+  function validateRole(role) {
+    if (!role.company || !role.title) {
+      roleEditorMessage = "Enter both a company and title before saving a role.";
+      RightForMeCareerVaultView.setVaultStatus(status, "Enter both a company and title before saving a role.");
+      return false;
+    }
+
+    return true;
+  }
+
+  function findRoleIndexById(roleId) {
+    return vaultStore.getVault().roles.findIndex((role) => role.id === roleId);
+  }
+
+  function exitRoleEditMode() {
+    editingRoleId = "";
+    roleEditorMessage = "";
+    clearRoleForm();
+  }
+
+  function enterRoleEditMode(roleId) {
+    const role = vaultStore.getVault().roles.find((item) => item.id === roleId);
+    if (!role) {
+      exitRoleEditMode();
+      render();
       return;
     }
 
-    vault.roles.push(role);
+    editingRoleId = role.id;
+    roleEditorMessage = "";
+    populateRoleForm(role);
+    render();
+  }
 
-    roleFields.company.value = "";
-    roleFields.title.value = "";
-    roleFields.start.value = "";
-    roleFields.end.value = "";
-    roleFields.summary.value = "";
+  function saveRole() {
+    const vault = vaultStore.getVault();
+    const roleValues = readRoleFromForm();
 
+    if (!validateRole(roleValues)) {
+      render();
+      return;
+    }
+
+    roleEditorMessage = "";
+
+    if (editingRoleId) {
+      const roleIndex = findRoleIndexById(editingRoleId);
+      if (roleIndex === -1) {
+        exitRoleEditMode();
+        RightForMeCareerVaultView.setVaultStatus(status, "That saved role is no longer available to edit.");
+        render();
+        return;
+      }
+
+      vault.roles[roleIndex] = RightForMeCareerVaultStorage.normalizeRole({
+        ...vault.roles[roleIndex],
+        ...roleValues,
+        id: vault.roles[roleIndex].id,
+      });
+      persist("Role updated.");
+      exitRoleEditMode();
+      render();
+      return;
+    }
+
+    vault.roles.push(RightForMeCareerVaultStorage.normalizeRole(roleValues));
+    clearRoleForm();
     persist();
     render();
   }
@@ -105,7 +182,15 @@ function initializeCareerVaultController(vaultStore) {
 
   function removeItem(type, index) {
     const vault = vaultStore.getVault();
-    vault[type].splice(index, 1);
+    if (type === "roles") {
+      const role = vault.roles[index];
+      vault.roles.splice(index, 1);
+      if (role?.id && role.id === editingRoleId) {
+        exitRoleEditMode();
+      }
+    } else {
+      vault[type].splice(index, 1);
+    }
 
     persist();
     render();
@@ -131,7 +216,11 @@ function initializeCareerVaultController(vaultStore) {
 
   document.querySelector("#save-vault").addEventListener("click", () => persist());
   document.querySelector("#export-vault").addEventListener("click", exportVault);
-  document.querySelector("#add-role").addEventListener("click", addRole);
+  document.querySelector("#add-role").addEventListener("click", saveRole);
+  document.querySelector("#cancel-role-edit").addEventListener("click", () => {
+    exitRoleEditMode();
+    render();
+  });
   document.querySelector("#add-skill").addEventListener("click", () => addSimpleItem("skills", "#skill-input"));
   document.querySelector("#add-tool").addEventListener("click", () => addSimpleItem("tools", "#tool-input"));
   document.querySelector("#add-accomplishment").addEventListener("click", () => addSimpleItem("accomplishments", "#accomplishment-input"));

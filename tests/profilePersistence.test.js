@@ -78,6 +78,7 @@ const reloaded = RightForMeCareerVaultStorage.loadVault();
 assert.equal(reloaded.person.name, "Jordan Lee");
 assert.equal(reloaded.person.location, "Chicago, IL");
 assert.equal(reloaded.professionalSummary, "Operations leader focused on practical change and measurable delivery.");
+assert.ok(reloaded.roles[0].id);
 assert.equal(reloaded.roles[0].company, "Example Co");
 assert.deepEqual(reloaded.skills, ["Stakeholder communication"]);
 assert.deepEqual(reloaded.metrics, ["Reduced cycle time by 18%."]);

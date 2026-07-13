@@ -347,7 +347,11 @@
             Summary
             <textarea id="role-summary-input" placeholder="Describe the role, scope, responsibilities, and measurable impact..."></textarea>
           </label>
-          <button type="button" id="add-role">Add Role</button>
+          <p id="role-edit-status" class="support-copy" aria-live="polite"></p>
+          <div class="button-row">
+            <button type="button" id="add-role">Add Role</button>
+            <button type="button" id="cancel-role-edit" class="secondary-button" hidden>Cancel</button>
+          </div>
           <ul id="roles-list"></ul>
         </div>
 
