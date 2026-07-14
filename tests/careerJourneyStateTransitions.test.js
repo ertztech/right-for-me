@@ -120,6 +120,24 @@ function createJourneyHarness() {
 
       if (selector === "[data-start-career-journey]") {
         return html.includes("data-start-career-journey")
+          ? createDynamicNode("[data-start-career-journey]:0", () => createButton(selector))
+          : null;
+      }
+
+      if (selector === "[data-start-career-journey-current]") {
+        return html.includes("data-start-career-journey-current")
+          ? createDynamicNode("[data-start-career-journey-current]", () => createButton(selector))
+          : null;
+      }
+
+      if (selector === "[data-career-journey-toggle-navigation]") {
+        return html.includes("data-career-journey-toggle-navigation")
+          ? createDynamicNode(selector, () => createButton(selector))
+          : null;
+      }
+
+      if (selector === "[data-career-journey-close-workspace]") {
+        return html.includes("data-career-journey-close-workspace")
           ? createDynamicNode(selector, () => createButton(selector))
           : null;
       }
@@ -233,6 +251,24 @@ function createJourneyHarness() {
           : null;
       }
 
+      if (selector === '[data-career-journey-open-chapter="1"]') {
+        return html.includes('data-career-journey-open-chapter="1"')
+          ? createDynamicNode('[data-career-journey-open-chapter]:1', () => createButton(selector, { careerJourneyOpenChapter: "1" }))
+          : null;
+      }
+
+      if (selector === '[data-career-journey-open-chapter="2"]') {
+        return html.includes('data-career-journey-open-chapter="2"')
+          ? createDynamicNode('[data-career-journey-open-chapter]:2', () => createButton(selector, { careerJourneyOpenChapter: "2" }))
+          : null;
+      }
+
+      if (selector === '[data-career-journey-open-chapter="3"]') {
+        return html.includes('data-career-journey-open-chapter="3"')
+          ? createDynamicNode('[data-career-journey-open-chapter]:3', () => createButton(selector, { careerJourneyOpenChapter: "3" }))
+          : null;
+      }
+
       if (selector === "[data-career-journey-form]") {
         if (!html.includes("data-career-journey-form")) {
           return null;
@@ -258,6 +294,122 @@ function createJourneyHarness() {
           endYear: { value: extractInputValue(html, "endYear") },
           seasonReflection: {
             value: extractTextareaValue(html, "seasonReflection"),
+          },
+        }));
+      }
+
+      if (selector === 'textarea[name="chapterOneResponse"]') {
+        if (!html.includes('name="chapterOneResponse"')) {
+          return null;
+        }
+
+        return createDynamicNode(selector, () => ({
+          selector,
+          dataset: {},
+          value: extractTextareaValue(html, "chapterOneResponse"),
+          handlers: {},
+          addEventListener(eventName, handler) {
+            this.handlers[eventName] = handler;
+          },
+          dispatchInput(value) {
+            this.value = value;
+            this.handlers.input?.({ target: this });
+          },
+        }));
+      }
+
+      if (selector === '[name="timelineEntryId"]') {
+        if (!html.includes('name="timelineEntryId"')) {
+          return null;
+        }
+
+        return createDynamicNode(selector, () => ({
+          selector,
+          dataset: {},
+          value: extractInputValue(html, "timelineEntryId"),
+          handlers: {},
+          addEventListener(eventName, handler) {
+            this.handlers[eventName] = handler;
+          },
+        }));
+      }
+
+      if (selector === '[name="seasonTitle"]') {
+        if (!html.includes('name="seasonTitle"')) {
+          return null;
+        }
+
+        return createDynamicNode(selector, () => ({
+          selector,
+          dataset: {},
+          value: extractInputValue(html, "seasonTitle"),
+          handlers: {},
+          addEventListener(eventName, handler) {
+            this.handlers[eventName] = handler;
+          },
+        }));
+      }
+
+      if (selector === '[name="organization"]') {
+        if (!html.includes('name="organization"')) {
+          return null;
+        }
+
+        return createDynamicNode(selector, () => ({
+          selector,
+          dataset: {},
+          value: extractInputValue(html, "organization"),
+          handlers: {},
+          addEventListener(eventName, handler) {
+            this.handlers[eventName] = handler;
+          },
+        }));
+      }
+
+      if (selector === '[name="startYear"]') {
+        if (!html.includes('name="startYear"')) {
+          return null;
+        }
+
+        return createDynamicNode(selector, () => ({
+          selector,
+          dataset: {},
+          value: extractInputValue(html, "startYear"),
+          handlers: {},
+          addEventListener(eventName, handler) {
+            this.handlers[eventName] = handler;
+          },
+        }));
+      }
+
+      if (selector === '[name="endYear"]') {
+        if (!html.includes('name="endYear"')) {
+          return null;
+        }
+
+        return createDynamicNode(selector, () => ({
+          selector,
+          dataset: {},
+          value: extractInputValue(html, "endYear"),
+          handlers: {},
+          addEventListener(eventName, handler) {
+            this.handlers[eventName] = handler;
+          },
+        }));
+      }
+
+      if (selector === '[name="seasonReflection"]') {
+        if (!html.includes('name="seasonReflection"')) {
+          return null;
+        }
+
+        return createDynamicNode(selector, () => ({
+          selector,
+          dataset: {},
+          value: extractTextareaValue(html, "seasonReflection"),
+          handlers: {},
+          addEventListener(eventName, handler) {
+            this.handlers[eventName] = handler;
           },
         }));
       }
@@ -334,6 +486,22 @@ function createJourneyHarness() {
       if (selector === "[data-career-journey-edit-moment]") {
         const matches = [...html.matchAll(/data-career-journey-edit-moment="([^"]+)"/g)];
         return matches.map((match) => createDynamicNode(`[data-career-journey-edit-moment]:${match[1]}`, () => createButton(selector, { careerJourneyEditMoment: match[1] })));
+      }
+
+      if (selector === "[data-career-journey-open-chapter]") {
+        const matches = [...html.matchAll(/data-career-journey-open-chapter="([^"]+)"/g)];
+        return matches.map((match) => createDynamicNode(`[data-career-journey-open-chapter]:${match[1]}`, () => createButton(selector, { careerJourneyOpenChapter: match[1] })));
+      }
+
+      if (selector === "[data-start-career-journey]") {
+        const matches = [...html.matchAll(/data-start-career-journey/g)];
+        return matches.map((_, index) => createDynamicNode(`[data-start-career-journey]:${index}`, () => createButton(selector)));
+      }
+
+      if (selector === "[data-start-career-journey-current]") {
+        return html.includes("data-start-career-journey-current")
+          ? [createDynamicNode("[data-start-career-journey-current]", () => createButton(selector))]
+          : [];
       }
 
       return [];
@@ -465,6 +633,14 @@ function createJourneyHarness() {
       context.renderCareerJourney();
       context.bindCareerJourneyActions();
     },
+    setChapterOneDraft(value) {
+      const serialized = JSON.stringify(String(value));
+      vm.runInContext(`
+        careerJourneyChapterOneResponse = ${serialized};
+        careerJourneyChapterOneSubmitted = false;
+        careerJourneyChapterOneEditing = true;
+      `, context);
+    },
   };
 }
 
@@ -473,6 +649,18 @@ function countMatches(text, needle) {
 }
 
 async function run() {
+  const chapterOneDraftJourney = createJourneyHarness();
+  chapterOneDraftJourney.setChapterOneDraft("I have a rough Chapter 1 draft that should stay intact.");
+  chapterOneDraftJourney.render();
+  assert.ok(chapterOneDraftJourney.journeyHtml.includes("Current Chapter"));
+  chapterOneDraftJourney.click("[data-start-career-journey-current]");
+  assert.equal(chapterOneDraftJourney.statusNode.textContent, "Career Journey started. Chapter 1 is ready for guided reflection.");
+  assert.ok(chapterOneDraftJourney.journeyHtml.includes("Focused Workspace"));
+  assert.ok(chapterOneDraftJourney.journeyHtml.includes("View journey"));
+  assert.ok(chapterOneDraftJourney.journeyHtml.includes("Back to Overview"));
+  assert.ok(chapterOneDraftJourney.journeyHtml.includes("Chapter 1 current"));
+  assert.ok(chapterOneDraftJourney.journeyHtml.includes("I have a rough Chapter 1 draft that should stay intact."));
+
   const journey = createJourneyHarness();
 
   journey.render();
@@ -480,38 +668,54 @@ async function run() {
   assert.ok(journey.journeyHtml.includes("Journey not started yet."));
   assert.ok(journey.journeyHtml.includes("Current chapter"));
   assert.ok(journey.journeyHtml.includes("Upcoming"));
+  assert.ok(!journey.journeyHtml.includes("Focused Workspace"));
+  assert.ok(!journey.journeyHtml.includes("View journey"));
 
   journey.click("[data-start-career-journey]");
   assert.equal(journey.statusNode.textContent, "Career Journey started. Chapter 1 is ready for guided reflection.");
   assert.equal(journey.statusNode.dataset.actionState, "success");
-  assert.ok(journey.journeyHtml.includes("Chapter 1 is in progress."));
+  assert.ok(journey.journeyHtml.includes("Focused Workspace"));
+  assert.ok(journey.journeyHtml.includes("View journey"));
+  assert.ok(journey.journeyHtml.includes("Back to Overview"));
+  assert.ok(journey.journeyHtml.includes("Chapter 1 current"));
 
   journey.submitChapterOne("");
   assert.equal(journey.statusNode.textContent, "You can keep going when you are ready.");
   assert.equal(journey.statusNode.dataset.actionState, "idle");
-  assert.ok(journey.journeyHtml.includes("Chapter 1 is in progress."));
   assert.ok(journey.journeyHtml.includes("Chapter 1 is now in motion, even if you are still finding the words."));
   assert.ok(!journey.journeyHtml.includes("Chapter 2 preview"));
+  assert.ok(journey.journeyHtml.includes("Chapter 1 current"));
 
   journey.submitChapterOne("   ");
   assert.equal(journey.statusNode.textContent, "You can keep going when you are ready.");
-  assert.ok(journey.journeyHtml.includes("Chapter 1 is in progress."));
   assert.ok(!journey.journeyHtml.includes("<blockquote class=\"journey-reflection-echo\">"));
+  assert.ok(journey.journeyHtml.includes("Chapter 1 current"));
 
   journey.submitChapterOne("I am ready to reconnect my operations work with roles that value calmer leadership.");
   assert.equal(journey.statusNode.textContent, "Chapter 1 reflection captured for this session.");
   assert.equal(journey.statusNode.dataset.actionState, "success");
-  assert.ok(journey.journeyHtml.includes("Chapter 2 of 5"));
-  assert.ok(journey.journeyHtml.includes("Chapter 2 is available when you are ready."));
-  assert.ok(journey.journeyHtml.includes("Complete"));
-  assert.ok(journey.journeyHtml.includes("Available next"));
+  assert.ok(journey.journeyHtml.includes("Build Your Career Timeline"));
+  assert.ok(journey.journeyHtml.includes("Chapter 2 next"));
+
+  journey.click("[data-career-journey-toggle-navigation]");
+  assert.ok(journey.journeyHtml.includes("Journey Navigation"));
+  assert.ok(journey.journeyHtml.includes('data-career-journey-open-chapter="1"'));
+  assert.ok(journey.journeyHtml.includes('data-career-journey-open-chapter="2"'));
+  assert.ok(journey.journeyHtml.includes('data-career-journey-open-chapter="3"'));
+  journey.click('[data-career-journey-open-chapter="2"]');
+  assert.ok(journey.journeyHtml.includes("Build Your Career Timeline"));
+  journey.click("[data-career-journey-close-workspace]");
+  assert.equal(journey.statusNode.textContent, "Returned to the Career Journey overview.");
+  assert.ok(!journey.journeyHtml.includes("Focused Workspace"));
+  journey.click("[data-start-career-journey]");
+  assert.ok(journey.journeyHtml.includes("Build Your Career Timeline"));
 
   journey.click("[data-start-career-journey-chapter-two]");
   assert.equal(journey.statusNode.textContent, "Chapter 2 is ready for one career season.");
-  assert.ok(journey.journeyHtml.includes("Chapter 2 is in progress."));
   assert.ok(journey.journeyHtml.includes("Build Your Career Timeline"));
   assert.ok(journey.journeyHtml.includes("We'll use this part of your journey to help uncover stories"));
   assert.ok(journey.journeyHtml.includes("Role or career season"));
+  assert.ok(journey.journeyHtml.includes("Chapter 2 in progress"));
 
   journey.submitChapterTwo({
     seasonTitle: "   ",
@@ -523,7 +727,12 @@ async function run() {
   assert.equal(journey.statusNode.textContent, "Add a role or career season before saving Chapter 2.");
   assert.equal(journey.statusNode.dataset.actionState, "failure");
   assert.ok(journey.journeyHtml.includes("Role or career season is required before you continue."));
-  assert.ok(journey.journeyHtml.includes("Chapter 2 is in progress."));
+  assert.ok(journey.journeyHtml.includes("Chapter 2 in progress"));
+
+  journey.click("[data-career-journey-toggle-navigation]");
+  journey.click("[data-career-journey-toggle-navigation]");
+  assert.ok(journey.journeyHtml.includes("Northwind Labs"));
+  assert.ok(journey.journeyHtml.includes("Built calmer systems after a volatile stretch."));
 
   journey.submitChapterTwo({
     seasonTitle: "Operations Lead",
@@ -535,14 +744,12 @@ async function run() {
   assert.equal(journey.statusNode.textContent, "Chapter 2 career season captured for this session.");
   assert.equal(journey.statusNode.dataset.actionState, "success");
   assert.ok(!journey.journeyHtml.includes("Chapter 3 is available when you are ready."));
-  assert.ok(journey.journeyHtml.includes("Start with one work moment."));
   assert.ok(journey.journeyHtml.includes("Complete"));
   assert.ok(!journey.journeyHtml.includes("Chapter 3 next"));
   assert.ok(journey.journeyHtml.includes("Chapter 3 in progress"));
-  assert.ok(journey.journeyHtml.includes("Chapter 3 of 5"));
   assert.ok(journey.journeyHtml.includes("Moments That Mattered"));
   assert.ok(journey.journeyHtml.includes("Explore This Story"));
-  assert.ok(journey.journeyHtml.includes("Think back to your time as <strong>Operations Lead at Northwind Labs</strong>. What is one moment that felt difficult, important, or stayed with you?"));
+  assert.ok(journey.journeyHtml.includes("Think back to when you worked as <strong>Operations Lead at Northwind Labs</strong>. What is one moment that felt difficult, important, or stayed with you?"));
   assert.ok(!journey.journeyHtml.includes("From your time as Operations Lead at Northwind Labs"));
   assert.ok(!journey.journeyHtml.includes("You said this season mattered because:"));
   assert.ok(journey.journeyHtml.includes("Built calmer systems after a volatile stretch."));
@@ -555,6 +762,12 @@ async function run() {
   assert.ok(!journey.journeyHtml.includes("Slow down around one meaningful work moment"));
   assert.ok(!journey.journeyHtml.includes("Some of your strongest stories"));
   assert.ok(!journey.journeyHtml.includes("Start wherever the memory begins"));
+
+  journey.click("[data-career-journey-toggle-navigation]");
+  journey.click('[data-career-journey-open-chapter="2"]');
+  assert.ok(journey.journeyHtml.includes("Operations Lead"));
+  journey.click('[data-career-journey-open-chapter="3"]');
+  assert.ok(journey.journeyHtml.includes("Explore This Story"));
 
   journey.context.fetch = async (_url, options) => {
   const body = JSON.parse(options.body);
@@ -578,12 +791,15 @@ async function run() {
   };
 
   journey.appendVoice("initialResponse", "   ");
-  assert.ok(journey.journeyHtml.includes("Start with one work moment."));
+  assert.ok(journey.journeyHtml.includes("Explore This Story"));
 
   journey.appendVoice("initialResponse", "I kept a launch handoff from falling apart when everyone was overloaded.");
-  assert.ok(journey.journeyHtml.includes("Chapter 3 is in progress."));
   assert.ok(!journey.journeyHtml.includes("Chapter 3 is available when you are ready."));
   assert.ok(!journey.journeyHtml.includes("Chapter 3 next"));
+  assert.ok(journey.journeyHtml.includes("I kept a launch handoff from falling apart when everyone was overloaded."));
+  assert.ok(journey.journeyHtml.includes("Chapter 3 in progress"));
+  journey.click("[data-career-journey-toggle-navigation]");
+  journey.click("[data-career-journey-toggle-navigation]");
   assert.ok(journey.journeyHtml.includes("I kept a launch handoff from falling apart when everyone was overloaded."));
   journey.click("[data-career-journey-explore-story]");
   await new Promise((resolve) => setImmediate(resolve));
@@ -622,7 +838,7 @@ async function run() {
   assert.equal(journey.statusNode.textContent, "Chapter 3 is ready for another moment.");
   assert.ok(journey.journeyHtml.includes("1 moment captured"));
   assert.ok(journey.journeyHtml.includes("Operations Lead · Northwind Labs"));
-  assert.ok(journey.journeyHtml.includes("Think back to your time as <strong>Operations Lead at Northwind Labs</strong>. What is one moment"));
+  assert.ok(journey.journeyHtml.includes("Think back to when you worked as <strong>Operations Lead at Northwind Labs</strong>. What is one moment"));
   assert.ok(!journey.journeyHtml.includes("Chapter 3 next"));
 
   journey.click('[data-career-journey-toggle-context="different"]');
@@ -633,7 +849,7 @@ async function run() {
   assert.ok(!journey.journeyHtml.includes("Built calmer systems after a volatile stretch."));
   journey.click('[data-career-journey-toggle-context="timeline"]');
   assert.equal(journey.statusNode.textContent, "This moment is connected to your Chapter 2 career season.");
-  assert.ok(journey.journeyHtml.includes("Think back to your time as <strong>Operations Lead at Northwind Labs</strong>. What is one moment"));
+  assert.ok(journey.journeyHtml.includes("Think back to when you worked as <strong>Operations Lead at Northwind Labs</strong>. What is one moment"));
   assert.ok(journey.journeyHtml.includes("Built calmer systems after a volatile stretch."));
   journey.click('[data-career-journey-toggle-context="different"]');
   assert.equal(journey.statusNode.textContent, "This moment is marked as a different experience.");
@@ -708,7 +924,7 @@ async function run() {
     organization: "",
     seasonReflection: "",
   });
-  assert.ok(noCompanyJourney.journeyHtml.includes("Think back to your time as <strong>Machine Operator</strong>. What is one moment"));
+  assert.ok(noCompanyJourney.journeyHtml.includes("Think back to when you worked as <strong>Machine Operator</strong>. What is one moment"));
   assert.ok(!noCompanyJourney.journeyHtml.includes("Machine Operator at"));
   assert.ok(!noCompanyJourney.journeyHtml.includes("You said this season mattered because:"));
 }
