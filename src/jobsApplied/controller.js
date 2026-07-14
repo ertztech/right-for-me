@@ -64,6 +64,7 @@ let careerJourneyChapterTwoValidation = "";
 let careerJourneyChapterTwoEntry = emptyCareerJourneyChapterTwoEntry();
 let careerJourneyChapterThree = emptyCareerJourneyChapterThreeState();
 let careerJourneyVoiceSession = null;
+let careerJourneyTimelineEntryIdCounter = 0;
 let careerJourneyMomentIdCounter = 0;
 
 function initializeJobsAppliedController() {
@@ -1017,6 +1018,7 @@ function renderCareerJourney() {
     return;
   }
 
+  normalizeCareerJourneyState();
   const journeyState = deriveCareerJourneyState();
   const actionLabel = careerJourneyStarted ? "Continue Journey" : "Start Journey";
   const progressLabel = `Chapter ${journeyState.progressChapter} of ${CAREER_JOURNEY_CHAPTERS.length}`;
@@ -1037,7 +1039,7 @@ function renderCareerJourney() {
       </div>
       <aside class="journey-progress-card" aria-label="Career Journey progress">
         <span>${escapeHtml(progressLabel)}</span>
-        <strong>${escapeHtml(journeyState.progressTitle)}</strong>
+        <strong>${escapeHtml(journeyState.progressSummary || journeyState.progressTitle)}</strong>
         <p>${escapeHtml(journeyState.progressMessage)}</p>
       </aside>
     </section>
@@ -1046,11 +1048,11 @@ function renderCareerJourney() {
         <div class="journey-card-header">
           <div>
             <p class="eyebrow">${escapeHtml(journeyState.headerEyebrow)}</p>
-            <h3>Chapter ${journeyState.activeChapter.number}: ${escapeHtml(journeyState.activeChapter.title)}</h3>
+            <h3>${escapeHtml(journeyState.activeChapter.title)}</h3>
           </div>
           <span class="status-badge ${journeyState.badgeClass}">${escapeHtml(journeyState.badgeLabel)}</span>
         </div>
-        <p class="support-copy">${escapeHtml(journeyState.activeChapter.description)}</p>
+        ${journeyState.activeChapter.number === 3 ? "" : `<p class="support-copy">${escapeHtml(journeyState.activeChapter.description)}</p>`}
         ${renderCareerJourneyActiveChapterInteraction(journeyState)}
       </article>
       <aside class="journey-sidebar">
@@ -1180,6 +1182,7 @@ function deriveCareerJourneyState() {
       headerEyebrow: "Current Chapter",
       progressChapter: chapterTwo.number,
       progressMessage: "Chapter 2 is in progress.",
+      progressSummary: "In progress",
       progressTitle: chapterTwo.title,
     };
   }
@@ -1190,12 +1193,13 @@ function deriveCareerJourneyState() {
       badgeClass: careerJourneyChapterThree.aiState === "loading" || isVoiceWorking(careerJourneyChapterThree.voiceState)
         ? "status-reviewing"
         : "status-maybe",
-      badgeLabel: isCareerJourneyChapterThreeIdle() ? `Chapter ${chapterThree.number} next` : `Chapter ${chapterThree.number} in progress`,
-      headerEyebrow: isCareerJourneyChapterThreeIdle() ? "Next Chapter" : "Current Chapter",
+      badgeLabel: `Chapter ${chapterThree.number} in progress`,
+      headerEyebrow: "Current Chapter",
       progressChapter: chapterThree.number,
       progressMessage: isCareerJourneyChapterThreeIdle()
-        ? "Chapter 3 is available when you are ready."
+        ? "Start with one work moment."
         : deriveCareerJourneyChapterThreeProgressMessage(),
+      progressSummary: "In progress",
       progressTitle: chapterThree.title,
     };
   }
@@ -1207,6 +1211,7 @@ function deriveCareerJourneyState() {
     headerEyebrow: "Current Progress",
     progressChapter: chapterThree.number,
     progressMessage: `${careerJourneyChapterThree.savedMoments.length} ${careerJourneyChapterThree.savedMoments.length === 1 ? "moment" : "moments"} captured. Chapter 3 is complete for now.`,
+    progressSummary: "Complete for now",
     progressTitle: chapterThree.title,
   };
 }
@@ -1227,8 +1232,8 @@ function renderCareerJourneyChapterTwoPreview() {
   return `
     <div class="journey-chapter-preview-card" aria-label="Chapter 2 preview">
       <small>Next up: Chapter 2</small>
-      <h4>Your Career Timeline</h4>
-      <p>When you are ready, we'll walk through the roles, projects, and seasons that shaped your work. You do not need perfect dates yet. We are just starting to put the story in order.</p>
+      <h4>Build Your Career Timeline</h4>
+      <p>Add a role, job, or season from your working life. Share what that period was like and what mattered. We'll use this part of your journey to help uncover stories you may not realize you already have.</p>
       <button type="button" class="secondary-button" data-start-career-journey-chapter-two>Start Your Career Timeline</button>
     </div>
   `;
@@ -1238,9 +1243,14 @@ function renderCareerJourneyChapterTwoForm() {
   return `
     <div class="journey-chapter-preview-card journey-chapter-preview-card-active" aria-label="Chapter 2 form">
       <small>Chapter 2</small>
-      <h4>Your Career Timeline</h4>
-      <p>When you are ready, we'll start by naming one role, project, or season that mattered. You do not need perfect dates yet. We are just beginning to put the story in order.</p>
+      <h4>Build Your Career Timeline</h4>
+      <p>Add a role, job, or season from your working life. Share what that period was like and what mattered. We'll use this part of your journey to help uncover stories you may not realize you already have.</p>
       <form class="journey-reflection-form" data-career-journey-chapter-two-form>
+        <input
+          name="timelineEntryId"
+          type="hidden"
+          value="${escapeAttribute(careerJourneyChapterTwoEntry.id)}"
+        >
         <label class="journey-reflection-label">
           Role or career season
           <input
@@ -1303,7 +1313,7 @@ function renderCareerJourneyChapterTwoSummary() {
   return `
     <div class="journey-chapter-preview-card journey-chapter-preview-card-active" aria-label="Chapter 2 summary">
       <small>Chapter 2</small>
-      <h4>Your Career Timeline</h4>
+      <h4>Build Your Career Timeline</h4>
       <p>You've started putting one meaningful season in order. We can keep shaping the story from here when you are ready.</p>
       <div class="journey-summary-card">
         <strong>${escapeHtml(careerJourneyChapterTwoEntry.seasonTitle)}</strong>
@@ -1330,7 +1340,7 @@ function renderCareerJourneyChapterThreeSection() {
   const showCoachForm = shouldRenderCareerJourneyStoryCoachForm();
   const showMomentView = careerJourneyChapterThree.mode === "viewing";
   const showDoneActions = showSavedMoments && careerJourneyChapterThree.aiState !== "loading" && !showCoachForm && !showMomentView;
-  const draftLabel = careerJourneyChapterThree.activeMomentId ? "Editing moment" : showSavedMoments ? "Add another moment" : "Start with one moment";
+  const draftLabel = careerJourneyChapterThree.activeMomentId ? "Editing moment" : showSavedMoments ? "Add another moment" : "Start a moment";
 
   return `
     <div class="journey-story-coach ${careerJourneyChapterThree.mode !== "idle" ? "journey-story-coach-active" : ""}">
@@ -1338,20 +1348,25 @@ function renderCareerJourneyChapterThreeSection() {
       ${showCoachForm ? `
         <div class="journey-story-coach-intro">
           <p class="eyebrow">${escapeHtml(draftLabel)}</p>
-          <p class="journey-story-kicker">Some of your strongest stories may feel ordinary to you because you were the one living them. Let's slow down and look at one moment that asked something of you.</p>
-          <h4>Tell me about a moment at work that was difficult, important, or stayed with you.</h4>
-          <p>Start wherever the memory begins. It does not need to sound polished.</p>
+          ${renderCareerJourneyChapterThreePrompt()}
+          ${renderCareerJourneyChapterTwoReflectionExcerpt()}
+          ${renderCareerJourneyDraftContext()}
         </div>
         <label class="journey-reflection-label">
-          Your moment
-          <textarea
-            name="chapterThreeInitialResponse"
-            class="journey-reflection-input"
-            rows="7"
-            placeholder="Start with the moment itself. What happened, what felt difficult, or what stayed with you afterward?"
-          >${escapeHtml(draft.initialResponse)}</textarea>
+          <span>Your moment</span>
+          <div class="journey-voice-field">
+            <div class="journey-textarea-shell">
+              <textarea
+                name="chapterThreeInitialResponse"
+                class="journey-reflection-input journey-reflection-input-with-voice"
+                rows="7"
+                placeholder="Start with what happened, what made it difficult, and what you did next."
+              >${escapeHtml(draft.initialResponse)}</textarea>
+              ${renderCareerJourneyVoiceControls("initialResponse", "story", "Use voice input")}
+            </div>
+            ${renderCareerJourneyVoiceStatus("initialResponse")}
+          </div>
         </label>
-        ${renderCareerJourneyVoiceControls("initialResponse", "story", "Start voice input for your story")}
         ${renderCareerJourneyChapterThreeError()}
         <div class="journey-action-row journey-action-row-spread">
           <button type="button" data-career-journey-explore-story ${exploreDisabled ? "disabled" : ""}>Explore This Story</button>
@@ -1364,15 +1379,20 @@ function renderCareerJourneyChapterThreeSection() {
       ${showCoachForm && draft.reflection ? `
         <div class="journey-follow-up-block">
           <label class="journey-reflection-label">
-            What you want to add
-            <textarea
-              name="chapterThreeFollowUpResponse"
-              class="journey-reflection-input journey-reflection-input-compact"
-              rows="4"
-              placeholder="Answer the follow-up in your own words. You can type or use voice."
-            >${escapeHtml(draft.followUpResponse)}</textarea>
+            <span>What you want to add</span>
+            <div class="journey-voice-field">
+              <div class="journey-textarea-shell">
+                <textarea
+                  name="chapterThreeFollowUpResponse"
+                  class="journey-reflection-input journey-reflection-input-compact journey-reflection-input-with-voice"
+                  rows="4"
+                  placeholder="Tell NextMove a little more."
+                >${escapeHtml(draft.followUpResponse)}</textarea>
+                ${renderCareerJourneyVoiceControls("followUpResponse", "follow-up", "Use voice input")}
+              </div>
+              ${renderCareerJourneyVoiceStatus("followUpResponse")}
+            </div>
           </label>
-          ${renderCareerJourneyVoiceControls("followUpResponse", "follow-up", "Start voice input for your follow-up")}
           <div class="journey-action-row">
             <button type="button" data-career-journey-save-moment ${saveDisabled ? "disabled" : ""}>Save This Moment</button>
           </div>
@@ -1391,6 +1411,55 @@ function shouldRenderCareerJourneyStoryCoachForm() {
   return ["adding", "editing", "coaching", "discovering"].includes(careerJourneyChapterThree.mode);
 }
 
+function renderCareerJourneyChapterThreePrompt() {
+  if (!isCareerJourneyDraftLinkedToTimeline()) {
+    return `
+      <p class="journey-story-main-prompt">Think of one moment that felt difficult, important, or stayed with you.</p>
+    `;
+  }
+
+  const timelineLabel = currentCareerJourneyTimelineSentenceLabel();
+  return `
+    <p class="journey-story-main-prompt">Think back to your time as <strong>${escapeHtml(timelineLabel)}</strong>. What is one moment that felt difficult, important, or stayed with you?</p>
+  `;
+}
+
+function renderCareerJourneyDraftContext() {
+  const timelineEntryId = currentCareerJourneyTimelineEntryId();
+  if (!timelineEntryId) {
+    return "";
+  }
+
+  const linked = isCareerJourneyDraftLinkedToTimeline();
+  return `
+    <div class="journey-story-context" aria-label="Story context">
+      ${linked ? "" : `<span>${escapeHtml("Different experience")}</span>`}
+      <button
+        type="button"
+        class="journey-context-link"
+        data-career-journey-toggle-context="${linked ? "different" : "timeline"}"
+      >${linked ? "Use a different experience" : "Use Chapter 2 career context"}</button>
+    </div>
+  `;
+}
+
+function renderCareerJourneyChapterTwoReflectionExcerpt() {
+  if (!isCareerJourneyDraftLinkedToTimeline()) {
+    return "";
+  }
+
+  const reflection = cleanValue(careerJourneyChapterTwoEntry.seasonReflection);
+  if (!reflection) {
+    return "";
+  }
+
+  return `
+    <div class="journey-story-season-reflection">
+      <blockquote>${escapeHtml(previewText(reflection, 180))}</blockquote>
+    </div>
+  `;
+}
+
 function renderCareerJourneyChapterThreeLoading() {
   return `
     <div class="journey-story-loading" aria-live="polite">
@@ -1407,19 +1476,11 @@ function renderCareerJourneyChapterThreeLoading() {
 function renderCareerJourneyReflectionCard() {
   return `
     <article class="journey-story-reflection-card" aria-live="polite">
-      <p class="eyebrow">What NextMove noticed</p>
-      <p>${escapeHtml(careerJourneyChapterThree.draft.reflection)}</p>
-      <div class="journey-reflection-grid">
-        <section>
-          <span>What NextMove asked</span>
-          <p>${escapeHtml(careerJourneyChapterThree.draft.followUpQuestion)}</p>
-        </section>
-        <section>
-          <span>What this may reveal</span>
-          <p>${escapeHtml(careerJourneyChapterThree.draft.possibleSignal)}</p>
-        </section>
-      </div>
-      <div class="journey-action-row">
+      <p class="eyebrow">NextMove's reflection</p>
+      <p class="journey-ai-reflection">${escapeHtml(careerJourneyChapterThree.draft.reflection)}</p>
+      <p class="journey-ai-question">${escapeHtml(careerJourneyChapterThree.draft.followUpQuestion)}</p>
+      <p class="journey-ai-signal">${escapeHtml(careerJourneyChapterThree.draft.possibleSignal)}</p>
+      <div class="journey-action-row journey-action-row-tight">
         <button type="button" class="secondary-button" data-career-journey-retry-story>Retry</button>
       </div>
     </article>
@@ -1444,7 +1505,8 @@ function renderCareerJourneySavedMomentsList() {
 
 function renderCareerJourneyMomentPreview(moment) {
   return `
-    <article class="journey-moment-preview" data-career-journey-moment-id="${escapeAttribute(moment.id)}">
+    <article class="journey-moment-preview" data-career-journey-moment-id="${escapeAttribute(moment.id)}" data-career-journey-timeline-entry-id="${escapeAttribute(moment.timelineEntryId)}">
+      <span>${escapeHtml(careerJourneyTimelineLabelForId(moment.timelineEntryId))}</span>
       <p>${escapeHtml(previewText(moment.initialResponse))}</p>
       <div class="journey-moment-preview-actions">
         <button type="button" class="secondary-button" data-career-journey-view-moment="${escapeAttribute(moment.id)}">View Moment</button>
@@ -1479,6 +1541,7 @@ function renderCareerJourneyChapterThreeSavedCard() {
     <article class="journey-story-saved-card" aria-live="polite">
       <p class="eyebrow">Saved Reflection</p>
       <h4>Moments That Mattered</h4>
+      <p class="journey-context-label">${escapeHtml(careerJourneyTimelineLabelForId(moment.timelineEntryId))}</p>
       <div class="journey-saved-sections">
         ${renderCareerJourneySavedSection("The moment", moment.initialResponse, "user")}
         ${renderCareerJourneySavedSection("What NextMove noticed", moment.reflection, "ai")}
@@ -1506,19 +1569,45 @@ function renderCareerJourneySavedSection(title, content, source) {
 function renderCareerJourneyVoiceControls(fieldName, fieldLabel, startLabel) {
   const isCurrentField = careerJourneyChapterThree.voiceTarget === fieldName;
   const state = isCurrentField ? careerJourneyChapterThree.voiceState : "idle";
-  const message = isCurrentField ? deriveVoiceMessage(state, careerJourneyChapterThree.voiceMessage) : "Use voice if it helps. Your transcript will stay editable before anything is submitted.";
   const stopVisible = isCurrentField && (state === "requesting" || state === "listening" || state === "processing");
 
   return `
-    <div class="journey-voice-row">
+    <div class="journey-voice-row journey-voice-row-compact">
       <div class="journey-voice-actions">
-        <button type="button" class="secondary-button" data-career-journey-voice-start="${escapeAttribute(fieldName)}" aria-label="${escapeAttribute(startLabel)}">
-          ${state === "unsupported" ? "Voice unavailable" : `Use voice for ${escapeHtml(fieldLabel)}`}
+        <button
+          type="button"
+          class="journey-voice-button"
+          data-career-journey-voice-start="${escapeAttribute(fieldName)}"
+          aria-label="${escapeAttribute(startLabel)}"
+          title="${escapeAttribute(startLabel)}"
+          data-voice-state="${escapeAttribute(state)}"
+        >
+          <span aria-hidden="true">Mic</span>
         </button>
         <button type="button" class="secondary-button journey-voice-stop ${stopVisible ? "" : "hidden"}" data-career-journey-voice-stop>Stop Listening</button>
       </div>
+    </div>
+  `;
+}
+
+function renderCareerJourneyVoiceStatus(fieldName) {
+  const isCurrentField = careerJourneyChapterThree.voiceTarget === fieldName;
+  const state = isCurrentField ? careerJourneyChapterThree.voiceState : "idle";
+  const message = isCurrentField ? deriveVoiceMessage(state, careerJourneyChapterThree.voiceMessage) : "";
+  const statusText = state === "requesting"
+    ? "Starting"
+    : state === "listening"
+      ? "Listening"
+      : state === "processing"
+        ? "Processing"
+        : state === "unsupported"
+          ? "Unavailable"
+          : "Voice input";
+
+  return `
+    <div class="journey-voice-status-row">
       <div class="journey-voice-copy">
-        <span>Voice is optional. Typed editing stays available.</span>
+        <span>${escapeHtml(statusText)}</span>
         <p class="journey-voice-status" data-career-journey-voice-status="${escapeAttribute(fieldName)}" data-voice-state="${escapeAttribute(state)}" aria-live="polite">${escapeHtml(message)}</p>
       </div>
     </div>
@@ -1545,7 +1634,85 @@ function renderCareerJourneyChapterTwoYears() {
 }
 
 function hasCareerJourneyChapterTwoEntry() {
+  normalizeCareerJourneyChapterTwoEntry();
   return Boolean(cleanValue(careerJourneyChapterTwoEntry.seasonTitle));
+}
+
+function normalizeCareerJourneyState() {
+  normalizeCareerJourneyChapterTwoEntry();
+  normalizeCareerJourneyChapterThreeRelationships();
+}
+
+function normalizeCareerJourneyChapterTwoEntry() {
+  if (!cleanValue(careerJourneyChapterTwoEntry.seasonTitle)) {
+    return;
+  }
+
+  if (!cleanValue(careerJourneyChapterTwoEntry.id)) {
+    careerJourneyChapterTwoEntry = {
+      ...careerJourneyChapterTwoEntry,
+      id: createCareerJourneyTimelineEntryId(),
+    };
+  }
+}
+
+function normalizeCareerJourneyChapterThreeRelationships() {
+  careerJourneyChapterThree.draft = normalizeCareerJourneyMomentRelationship(careerJourneyChapterThree.draft);
+  careerJourneyChapterThree.savedMoments = careerJourneyChapterThree.savedMoments.map(normalizeCareerJourneyMomentRelationship);
+}
+
+function normalizeCareerJourneyMomentRelationship(moment = {}) {
+  return {
+    ...moment,
+    timelineEntryId: Object.prototype.hasOwnProperty.call(moment, "timelineEntryId")
+      ? cleanValue(moment.timelineEntryId)
+      : "",
+  };
+}
+
+function createCareerJourneyTimelineEntryId() {
+  careerJourneyTimelineEntryIdCounter += 1;
+  return `journey_role_${careerJourneyTimelineEntryIdCounter}`;
+}
+
+function currentCareerJourneyTimelineEntryId() {
+  normalizeCareerJourneyChapterTwoEntry();
+  return hasCareerJourneyChapterTwoEntry() ? cleanValue(careerJourneyChapterTwoEntry.id) : "";
+}
+
+function currentCareerJourneyTimelineLabel() {
+  return careerJourneyTimelineLabelForId(currentCareerJourneyTimelineEntryId());
+}
+
+function currentCareerJourneyTimelineSentenceLabel() {
+  normalizeCareerJourneyChapterTwoEntry();
+  const role = cleanValue(careerJourneyChapterTwoEntry.seasonTitle);
+  const organization = cleanValue(careerJourneyChapterTwoEntry.organization);
+  return organization ? `${role} at ${organization}` : role;
+}
+
+function careerJourneyTimelineLabelForId(timelineEntryId) {
+  const id = cleanValue(timelineEntryId);
+  if (!id) {
+    return "Different experience";
+  }
+
+  normalizeCareerJourneyChapterTwoEntry();
+  if (id !== cleanValue(careerJourneyChapterTwoEntry.id)) {
+    return "Career season unavailable";
+  }
+
+  const role = cleanValue(careerJourneyChapterTwoEntry.seasonTitle);
+  const organization = cleanValue(careerJourneyChapterTwoEntry.organization);
+  if (!role) {
+    return "Career season unavailable";
+  }
+
+  return organization ? `${role} · ${organization}` : role;
+}
+
+function isCareerJourneyDraftLinkedToTimeline() {
+  return Boolean(cleanValue(careerJourneyChapterThree.draft.timelineEntryId));
 }
 
 function emptyCareerJourneyChapterThreeState() {
@@ -1566,6 +1733,7 @@ function emptyCareerJourneyChapterThreeState() {
 function emptyCareerJourneyChapterThreeDraft() {
   return {
     id: "",
+    timelineEntryId: currentCareerJourneyTimelineEntryId(),
     initialResponse: "",
     reflection: "",
     followUpQuestion: "",
@@ -1630,6 +1798,7 @@ function createCareerJourneyMomentId() {
 function createCareerJourneyMomentFromDraft() {
   return {
     id: careerJourneyChapterThree.draft.id || createCareerJourneyMomentId(),
+    timelineEntryId: cleanValue(careerJourneyChapterThree.draft.timelineEntryId),
     initialResponse: cleanValue(careerJourneyChapterThree.draft.initialResponse),
     reflection: cleanValue(careerJourneyChapterThree.draft.reflection),
     followUpQuestion: cleanValue(careerJourneyChapterThree.draft.followUpQuestion),
@@ -1699,6 +1868,7 @@ function isVoiceWorking(state) {
 
 function emptyCareerJourneyChapterTwoEntry() {
   return {
+    id: "",
     seasonTitle: "",
     organization: "",
     startYear: "",
@@ -1749,6 +1919,25 @@ function bindCareerJourneyChapterThreeActions() {
       syncCareerJourneyVoiceStatusUi();
     });
   });
+
+  const contextToggle = document.querySelector("[data-career-journey-toggle-context]");
+  if (contextToggle && contextToggle.dataset.bound !== "true") {
+    contextToggle.dataset.bound = "true";
+    contextToggle.addEventListener("click", () => {
+      const nextContext = contextToggle.dataset.careerJourneyToggleContext || "";
+      careerJourneyChapterThree.draft.timelineEntryId = nextContext === "timeline"
+        ? currentCareerJourneyTimelineEntryId()
+        : "";
+      renderCareerJourney();
+      bindCareerJourneyActions();
+      setJobsStatus(
+        nextContext === "timeline"
+          ? "This moment is connected to your Chapter 2 career season."
+          : "This moment is marked as a different experience.",
+        "idle"
+      );
+    });
+  }
 
   const exploreButton = document.querySelector("[data-career-journey-explore-story]");
   if (exploreButton && exploreButton.dataset.bound !== "true") {
@@ -2142,10 +2331,10 @@ function renderCareerJourneyChapterCard(chapter, journeyState) {
   const chapterMeta = deriveCareerJourneyChapterMeta(chapter, journeyState);
 
   return `
-    <div class="journey-chapter-card ${chapterMeta.className}">
+    <div class="journey-chapter-card ${chapterMeta.className}" aria-label="${escapeAttribute(`Chapter ${chapter.number}: ${chapter.title}. ${chapterMeta.label}`)}">
+      <span class="journey-chapter-marker" aria-hidden="true">${escapeHtml(chapterMeta.marker)}</span>
+      <h4>${chapter.number}. ${escapeHtml(chapter.title)}</h4>
       <small>${escapeHtml(chapterMeta.label)}</small>
-      <h4>Chapter ${chapter.number}: ${escapeHtml(chapter.title)}</h4>
-      <p>${escapeHtml(chapter.description)}</p>
     </div>
   `;
 }
@@ -2153,45 +2342,45 @@ function renderCareerJourneyChapterCard(chapter, journeyState) {
 function deriveCareerJourneyChapterMeta(chapter, journeyState) {
   if (chapter.number === 1) {
     if (!careerJourneyChapterOneSubmitted) {
-      return { className: "journey-chapter-card-active", label: "Current chapter" };
+      return { className: "journey-chapter-card-active", label: "Current chapter", marker: ">" };
     }
 
-    return { className: "journey-chapter-card-complete", label: "Complete" };
+    return { className: "journey-chapter-card-complete", label: "Complete", marker: "✓" };
   }
 
   if (chapter.number === 2) {
     if (!careerJourneyChapterOneSubmitted) {
-      return { className: "journey-chapter-card-upcoming", label: "Upcoming" };
+      return { className: "journey-chapter-card-upcoming", label: "Upcoming", marker: "o" };
     }
 
     if (hasCareerJourneyChapterTwoEntry() && !careerJourneyChapterTwoEditing) {
-      return { className: "journey-chapter-card-complete", label: "Complete" };
+      return { className: "journey-chapter-card-complete", label: "Complete", marker: "✓" };
     }
 
     if (careerJourneyChapterTwoStarted) {
-      return { className: "journey-chapter-card-active", label: "In progress" };
+      return { className: "journey-chapter-card-active", label: "In progress", marker: ">" };
     }
 
-    return { className: "journey-chapter-card-ready", label: "Available next" };
+    return { className: "journey-chapter-card-ready", label: "Available next", marker: "o" };
   }
 
   if (chapter.number === 3) {
     if (!hasCareerJourneyChapterTwoEntry()) {
-      return { className: "journey-chapter-card-upcoming", label: "Upcoming" };
+      return { className: "journey-chapter-card-upcoming", label: "Upcoming", marker: "o" };
     }
 
     if (isCareerJourneyChapterThreeComplete()) {
-      return { className: "journey-chapter-card-complete", label: "Complete" };
+      return { className: "journey-chapter-card-complete", label: "Complete", marker: "✓" };
     }
 
     if (!isCareerJourneyChapterThreeIdle() || journeyState.badgeLabel.includes("in progress")) {
-      return { className: "journey-chapter-card-active", label: "In progress" };
+      return { className: "journey-chapter-card-active", label: "In progress", marker: ">" };
     }
 
-    return { className: "journey-chapter-card-ready", label: "Available next" };
+    return { className: "journey-chapter-card-ready", label: "Available next", marker: "o" };
   }
 
-  return { className: "journey-chapter-card-upcoming", label: "Upcoming" };
+  return { className: "journey-chapter-card-upcoming", label: "Upcoming", marker: "o" };
 }
 
 function bindCareerJourneyActions() {
@@ -2286,6 +2475,7 @@ function bindCareerJourneyActions() {
       event.preventDefault();
 
       const seasonTitle = cleanValue(chapterTwoForm.elements.seasonTitle?.value);
+      const timelineEntryId = cleanValue(chapterTwoForm.elements.timelineEntryId?.value) || cleanValue(careerJourneyChapterTwoEntry.id);
       const organization = cleanValue(chapterTwoForm.elements.organization?.value);
       const startYear = cleanValue(chapterTwoForm.elements.startYear?.value);
       const endYear = cleanValue(chapterTwoForm.elements.endYear?.value);
@@ -2296,6 +2486,7 @@ function bindCareerJourneyActions() {
         careerJourneyChapterTwoEditing = true;
         careerJourneyChapterTwoValidation = "Role or career season is required before you continue.";
         careerJourneyChapterTwoEntry = {
+          id: timelineEntryId,
           seasonTitle,
           organization,
           startYear,
@@ -2312,6 +2503,7 @@ function bindCareerJourneyActions() {
       careerJourneyChapterTwoStarted = true;
       careerJourneyChapterTwoEditing = false;
       careerJourneyChapterTwoEntry = {
+        id: timelineEntryId || createCareerJourneyTimelineEntryId(),
         seasonTitle,
         organization,
         startYear,

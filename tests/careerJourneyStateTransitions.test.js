@@ -172,6 +172,25 @@ function createJourneyHarness() {
           : null;
       }
 
+      if (selector === "[data-career-journey-toggle-context]") {
+        const match = html.match(/data-career-journey-toggle-context="([^"]+)"/);
+        return match
+          ? createDynamicNode("[data-career-journey-toggle-context]", () => createButton(selector, { careerJourneyToggleContext: match[1] }))
+          : null;
+      }
+
+      if (selector === '[data-career-journey-toggle-context="different"]') {
+        return html.includes('data-career-journey-toggle-context="different"')
+          ? createDynamicNode("[data-career-journey-toggle-context]", () => createButton(selector, { careerJourneyToggleContext: "different" }))
+          : null;
+      }
+
+      if (selector === '[data-career-journey-toggle-context="timeline"]') {
+        return html.includes('data-career-journey-toggle-context="timeline"')
+          ? createDynamicNode("[data-career-journey-toggle-context]", () => createButton(selector, { careerJourneyToggleContext: "timeline" }))
+          : null;
+      }
+
       if (selector === "[data-career-journey-add-moment]") {
         return html.includes("data-career-journey-add-moment")
           ? createDynamicNode(selector, () => createButton(selector))
@@ -232,6 +251,7 @@ function createJourneyHarness() {
         }
 
         return createDynamicNode(selector, () => createForm(selector, {
+          timelineEntryId: { value: extractInputValue(html, "timelineEntryId") },
           seasonTitle: { value: extractInputValue(html, "seasonTitle") },
           organization: { value: extractInputValue(html, "organization") },
           startYear: { value: extractInputValue(html, "startYear") },
@@ -489,6 +509,8 @@ async function run() {
   journey.click("[data-start-career-journey-chapter-two]");
   assert.equal(journey.statusNode.textContent, "Chapter 2 is ready for one career season.");
   assert.ok(journey.journeyHtml.includes("Chapter 2 is in progress."));
+  assert.ok(journey.journeyHtml.includes("Build Your Career Timeline"));
+  assert.ok(journey.journeyHtml.includes("We'll use this part of your journey to help uncover stories"));
   assert.ok(journey.journeyHtml.includes("Role or career season"));
 
   journey.submitChapterTwo({
@@ -512,13 +534,27 @@ async function run() {
   });
   assert.equal(journey.statusNode.textContent, "Chapter 2 career season captured for this session.");
   assert.equal(journey.statusNode.dataset.actionState, "success");
-  assert.ok(journey.journeyHtml.includes("Chapter 3 is available when you are ready."));
+  assert.ok(!journey.journeyHtml.includes("Chapter 3 is available when you are ready."));
+  assert.ok(journey.journeyHtml.includes("Start with one work moment."));
   assert.ok(journey.journeyHtml.includes("Complete"));
-  assert.ok(journey.journeyHtml.includes("Chapter 3 next"));
-  assert.ok(journey.journeyHtml.includes("Available next"));
+  assert.ok(!journey.journeyHtml.includes("Chapter 3 next"));
+  assert.ok(journey.journeyHtml.includes("Chapter 3 in progress"));
   assert.ok(journey.journeyHtml.includes("Chapter 3 of 5"));
   assert.ok(journey.journeyHtml.includes("Moments That Mattered"));
   assert.ok(journey.journeyHtml.includes("Explore This Story"));
+  assert.ok(journey.journeyHtml.includes("Think back to your time as <strong>Operations Lead at Northwind Labs</strong>. What is one moment that felt difficult, important, or stayed with you?"));
+  assert.ok(!journey.journeyHtml.includes("From your time as Operations Lead at Northwind Labs"));
+  assert.ok(!journey.journeyHtml.includes("You said this season mattered because:"));
+  assert.ok(journey.journeyHtml.includes("Built calmer systems after a volatile stretch."));
+  assert.ok(journey.journeyHtml.includes("Start with what happened, what made it difficult, and what you did next."));
+  assert.ok(journey.journeyHtml.includes('data-career-journey-voice-start="initialResponse"'));
+  assert.ok(journey.journeyHtml.includes('aria-label="Use voice input"'));
+  assert.ok(journey.journeyHtml.includes("journey-voice-row-compact"));
+  assert.ok(journey.journeyHtml.includes("journey-voice-status-row"));
+  assert.ok(journey.journeyHtml.includes("3. Moments That Mattered"));
+  assert.ok(!journey.journeyHtml.includes("Slow down around one meaningful work moment"));
+  assert.ok(!journey.journeyHtml.includes("Some of your strongest stories"));
+  assert.ok(!journey.journeyHtml.includes("Start wherever the memory begins"));
 
   journey.context.fetch = async (_url, options) => {
   const body = JSON.parse(options.body);
@@ -542,7 +578,7 @@ async function run() {
   };
 
   journey.appendVoice("initialResponse", "   ");
-  assert.ok(journey.journeyHtml.includes("Chapter 3 is available when you are ready."));
+  assert.ok(journey.journeyHtml.includes("Start with one work moment."));
 
   journey.appendVoice("initialResponse", "I kept a launch handoff from falling apart when everyone was overloaded.");
   assert.ok(journey.journeyHtml.includes("Chapter 3 is in progress."));
@@ -552,15 +588,23 @@ async function run() {
   journey.click("[data-career-journey-explore-story]");
   await new Promise((resolve) => setImmediate(resolve));
   assert.equal(journey.statusNode.textContent, "NextMove reflected on this moment and asked one follow-up question.");
-  assert.ok(journey.journeyHtml.includes("What NextMove noticed"));
+  assert.ok(journey.journeyHtml.includes("NextMove's reflection"));
+  assert.ok(journey.journeyHtml.includes("journey-ai-reflection"));
   assert.ok(journey.journeyHtml.includes("What felt most important for you to protect in that moment?"));
-  assert.ok(journey.journeyHtml.includes("What this may reveal"));
+  assert.ok(journey.journeyHtml.includes("journey-ai-question"));
+  assert.ok(journey.journeyHtml.includes("This may suggest that you pay close attention to stability when stakes feel high."));
+  assert.ok(journey.journeyHtml.includes("journey-ai-signal"));
+  assert.ok(journey.journeyHtml.includes('data-career-journey-retry-story'));
+  assert.ok(journey.journeyHtml.includes("Tell NextMove a little more."));
+  assert.ok(!journey.journeyHtml.includes("What NextMove asked"));
 
   journey.appendVoice("followUpResponse", "I was trying to keep the customer impact from getting worse while the team regrouped.");
   journey.click("[data-career-journey-save-moment]");
   assert.equal(journey.statusNode.textContent, "Chapter 3 story moment saved for this session.");
   assert.ok(journey.journeyHtml.includes("Your Moments That Mattered"));
   assert.ok(journey.journeyHtml.includes("1 moment captured"));
+  assert.ok(journey.journeyHtml.includes('data-career-journey-timeline-entry-id="journey_role_1"'));
+  assert.ok(journey.journeyHtml.includes("Operations Lead · Northwind Labs"));
   assert.ok(journey.journeyHtml.includes("I'm Done for Now"));
   assert.ok(!journey.journeyHtml.includes("Chapter 3 is complete for now."));
 
@@ -568,6 +612,7 @@ async function run() {
   assert.equal(journey.statusNode.textContent, "Saved moment opened.");
   assert.ok(journey.journeyHtml.includes("Saved Reflection"));
   assert.ok(journey.journeyHtml.includes("What you added"));
+  assert.ok(journey.journeyHtml.includes("Operations Lead · Northwind Labs"));
   assert.ok(journey.journeyHtml.includes("Back to Moments"));
 
   journey.click("[data-career-journey-back-to-moments]");
@@ -576,8 +621,22 @@ async function run() {
   journey.click("[data-career-journey-add-moment]");
   assert.equal(journey.statusNode.textContent, "Chapter 3 is ready for another moment.");
   assert.ok(journey.journeyHtml.includes("1 moment captured"));
-  assert.ok(journey.journeyHtml.includes("Tell me about a moment at work"));
+  assert.ok(journey.journeyHtml.includes("Operations Lead · Northwind Labs"));
+  assert.ok(journey.journeyHtml.includes("Think back to your time as <strong>Operations Lead at Northwind Labs</strong>. What is one moment"));
   assert.ok(!journey.journeyHtml.includes("Chapter 3 next"));
+
+  journey.click('[data-career-journey-toggle-context="different"]');
+  assert.equal(journey.statusNode.textContent, "This moment is marked as a different experience.");
+  assert.ok(journey.journeyHtml.includes("Different experience"));
+  assert.ok(journey.journeyHtml.includes("Think of one moment that felt difficult, important, or stayed with you."));
+  assert.ok(!journey.journeyHtml.includes("You said this season mattered because:"));
+  assert.ok(!journey.journeyHtml.includes("Built calmer systems after a volatile stretch."));
+  journey.click('[data-career-journey-toggle-context="timeline"]');
+  assert.equal(journey.statusNode.textContent, "This moment is connected to your Chapter 2 career season.");
+  assert.ok(journey.journeyHtml.includes("Think back to your time as <strong>Operations Lead at Northwind Labs</strong>. What is one moment"));
+  assert.ok(journey.journeyHtml.includes("Built calmer systems after a volatile stretch."));
+  journey.click('[data-career-journey-toggle-context="different"]');
+  assert.equal(journey.statusNode.textContent, "This moment is marked as a different experience.");
 
   journey.input('textarea[name="chapterThreeInitialResponse"]', "A malformed retry should preserve what I typed.");
   journey.click("[data-career-journey-explore-story]");
@@ -605,10 +664,15 @@ async function run() {
   assert.ok(journey.journeyHtml.includes("2 moments captured"));
   assert.ok(journey.journeyHtml.includes('data-career-journey-view-moment="journey_moment_1"'));
   assert.ok(journey.journeyHtml.includes('data-career-journey-view-moment="journey_moment_2"'));
+  assert.ok(journey.journeyHtml.includes('data-career-journey-timeline-entry-id=""'));
+  assert.ok(journey.journeyHtml.includes("Different experience"));
 
   journey.click('[data-career-journey-edit-moment="journey_moment_1"]');
   assert.equal(journey.statusNode.textContent, "You can revise this saved moment whenever you are ready.");
   assert.ok(journey.journeyHtml.includes("Save This Moment"));
+  assert.ok(journey.journeyHtml.includes("Operations Lead · Northwind Labs"));
+  journey.click('[data-career-journey-toggle-context="different"]');
+  assert.equal(journey.statusNode.textContent, "This moment is marked as a different experience.");
   journey.input('textarea[name="chapterThreeInitialResponse"]', "I kept a launch handoff from falling apart and rewired the escalation path.");
   journey.click("[data-career-journey-explore-story]");
   await new Promise((resolve) => setImmediate(resolve));
@@ -616,6 +680,7 @@ async function run() {
   journey.click("[data-career-journey-save-moment]");
   assert.ok(journey.journeyHtml.includes("2 moments captured"));
   assert.equal(countMatches(journey.journeyHtml, 'data-career-journey-view-moment="journey_moment_1"'), 1);
+  assert.ok(journey.journeyHtml.includes('data-career-journey-timeline-entry-id=""'));
 
   journey.click("[data-career-journey-done-for-now]");
   assert.equal(journey.statusNode.textContent, "Chapter 3 marked complete for now.");
@@ -632,6 +697,20 @@ async function run() {
   assert.ok(journey.journeyHtml.includes("2 moments captured"));
   assert.ok(journey.journeyHtml.includes("Explore This Story"));
   assert.ok(!journey.journeyHtml.includes("Saved Reflection"));
+
+  const noCompanyJourney = createJourneyHarness();
+  noCompanyJourney.render();
+  noCompanyJourney.click("[data-start-career-journey]");
+  noCompanyJourney.submitChapterOne("I want to test a season without an organization.");
+  noCompanyJourney.click("[data-start-career-journey-chapter-two]");
+  noCompanyJourney.submitChapterTwo({
+    seasonTitle: "Machine Operator",
+    organization: "",
+    seasonReflection: "",
+  });
+  assert.ok(noCompanyJourney.journeyHtml.includes("Think back to your time as <strong>Machine Operator</strong>. What is one moment"));
+  assert.ok(!noCompanyJourney.journeyHtml.includes("Machine Operator at"));
+  assert.ok(!noCompanyJourney.journeyHtml.includes("You said this season mattered because:"));
 }
 
 run();
