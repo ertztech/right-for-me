@@ -72,11 +72,24 @@ The demo data seeder is part of this outcome. It gives developers and product ow
 
 Focused Career Journey Workspace for Chapters 1 through 3.
 
+- Status: Complete
+- Shared focused workspace implemented for Chapters 1, 2, and 3.
 - Career Journey overview remains the orientation and progress surface.
 - Focused workspace is the active chapter shell opened by `Start Journey` or `Continue Journey`.
 - Journey navigation lives behind the compact `View journey` control inside that workspace.
 - Chapter-specific content continues to come from the existing Chapter 1, 2, and 3 behaviors.
+- Automated Career Journey state-transition tests passed.
+- Story Coach regression tests passed.
+- Guided desktop browser testing passed.
+- Guided narrow-width browser testing passed.
+- Implementation Review passed.
 - Career Journey -> Professional Experience refinement remains deferred pending a future product decision.
+
+Keep parked for future refinement:
+
+- Chapter 1 voice input
+- Chapter 3 post-save destination when Chapter 4 is introduced
+- Narrow-width Open Profile prominence
 
 ## Recommended Next Outcomes
 
