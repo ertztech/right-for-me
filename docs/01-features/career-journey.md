@@ -73,9 +73,35 @@ Approved anchor phrase to preserve:
 
 Career Journey collects and shapes information through the guided experience. Career Brain owns the durable career data that survives beyond any single session or UI flow. Career Journey should help the user create clarity; Career Brain should preserve the result as reusable source-of-truth material.
 
+## Workspace Definitions
+
+- Career Journey overview: the light orientation surface with progress framing, overview copy, and the entry point into active chapter work.
+- Focused workspace: the shared chapter-working shell for Chapters 1, 2, and 3 where one chapter is visually dominant at a time.
+- Journey navigation: the compact `View journey` control and chapter picker inside the focused workspace.
+- Chapter-specific content: the existing Chapter 1, 2, and 3 renderers, handlers, validations, voice controls, and save/edit flows.
+
+These are separate concerns. The overview should not try to carry the full active chapter workload, and the focused workspace should not become a second application shell.
+
 ## Chapter 2 Direction
 
 Chapter 2 is `Your Career Timeline`. Early MVP language should use `Role or career season` so the experience does not assume every meaningful period was traditional employment. A career season may include employment, education, caregiving, entrepreneurship, transition, volunteer work, a meaningful project, or another formative period.
+
+## Current Active Implementation
+
+Current approved implementation slice: Focused Career Journey Workspace for Chapters 1 through 3.
+
+Expected behavior:
+
+- `Start Journey` and `Continue Journey` open the focused workspace.
+- The workspace should choose the recommended active chapter from existing derived journey state.
+- The chapter area should stay dominant while journey navigation remains secondary.
+- Opening and closing journey navigation must not reset unsaved chapter work.
+
+Deferred explicitly:
+
+- Career Journey -> Professional Experience refinement
+- Chapter 4 and Chapter 5 workspace content
+- Persistence beyond the current local prototype behavior
 
 ## Out Of Scope For V1
 

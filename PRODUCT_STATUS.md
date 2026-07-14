@@ -68,6 +68,16 @@ Make NextMove easier to test, demo, and extend locally.
 
 The demo data seeder is part of this outcome. It gives developers and product owners a fast way to load realistic records, verify Dashboard and Tracker behavior, open seeded records in Opportunity Review and Create Packet, and clear demo records without destroying real local data.
 
+## Active Implementation
+
+Focused Career Journey Workspace for Chapters 1 through 3.
+
+- Career Journey overview remains the orientation and progress surface.
+- Focused workspace is the active chapter shell opened by `Start Journey` or `Continue Journey`.
+- Journey navigation lives behind the compact `View journey` control inside that workspace.
+- Chapter-specific content continues to come from the existing Chapter 1, 2, and 3 behaviors.
+- Career Journey -> Professional Experience refinement remains deferred pending a future product decision.
+
 ## Recommended Next Outcomes
 
 1. Improve application workflow completeness.

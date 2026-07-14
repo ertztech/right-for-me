@@ -54,6 +54,9 @@ const CAREER_JOURNEY_CHAPTERS = [
 
 let selectedJobId = "";
 let careerJourneyStarted = false;
+let careerJourneyWorkspaceOpen = false;
+let careerJourneyNavigationOpen = false;
+let careerJourneyFocusedChapterNumber = 0;
 let careerJourneyChapterOneResponse = "";
 let careerJourneyChapterOneSubmitted = false;
 let careerJourneyChapterOneEditing = false;
@@ -1020,13 +1023,19 @@ function renderCareerJourney() {
 
   normalizeCareerJourneyState();
   const journeyState = deriveCareerJourneyState();
+  node.innerHTML = careerJourneyWorkspaceOpen
+    ? renderCareerJourneyFocusedWorkspace(journeyState)
+    : renderCareerJourneyOverview(journeyState);
+}
+
+function renderCareerJourneyOverview(journeyState) {
   const actionLabel = careerJourneyStarted ? "Continue Journey" : "Start Journey";
   const progressLabel = `Chapter ${journeyState.progressChapter} of ${CAREER_JOURNEY_CHAPTERS.length}`;
   const heroCopy = careerJourneyStarted
     ? "Pick up where you left off with a calm chapter-based workspace designed to help you shape your story before you turn it into outputs."
     : "Start with a guided experience that helps you reflect on where you are today before you jump into resumes, packets, or interview prep.";
 
-  node.innerHTML = `
+  return `
     <section class="journey-hero">
       <div class="journey-hero-main">
         <p class="eyebrow">Interview-First Start</p>
@@ -1043,32 +1052,179 @@ function renderCareerJourney() {
         <p>${escapeHtml(journeyState.progressMessage)}</p>
       </aside>
     </section>
-    <section class="journey-layout">
-      <article class="journey-card journey-card-primary">
-        <div class="journey-card-header">
-          <div>
-            <p class="eyebrow">${escapeHtml(journeyState.headerEyebrow)}</p>
-            <h3>${escapeHtml(journeyState.activeChapter.title)}</h3>
-          </div>
-          <span class="status-badge ${journeyState.badgeClass}">${escapeHtml(journeyState.badgeLabel)}</span>
-        </div>
-        ${journeyState.activeChapter.number === 3 ? "" : `<p class="support-copy">${escapeHtml(journeyState.activeChapter.description)}</p>`}
-        ${renderCareerJourneyActiveChapterInteraction(journeyState)}
-      </article>
+    <section class="journey-layout journey-layout-overview">
       <aside class="journey-sidebar">
         <article class="journey-card">
-          <p class="eyebrow">Chapter Map</p>
+          <p class="eyebrow">Journey Progress</p>
           <div class="journey-chapter-list">
             ${CAREER_JOURNEY_CHAPTERS.map((chapter) => renderCareerJourneyChapterCard(chapter, journeyState)).join("")}
+          </div>
+        </article>
+      </aside>
+      <div class="journey-overview-main">
+        <article class="journey-card journey-card-primary">
+          <div class="journey-card-header">
+            <div>
+              <p class="eyebrow">${escapeHtml(journeyState.headerEyebrow)}</p>
+              <h3>${escapeHtml(journeyState.activeChapter.title)}</h3>
+            </div>
+            <span class="status-badge ${journeyState.badgeClass}">${escapeHtml(journeyState.badgeLabel)}</span>
+          </div>
+          <p class="support-copy">${escapeHtml(journeyState.activeChapter.description)}</p>
+          <div class="journey-overview-next-step">
+            <p class="support-copy">${escapeHtml(journeyState.progressMessage)}</p>
+            <div class="journey-action-row">
+              <button type="button" data-start-career-journey-current>${escapeHtml(actionLabel)}</button>
+            </div>
           </div>
         </article>
         <article class="journey-card">
           <p class="eyebrow">Experience Layer</p>
           <p class="support-copy">Career Journey is the guided experience layer. Career Brain comes later as the durable source of truth behind the story you uncover here.</p>
         </article>
-      </aside>
+      </div>
     </section>
   `;
+}
+
+function renderCareerJourneyFocusedWorkspace(journeyState) {
+  const activeChapter = resolveCareerJourneyFocusedChapter(journeyState);
+  const activeJourneyState = activeChapter.number === journeyState.activeChapter.number
+    ? journeyState
+    : deriveCareerJourneyWorkspaceStateForChapter(activeChapter.number, journeyState);
+
+  return `
+    <section class="journey-workspace" aria-label="Career Journey focused workspace">
+      <div class="journey-workspace-shell">
+        <div class="journey-workspace-header">
+          <div>
+            <p class="eyebrow">Focused Workspace</p>
+            <h2>${escapeHtml(activeChapter.title)}</h2>
+            <p class="support-copy">Career Journey overview stays outside this workspace. Use the chapter area to keep moving without losing your place.</p>
+          </div>
+          <div class="journey-action-row journey-workspace-actions">
+            <button type="button" class="secondary-button" data-career-journey-toggle-navigation>${escapeHtml(careerJourneyNavigationOpen ? "Hide journey" : "View journey")}</button>
+            <button type="button" class="secondary-button" data-career-journey-close-workspace>Back to Overview</button>
+          </div>
+        </div>
+        <div class="journey-workspace-body ${careerJourneyNavigationOpen ? "journey-workspace-body-with-navigation" : ""}">
+          <aside class="journey-workspace-navigation ${careerJourneyNavigationOpen ? "" : "hidden"}" aria-label="Journey navigation">
+            <article class="journey-card">
+              <p class="eyebrow">Journey Navigation</p>
+              <div class="journey-chapter-list">
+                ${CAREER_JOURNEY_CHAPTERS.slice(0, 3).map((chapter) => renderCareerJourneyWorkspaceChapterButton(chapter, activeJourneyState, activeChapter.number)).join("")}
+              </div>
+            </article>
+          </aside>
+          <article class="journey-card journey-card-primary journey-workspace-chapter">
+            <div class="journey-card-header">
+              <div>
+                <p class="eyebrow">${escapeHtml(activeJourneyState.headerEyebrow)}</p>
+                <h3>${escapeHtml(activeChapter.title)}</h3>
+              </div>
+              <span class="status-badge ${activeJourneyState.badgeClass}">${escapeHtml(activeJourneyState.badgeLabel)}</span>
+            </div>
+            ${activeChapter.number === 3 ? "" : `<p class="support-copy">${escapeHtml(activeChapter.description)}</p>`}
+            ${renderCareerJourneyActiveChapterInteraction(activeJourneyState)}
+          </article>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function deriveCareerJourneyWorkspaceStateForChapter(chapterNumber, journeyState) {
+  const chapter = CAREER_JOURNEY_CHAPTERS.find((entry) => entry.number === chapterNumber) || journeyState.activeChapter;
+  const chapterMeta = deriveCareerJourneyChapterMeta(chapter, journeyState);
+  let badgeLabel = chapterMeta.label;
+  if (chapterMeta.label === "Current chapter") {
+    badgeLabel = `Chapter ${chapter.number} current`;
+  } else if (chapterMeta.label === "Available next") {
+    badgeLabel = `Chapter ${chapter.number} next`;
+  } else if (chapterMeta.label === "In progress") {
+    badgeLabel = `Chapter ${chapter.number} in progress`;
+  } else if (chapterMeta.label === "Complete") {
+    badgeLabel = `Chapter ${chapter.number} complete`;
+  } else {
+    badgeLabel = `Chapter ${chapter.number} upcoming`;
+  }
+
+  return {
+    ...journeyState,
+    activeChapter: chapter,
+    badgeClass: chapterMeta.className === "journey-chapter-card-complete"
+      ? "status-apply"
+      : chapterMeta.className === "journey-chapter-card-ready"
+        ? "status-maybe"
+        : chapterMeta.className === "journey-chapter-card-upcoming"
+          ? "status-skip"
+          : "status-reviewing",
+    badgeLabel,
+    headerEyebrow: chapterMeta.label === "Complete"
+      ? "Completed Chapter"
+      : chapterMeta.label === "Available next"
+        ? "Available Chapter"
+        : chapterMeta.label === "Upcoming"
+          ? "Upcoming Chapter"
+          : "Current Chapter",
+  };
+}
+
+function renderCareerJourneyWorkspaceChapterButton(chapter, journeyState, activeChapterNumber) {
+  const chapterMeta = deriveCareerJourneyChapterMeta(chapter, journeyState);
+  const available = isCareerJourneyChapterAvailable(chapter.number);
+  const isActive = chapter.number === activeChapterNumber;
+  const disabled = !available && !isActive;
+
+  return `
+    <button
+      type="button"
+      class="journey-chapter-card ${chapterMeta.className} ${available ? "journey-chapter-card-selectable" : ""}"
+      data-career-journey-open-chapter="${escapeAttribute(String(chapter.number))}"
+      ${disabled ? "disabled" : ""}
+      aria-current="${isActive ? "step" : "false"}"
+      aria-label="${escapeAttribute(`Chapter ${chapter.number}: ${chapter.title}. ${chapterMeta.label}`)}"
+    >
+      <span class="journey-chapter-marker" aria-hidden="true">${escapeHtml(chapterMeta.marker)}</span>
+      <h4>${chapter.number}. ${escapeHtml(chapter.title)}</h4>
+      <small>${escapeHtml(chapterMeta.label)}</small>
+    </button>
+  `;
+}
+
+function resolveCareerJourneyFocusedChapter(journeyState) {
+  const chapterNumber = normalizeCareerJourneyFocusedChapterNumber(careerJourneyFocusedChapterNumber, journeyState.activeChapter.number);
+  return CAREER_JOURNEY_CHAPTERS.find((chapter) => chapter.number === chapterNumber) || CAREER_JOURNEY_CHAPTERS[0];
+}
+
+function normalizeCareerJourneyFocusedChapterNumber(chapterNumber, fallbackNumber = 1) {
+  const numeric = Number(chapterNumber);
+  if (Number.isInteger(numeric) && numeric >= 1 && numeric <= 3 && isCareerJourneyChapterAvailable(numeric)) {
+    return numeric;
+  }
+
+  const fallback = Number(fallbackNumber);
+  if (Number.isInteger(fallback) && fallback >= 1 && fallback <= 3) {
+    return fallback;
+  }
+
+  return 1;
+}
+
+function isCareerJourneyChapterAvailable(chapterNumber) {
+  if (chapterNumber === 1) {
+    return true;
+  }
+
+  if (chapterNumber === 2) {
+    return careerJourneyChapterOneSubmitted;
+  }
+
+  if (chapterNumber === 3) {
+    return hasCareerJourneyChapterTwoEntry();
+  }
+
+  return false;
 }
 
 function renderCareerJourneyActiveChapterInteraction(journeyState) {
@@ -1420,7 +1576,7 @@ function renderCareerJourneyChapterThreePrompt() {
 
   const timelineLabel = currentCareerJourneyTimelineSentenceLabel();
   return `
-    <p class="journey-story-main-prompt">Think back to your time as <strong>${escapeHtml(timelineLabel)}</strong>. What is one moment that felt difficult, important, or stayed with you?</p>
+    <p class="journey-story-main-prompt">Think back to when you worked as <strong>${escapeHtml(timelineLabel)}</strong>. What is one moment that felt difficult, important, or stayed with you?</p>
   `;
 }
 
@@ -2384,17 +2540,72 @@ function deriveCareerJourneyChapterMeta(chapter, journeyState) {
 }
 
 function bindCareerJourneyActions() {
-  const journeyButton = document.querySelector("[data-start-career-journey]");
-  if (!journeyButton || journeyButton.dataset.bound === "true") {
-  } else {
+  const journeyButtons = [
+    ...document.querySelectorAll("[data-start-career-journey]"),
+    ...document.querySelectorAll("[data-start-career-journey-current]"),
+  ];
+  journeyButtons.forEach((journeyButton) => {
+    if (journeyButton.dataset.bound === "true") {
+      return;
+    }
+
     journeyButton.dataset.bound = "true";
     journeyButton.addEventListener("click", () => {
+      syncCareerJourneyDraftInputs();
       careerJourneyStarted = true;
+      careerJourneyWorkspaceOpen = true;
+      careerJourneyNavigationOpen = false;
+      careerJourneyFocusedChapterNumber = normalizeCareerJourneyFocusedChapterNumber(deriveCareerJourneyState().activeChapter.number);
       renderCareerJourney();
       bindCareerJourneyActions();
       setJobsStatus("Career Journey started. Chapter 1 is ready for guided reflection.", "success");
     });
+  });
+
+  const navigationToggleButton = document.querySelector("[data-career-journey-toggle-navigation]");
+  if (navigationToggleButton && navigationToggleButton.dataset.bound !== "true") {
+    navigationToggleButton.dataset.bound = "true";
+    navigationToggleButton.addEventListener("click", () => {
+      syncCareerJourneyDraftInputs();
+      careerJourneyNavigationOpen = !careerJourneyNavigationOpen;
+      renderCareerJourney();
+      bindCareerJourneyActions();
+    });
   }
+
+  const closeWorkspaceButton = document.querySelector("[data-career-journey-close-workspace]");
+  if (closeWorkspaceButton && closeWorkspaceButton.dataset.bound !== "true") {
+    closeWorkspaceButton.dataset.bound = "true";
+    closeWorkspaceButton.addEventListener("click", () => {
+      syncCareerJourneyDraftInputs();
+      careerJourneyWorkspaceOpen = false;
+      careerJourneyNavigationOpen = false;
+      renderCareerJourney();
+      bindCareerJourneyActions();
+      setJobsStatus("Returned to the Career Journey overview.", "idle");
+    });
+  }
+
+  const chapterButtons = document.querySelectorAll("[data-career-journey-open-chapter]");
+  chapterButtons.forEach((button) => {
+    if (button.dataset.bound === "true") {
+      return;
+    }
+
+    button.dataset.bound = "true";
+    button.addEventListener("click", () => {
+      const nextChapterNumber = Number(button.dataset.careerJourneyOpenChapter || 0);
+      const normalizedChapterNumber = normalizeCareerJourneyFocusedChapterNumber(nextChapterNumber, deriveCareerJourneyState().activeChapter.number);
+      if (normalizedChapterNumber === careerJourneyFocusedChapterNumber) {
+        return;
+      }
+
+      syncCareerJourneyDraftInputs();
+      careerJourneyFocusedChapterNumber = normalizedChapterNumber;
+      renderCareerJourney();
+      bindCareerJourneyActions();
+    });
+  });
 
   const journeyForm = document.querySelector("[data-career-journey-form]");
   if (journeyForm && journeyForm.dataset.bound !== "true") {
@@ -2402,7 +2613,9 @@ function bindCareerJourneyActions() {
     journeyForm.addEventListener("submit", (event) => {
       event.preventDefault();
 
-      const response = cleanValue(journeyForm.elements.chapterOneResponse?.value);
+      const rawResponse = journeyForm.elements.chapterOneResponse?.value || "";
+      const response = cleanValue(rawResponse);
+      careerJourneyChapterOneResponse = rawResponse;
       careerJourneyStarted = true;
 
       if (!response) {
@@ -2423,6 +2636,7 @@ function bindCareerJourneyActions() {
       careerJourneyChapterOneSubmitted = true;
       careerJourneyChapterOneEditing = false;
       careerJourneyChapterOneSupportMessage = "";
+      careerJourneyFocusedChapterNumber = 2;
 
       renderCareerJourney();
       bindCareerJourneyActions();
@@ -2474,8 +2688,8 @@ function bindCareerJourneyActions() {
     chapterTwoForm.addEventListener("submit", (event) => {
       event.preventDefault();
 
-      const seasonTitle = cleanValue(chapterTwoForm.elements.seasonTitle?.value);
       const timelineEntryId = cleanValue(chapterTwoForm.elements.timelineEntryId?.value) || cleanValue(careerJourneyChapterTwoEntry.id);
+      const seasonTitle = cleanValue(chapterTwoForm.elements.seasonTitle?.value);
       const organization = cleanValue(chapterTwoForm.elements.organization?.value);
       const startYear = cleanValue(chapterTwoForm.elements.startYear?.value);
       const endYear = cleanValue(chapterTwoForm.elements.endYear?.value);
@@ -2515,6 +2729,8 @@ function bindCareerJourneyActions() {
         resetCareerJourneyChapterThree();
       }
 
+      careerJourneyFocusedChapterNumber = 3;
+
       renderCareerJourney();
       bindCareerJourneyActions();
       setJobsStatus("Chapter 2 career season captured for this session.", "success");
@@ -2522,6 +2738,55 @@ function bindCareerJourneyActions() {
   }
 
   bindCareerJourneyChapterThreeActions();
+  bindCareerJourneyDraftSyncActions();
+}
+
+function bindCareerJourneyDraftSyncActions() {
+  const chapterOneField = document.querySelector('textarea[name="chapterOneResponse"]');
+  if (chapterOneField && chapterOneField.dataset.bound !== "true") {
+    chapterOneField.dataset.bound = "true";
+    chapterOneField.addEventListener("input", (event) => {
+      careerJourneyChapterOneResponse = event.target.value;
+      if (careerJourneyChapterOneSupportMessage) {
+        careerJourneyChapterOneSupportMessage = "";
+      }
+    });
+  }
+
+  const chapterTwoFieldNames = ["timelineEntryId", "seasonTitle", "organization", "startYear", "endYear", "seasonReflection"];
+  chapterTwoFieldNames.forEach((fieldName) => {
+    const field = document.querySelector(`[name="${fieldName}"]`);
+    if (!field || field.dataset.bound === "true") {
+      return;
+    }
+
+    field.dataset.bound = "true";
+    field.addEventListener("input", (event) => {
+      careerJourneyChapterTwoEntry = {
+        ...careerJourneyChapterTwoEntry,
+        [fieldName]: event.target.value,
+      };
+    });
+  });
+}
+
+function syncCareerJourneyDraftInputs() {
+  const chapterOneField = document.querySelector('textarea[name="chapterOneResponse"]');
+  if (chapterOneField) {
+    careerJourneyChapterOneResponse = chapterOneField.value;
+  }
+
+  const chapterTwoField = (fieldName) => document.querySelector(`[name="${fieldName}"]`)?.value;
+  if (document.querySelector("[data-career-journey-chapter-two-form]")) {
+    careerJourneyChapterTwoEntry = {
+      id: chapterTwoField("timelineEntryId") ?? careerJourneyChapterTwoEntry.id,
+      seasonTitle: chapterTwoField("seasonTitle") ?? careerJourneyChapterTwoEntry.seasonTitle,
+      organization: chapterTwoField("organization") ?? careerJourneyChapterTwoEntry.organization,
+      startYear: chapterTwoField("startYear") ?? careerJourneyChapterTwoEntry.startYear,
+      endYear: chapterTwoField("endYear") ?? careerJourneyChapterTwoEntry.endYear,
+      seasonReflection: chapterTwoField("seasonReflection") ?? careerJourneyChapterTwoEntry.seasonReflection,
+    };
+  }
 }
 
 function renderJobDetail(job) {
