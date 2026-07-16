@@ -1520,6 +1520,13 @@ button[data-clear-demo-data]:hover {
   animation: journey-voice-pulse 1100ms ease-in-out infinite;
 }
 
+.journey-voice-button[data-voice-state="requesting"],
+.journey-voice-button[data-voice-state="processing"],
+.journey-voice-button[data-voice-state="restarting"] {
+  border-color: rgba(15, 118, 110, 0.3);
+  background: rgba(223, 243, 238, 0.7);
+}
+
 .journey-voice-row-compact .journey-voice-copy {
   display: none;
 }

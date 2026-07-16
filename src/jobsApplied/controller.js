@@ -66,6 +66,7 @@ let careerJourneyChapterTwoEditing = false;
 let careerJourneyChapterTwoValidation = "";
 let careerJourneyChapterTwoEntry = emptyCareerJourneyChapterTwoEntry();
 let careerJourneyChapterThree = emptyCareerJourneyChapterThreeState();
+let careerJourneyVoiceUi = emptyCareerJourneyVoiceUiState();
 let careerJourneyVoiceSession = null;
 let careerJourneyTimelineEntryIdCounter = 0;
 let careerJourneyMomentIdCounter = 0;
@@ -1268,18 +1269,25 @@ function renderCareerJourneyChapterOneForm(actionLabel) {
   const placeholderText = careerJourneyChapterOneSupportMessage
     ? careerJourneyChapterOneSupportMessage
     : "You might describe a transition, a question you are trying to answer, or the kind of next move you want to make.";
+  const chapterOneTargetKey = "chapterOneResponse";
 
   return `
     <div class="${careerJourneyChapterOneSubmitted ? "journey-reflection-prompt" : ""}">
       <form class="journey-reflection-form" data-career-journey-form>
         <label class="journey-reflection-label">
           What brings you to NextMove right now?
-          <textarea
-            name="chapterOneResponse"
-            class="journey-reflection-input"
-            rows="5"
-            placeholder="${escapeAttribute(placeholderText)}"
-          >${escapeHtml(careerJourneyChapterOneResponse)}</textarea>
+          <div class="journey-voice-field">
+            <div class="journey-textarea-shell">
+              <textarea
+                name="chapterOneResponse"
+                class="journey-reflection-input journey-reflection-input-with-voice"
+                rows="5"
+                placeholder="${escapeAttribute(placeholderText)}"
+              >${escapeHtml(careerJourneyChapterOneResponse)}</textarea>
+              ${renderCareerJourneyVoiceControls(chapterOneTargetKey, "Use voice input")}
+            </div>
+            ${renderCareerJourneyVoiceStatus(chapterOneTargetKey)}
+          </div>
         </label>
         <div class="journey-action-row">
           <button type="submit">${escapeHtml(actionLabel)}</button>
@@ -1518,7 +1526,7 @@ function renderCareerJourneyChapterThreeSection() {
                 rows="7"
                 placeholder="Start with what happened, what made it difficult, and what you did next."
               >${escapeHtml(draft.initialResponse)}</textarea>
-              ${renderCareerJourneyVoiceControls("initialResponse", "story", "Use voice input")}
+              ${renderCareerJourneyVoiceControls("initialResponse", "Use voice input")}
             </div>
             ${renderCareerJourneyVoiceStatus("initialResponse")}
           </div>
@@ -1544,7 +1552,7 @@ function renderCareerJourneyChapterThreeSection() {
                   rows="4"
                   placeholder="Tell NextMove a little more."
                 >${escapeHtml(draft.followUpResponse)}</textarea>
-                ${renderCareerJourneyVoiceControls("followUpResponse", "follow-up", "Use voice input")}
+                ${renderCareerJourneyVoiceControls("followUpResponse", "Use voice input")}
               </div>
               ${renderCareerJourneyVoiceStatus("followUpResponse")}
             </div>
@@ -1722,10 +1730,9 @@ function renderCareerJourneySavedSection(title, content, source) {
   `;
 }
 
-function renderCareerJourneyVoiceControls(fieldName, fieldLabel, startLabel) {
-  const isCurrentField = careerJourneyChapterThree.voiceTarget === fieldName;
-  const state = isCurrentField ? careerJourneyChapterThree.voiceState : "idle";
-  const stopVisible = isCurrentField && (state === "requesting" || state === "listening" || state === "processing");
+function renderCareerJourneyVoiceControls(targetKey, startLabel) {
+  const state = isCareerJourneyVoiceTarget(targetKey) ? careerJourneyVoiceUi.state : "idle";
+  const stopVisible = isCareerJourneyVoiceTarget(targetKey) && isVoiceWorking(state);
 
   return `
     <div class="journey-voice-row journey-voice-row-compact">
@@ -1733,7 +1740,7 @@ function renderCareerJourneyVoiceControls(fieldName, fieldLabel, startLabel) {
         <button
           type="button"
           class="journey-voice-button"
-          data-career-journey-voice-start="${escapeAttribute(fieldName)}"
+          data-career-journey-voice-start="${escapeAttribute(targetKey)}"
           aria-label="${escapeAttribute(startLabel)}"
           title="${escapeAttribute(startLabel)}"
           data-voice-state="${escapeAttribute(state)}"
@@ -1746,16 +1753,18 @@ function renderCareerJourneyVoiceControls(fieldName, fieldLabel, startLabel) {
   `;
 }
 
-function renderCareerJourneyVoiceStatus(fieldName) {
-  const isCurrentField = careerJourneyChapterThree.voiceTarget === fieldName;
-  const state = isCurrentField ? careerJourneyChapterThree.voiceState : "idle";
-  const message = isCurrentField ? deriveVoiceMessage(state, careerJourneyChapterThree.voiceMessage) : "";
+function renderCareerJourneyVoiceStatus(targetKey) {
+  const isCurrentField = isCareerJourneyVoiceTarget(targetKey);
+  const state = isCurrentField ? careerJourneyVoiceUi.state : "idle";
+  const message = isCurrentField ? deriveVoiceMessage(state, careerJourneyVoiceUi.message) : deriveVoiceMessage("idle");
   const statusText = state === "requesting"
     ? "Starting"
     : state === "listening"
       ? "Listening"
       : state === "processing"
         ? "Processing"
+        : state === "restarting"
+          ? "Listening"
         : state === "unsupported"
           ? "Unavailable"
           : "Voice input";
@@ -1764,7 +1773,7 @@ function renderCareerJourneyVoiceStatus(fieldName) {
     <div class="journey-voice-status-row">
       <div class="journey-voice-copy">
         <span>${escapeHtml(statusText)}</span>
-        <p class="journey-voice-status" data-career-journey-voice-status="${escapeAttribute(fieldName)}" data-voice-state="${escapeAttribute(state)}" aria-live="polite">${escapeHtml(message)}</p>
+        <p class="journey-voice-status" data-career-journey-voice-status="${escapeAttribute(targetKey)}" data-voice-state="${escapeAttribute(state)}" aria-live="polite">${escapeHtml(message)}</p>
       </div>
     </div>
   `;
@@ -1877,12 +1886,17 @@ function emptyCareerJourneyChapterThreeState() {
     activeMomentId: "",
     draft: emptyCareerJourneyChapterThreeDraft(),
     chapterCompletionConfirmed: false,
-    voiceState: "idle",
-    voiceTarget: "",
-    voiceMessage: "",
     aiState: "idle",
     mode: "idle",
     error: "",
+  };
+}
+
+function emptyCareerJourneyVoiceUiState() {
+  return {
+    state: "idle",
+    target: "",
+    message: "",
   };
 }
 
@@ -1899,7 +1913,7 @@ function emptyCareerJourneyChapterThreeDraft() {
 }
 
 function resetCareerJourneyChapterThree() {
-  stopCareerJourneyVoiceCapture();
+  disposeCareerJourneyVoiceCapture();
   careerJourneyChapterThree = emptyCareerJourneyChapterThreeState();
 }
 
@@ -1965,7 +1979,7 @@ function createCareerJourneyMomentFromDraft() {
 }
 
 function beginCareerJourneyNewMoment() {
-  stopCareerJourneyVoiceCapture();
+  disposeCareerJourneyVoiceCapture();
   careerJourneyChapterThree.activeMomentId = "";
   careerJourneyChapterThree.draft = emptyCareerJourneyChapterThreeDraft();
   careerJourneyChapterThree.aiState = "idle";
@@ -1980,7 +1994,7 @@ function openCareerJourneyMomentById(momentId, mode = "viewing") {
     return false;
   }
 
-  stopCareerJourneyVoiceCapture();
+  disposeCareerJourneyVoiceCapture();
   careerJourneyChapterThree.activeMomentId = moment.id;
   careerJourneyChapterThree.draft = { ...moment };
   careerJourneyChapterThree.aiState = "idle";
@@ -2008,6 +2022,7 @@ function deriveVoiceMessage(state, fallbackMessage = "") {
     requesting: "Waiting for microphone permission.",
     listening: "Listening now. You can stop whenever you want.",
     processing: "Finishing the transcript.",
+    restarting: "Listening now. You can stop whenever you want.",
     complete: "Transcript added. Review and edit it before you continue.",
     denied: "Microphone permission was denied. You can keep typing instead.",
     unsupported: "Voice input is not supported in this browser. You can keep typing instead.",
@@ -2019,7 +2034,68 @@ function deriveVoiceMessage(state, fallbackMessage = "") {
 }
 
 function isVoiceWorking(state) {
-  return ["requesting", "listening", "processing"].includes(state);
+  return ["requesting", "listening", "processing", "restarting"].includes(state);
+}
+
+function isCareerJourneyVoiceTarget(targetKey) {
+  return cleanValue(careerJourneyVoiceUi.target) === cleanValue(targetKey);
+}
+
+function setCareerJourneyVoiceUiState(targetKey, state, message = "") {
+  careerJourneyVoiceUi = {
+    target: cleanValue(targetKey),
+    state,
+    message,
+  };
+}
+
+function clearCareerJourneyVoiceUiState() {
+  careerJourneyVoiceUi = emptyCareerJourneyVoiceUiState();
+}
+
+function resolveCareerJourneyVoiceTargetDescriptor(targetKey) {
+  const normalizedTargetKey = cleanValue(targetKey);
+
+  if (normalizedTargetKey === "chapterOneResponse") {
+    return {
+      targetKey: normalizedTargetKey,
+      selector: 'textarea[name="chapterOneResponse"]',
+      getValue: () => careerJourneyChapterOneResponse,
+      setValue(value) {
+        careerJourneyChapterOneResponse = value;
+        if (careerJourneyChapterOneSupportMessage) {
+          careerJourneyChapterOneSupportMessage = "";
+        }
+      },
+    };
+  }
+
+  if (normalizedTargetKey === "followUpResponse") {
+    return {
+      targetKey: normalizedTargetKey,
+      selector: 'textarea[name="chapterThreeFollowUpResponse"]',
+      getValue: () => careerJourneyChapterThree.draft.followUpResponse,
+      setValue(value) {
+        careerJourneyChapterThree.draft.followUpResponse = value;
+      },
+    };
+  }
+
+  if (normalizedTargetKey === "initialResponse") {
+    return {
+      targetKey: normalizedTargetKey,
+      selector: 'textarea[name="chapterThreeInitialResponse"]',
+      getValue: () => careerJourneyChapterThree.draft.initialResponse,
+      setValue(value) {
+        careerJourneyChapterThree.draft.initialResponse = value;
+        if (careerJourneyChapterThree.mode === "idle" && cleanValue(value)) {
+          careerJourneyChapterThree.mode = "discovering";
+        }
+      },
+    };
+  }
+
+  return null;
 }
 
 function emptyCareerJourneyChapterTwoEntry() {
@@ -2071,7 +2147,7 @@ function bindCareerJourneyChapterThreeActions() {
 
     button.dataset.bound = "true";
     button.addEventListener("click", () => {
-      stopCareerJourneyVoiceCapture("processing", "Finishing the transcript.");
+      stopCareerJourneyVoiceCapture();
       syncCareerJourneyVoiceStatusUi();
     });
   });
@@ -2080,6 +2156,7 @@ function bindCareerJourneyChapterThreeActions() {
   if (contextToggle && contextToggle.dataset.bound !== "true") {
     contextToggle.dataset.bound = "true";
     contextToggle.addEventListener("click", () => {
+      disposeCareerJourneyVoiceCapture();
       const nextContext = contextToggle.dataset.careerJourneyToggleContext || "";
       careerJourneyChapterThree.draft.timelineEntryId = nextContext === "timeline"
         ? currentCareerJourneyTimelineEntryId()
@@ -2258,6 +2335,7 @@ function updateCareerJourneyChapterThreeActionAvailability() {
 }
 
 async function exploreCareerJourneyStory() {
+  disposeCareerJourneyVoiceCapture();
   const initialResponse = cleanValue(careerJourneyChapterThree.draft.initialResponse);
   if (!initialResponse) {
     careerJourneyChapterThree.error = "Add a real moment before you ask NextMove to explore it.";
@@ -2314,6 +2392,7 @@ async function exploreCareerJourneyStory() {
 }
 
 function saveCareerJourneyStoryMoment() {
+  disposeCareerJourneyVoiceCapture();
   const followUpResponse = cleanValue(careerJourneyChapterThree.draft.followUpResponse);
   if (!followUpResponse) {
     careerJourneyChapterThree.error = "Add your follow-up response before saving this moment.";
@@ -2353,131 +2432,104 @@ function hasMeaningfulCareerJourneyChapterThreeDraft() {
 }
 
 function startCareerJourneyVoiceCapture(fieldName) {
-  const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!Recognition) {
-    careerJourneyChapterThree.voiceTarget = fieldName;
-    careerJourneyChapterThree.voiceState = "unsupported";
-    careerJourneyChapterThree.voiceMessage = deriveVoiceMessage("unsupported");
-    syncCareerJourneyVoiceStatusUi();
+  const descriptor = resolveCareerJourneyVoiceTargetDescriptor(fieldName);
+  if (!descriptor) {
     return;
   }
 
-  stopCareerJourneyVoiceCapture();
-  const recognition = new Recognition();
-  let transcript = "";
+  disposeCareerJourneyVoiceCapture();
 
-  recognition.lang = "en-US";
-  recognition.interimResults = true;
-  recognition.maxAlternatives = 1;
+  careerJourneyVoiceSession = window.NextMoveVoiceSession.createVoiceSession({
+    messages: {
+      idle: deriveVoiceMessage("idle"),
+      requesting: deriveVoiceMessage("requesting"),
+      listening: deriveVoiceMessage("listening"),
+      processing: deriveVoiceMessage("processing"),
+      complete: deriveVoiceMessage("complete"),
+      denied: deriveVoiceMessage("denied"),
+      unsupported: deriveVoiceMessage("unsupported"),
+      "no-speech": deriveVoiceMessage("no-speech"),
+      error: deriveVoiceMessage("error"),
+    },
+    shouldContinueSession: () => isCareerJourneyVoiceTarget(descriptor.targetKey) && hasCareerJourneyVoiceTarget(descriptor.targetKey),
+    onStateChange: (state, message) => {
+      setCareerJourneyVoiceUiState(descriptor.targetKey, state, message || deriveVoiceMessage(state));
+      syncCareerJourneyVoiceStatusUi();
+    },
+    onFinalTranscript: (transcript) => {
+      appendTranscriptToCareerJourneyField(descriptor.targetKey, transcript);
+    },
+  });
 
-  careerJourneyVoiceSession = recognition;
-  careerJourneyChapterThree.voiceTarget = fieldName;
-  careerJourneyChapterThree.voiceState = "requesting";
-  careerJourneyChapterThree.voiceMessage = deriveVoiceMessage("requesting");
+  setCareerJourneyVoiceUiState(descriptor.targetKey, "requesting", deriveVoiceMessage("requesting"));
   syncCareerJourneyVoiceStatusUi();
-
-  recognition.onstart = () => {
-    careerJourneyChapterThree.voiceState = "listening";
-    careerJourneyChapterThree.voiceMessage = deriveVoiceMessage("listening");
-    syncCareerJourneyVoiceStatusUi();
-  };
-
-  recognition.onresult = (event) => {
-    transcript = Array.from(event.results || [])
-      .map((result) => result[0]?.transcript || "")
-      .join(" ")
-      .trim();
-    careerJourneyChapterThree.voiceState = "processing";
-    careerJourneyChapterThree.voiceMessage = deriveVoiceMessage("processing");
-    syncCareerJourneyVoiceStatusUi();
-  };
-
-  recognition.onerror = (event) => {
-    const errorState = event.error === "not-allowed" || event.error === "service-not-allowed"
-      ? "denied"
-      : event.error === "no-speech"
-        ? "no-speech"
-        : "error";
-    careerJourneyVoiceSession = null;
-    careerJourneyChapterThree.voiceState = errorState;
-    careerJourneyChapterThree.voiceMessage = deriveVoiceMessage(errorState);
-    syncCareerJourneyVoiceStatusUi();
-  };
-
-  recognition.onend = () => {
-    if (transcript) {
-      appendTranscriptToChapterThreeField(fieldName, transcript);
-      careerJourneyChapterThree.voiceState = "complete";
-      careerJourneyChapterThree.voiceMessage = deriveVoiceMessage("complete");
-    } else if (careerJourneyChapterThree.voiceState === "processing" || careerJourneyChapterThree.voiceState === "listening" || careerJourneyChapterThree.voiceState === "requesting") {
-      careerJourneyChapterThree.voiceState = "no-speech";
-      careerJourneyChapterThree.voiceMessage = deriveVoiceMessage("no-speech");
-    }
-
-    careerJourneyVoiceSession = null;
-    syncCareerJourneyVoiceStatusUi();
-  };
-
-  recognition.start();
+  careerJourneyVoiceSession.start();
 }
 
-function stopCareerJourneyVoiceCapture(nextState = "idle", message = "") {
+function stopCareerJourneyVoiceCapture() {
   if (careerJourneyVoiceSession) {
-    try {
-      careerJourneyVoiceSession.stop();
-    } catch (error) {
-      // Ignore stop races from browsers that end recognition quickly.
-    }
-  }
-
-  careerJourneyVoiceSession = null;
-  if (nextState !== "idle") {
-    careerJourneyChapterThree.voiceState = nextState;
-    careerJourneyChapterThree.voiceMessage = message || deriveVoiceMessage(nextState);
+    careerJourneyVoiceSession.stop();
+  } else {
+    clearCareerJourneyVoiceUiState();
   }
 }
 
-function appendTranscriptToChapterThreeField(fieldName, transcript) {
-  const existing = fieldName === "followUpResponse"
-    ? careerJourneyChapterThree.draft.followUpResponse
-    : careerJourneyChapterThree.draft.initialResponse;
+function disposeCareerJourneyVoiceCapture() {
+  if (careerJourneyVoiceSession) {
+    careerJourneyVoiceSession.dispose();
+    careerJourneyVoiceSession = null;
+  }
+  clearCareerJourneyVoiceUiState();
+  syncCareerJourneyVoiceStatusUi();
+}
+
+function appendTranscriptToCareerJourneyField(targetKey, transcript) {
+  const descriptor = resolveCareerJourneyVoiceTargetDescriptor(targetKey);
+  if (!descriptor) {
+    return;
+  }
+
+  const existing = descriptor.getValue();
   const nextValue = cleanValue(existing)
     ? `${String(existing).trimEnd()} ${transcript}`.trim()
     : transcript;
 
-  if (fieldName === "followUpResponse") {
-    careerJourneyChapterThree.draft.followUpResponse = nextValue;
-  } else {
-    careerJourneyChapterThree.draft.initialResponse = nextValue;
-    if (careerJourneyChapterThree.mode === "idle" && cleanValue(nextValue)) {
-      careerJourneyChapterThree.mode = "discovering";
-      renderCareerJourney();
-      bindCareerJourneyActions();
-      return;
-    }
-  }
+  descriptor.setValue(nextValue);
 
-  const selector = fieldName === "followUpResponse"
-    ? 'textarea[name="chapterThreeFollowUpResponse"]'
-    : 'textarea[name="chapterThreeInitialResponse"]';
-  const field = document.querySelector(selector);
+  const field = document.querySelector(descriptor.selector);
   if (field) {
     field.value = nextValue;
   }
+
   updateCareerJourneyChapterThreeActionAvailability();
 }
 
+function hasCareerJourneyVoiceTarget(targetKey) {
+  const descriptor = resolveCareerJourneyVoiceTargetDescriptor(targetKey);
+  if (!descriptor) {
+    return false;
+  }
+
+  return Boolean(document.querySelector(descriptor.selector));
+}
+
 function syncCareerJourneyVoiceStatusUi() {
-  const target = cleanValue(careerJourneyChapterThree.voiceTarget);
+  const target = cleanValue(careerJourneyVoiceUi.target);
   const statusNode = document.querySelector(`[data-career-journey-voice-status="${target}"]`) || document.querySelector(".journey-voice-status");
   if (statusNode) {
-    statusNode.textContent = deriveVoiceMessage(careerJourneyChapterThree.voiceState, careerJourneyChapterThree.voiceMessage);
-    statusNode.dataset.voiceState = careerJourneyChapterThree.voiceState;
+    statusNode.textContent = deriveVoiceMessage(careerJourneyVoiceUi.state, careerJourneyVoiceUi.message);
+    statusNode.dataset.voiceState = careerJourneyVoiceUi.state;
   }
+
+  const voiceButtons = document.querySelectorAll("[data-career-journey-voice-start]");
+  voiceButtons.forEach((button) => {
+    const targetKey = cleanValue(button.dataset.careerJourneyVoiceStart);
+    button.dataset.voiceState = isCareerJourneyVoiceTarget(targetKey) ? careerJourneyVoiceUi.state : "idle";
+  });
 
   const stopButtons = document.querySelectorAll("[data-career-journey-voice-stop]");
   stopButtons.forEach((button) => {
-    const shouldShow = isVoiceWorking(careerJourneyChapterThree.voiceState);
+    const shouldShow = isVoiceWorking(careerJourneyVoiceUi.state);
     button.classList?.toggle("hidden", !shouldShow);
   });
   updateCareerJourneyChapterThreeActionAvailability();
@@ -2551,6 +2603,7 @@ function bindCareerJourneyActions() {
 
     journeyButton.dataset.bound = "true";
     journeyButton.addEventListener("click", () => {
+      disposeCareerJourneyVoiceCapture();
       syncCareerJourneyDraftInputs();
       careerJourneyStarted = true;
       careerJourneyWorkspaceOpen = true;
@@ -2577,6 +2630,7 @@ function bindCareerJourneyActions() {
   if (closeWorkspaceButton && closeWorkspaceButton.dataset.bound !== "true") {
     closeWorkspaceButton.dataset.bound = "true";
     closeWorkspaceButton.addEventListener("click", () => {
+      disposeCareerJourneyVoiceCapture();
       syncCareerJourneyDraftInputs();
       careerJourneyWorkspaceOpen = false;
       careerJourneyNavigationOpen = false;
@@ -2600,6 +2654,7 @@ function bindCareerJourneyActions() {
         return;
       }
 
+      disposeCareerJourneyVoiceCapture();
       syncCareerJourneyDraftInputs();
       careerJourneyFocusedChapterNumber = normalizedChapterNumber;
       renderCareerJourney();
@@ -2612,6 +2667,7 @@ function bindCareerJourneyActions() {
     journeyForm.dataset.bound = "true";
     journeyForm.addEventListener("submit", (event) => {
       event.preventDefault();
+      disposeCareerJourneyVoiceCapture();
 
       const rawResponse = journeyForm.elements.chapterOneResponse?.value || "";
       const response = cleanValue(rawResponse);
@@ -2648,6 +2704,7 @@ function bindCareerJourneyActions() {
   if (chapterOneEditButton && chapterOneEditButton.dataset.bound !== "true") {
     chapterOneEditButton.dataset.bound = "true";
     chapterOneEditButton.addEventListener("click", () => {
+      disposeCareerJourneyVoiceCapture();
       careerJourneyChapterOneEditing = true;
       careerJourneyChapterOneSupportMessage = "";
       renderCareerJourney();
@@ -2687,6 +2744,7 @@ function bindCareerJourneyActions() {
     chapterTwoForm.dataset.bound = "true";
     chapterTwoForm.addEventListener("submit", (event) => {
       event.preventDefault();
+      disposeCareerJourneyVoiceCapture();
 
       const timelineEntryId = cleanValue(chapterTwoForm.elements.timelineEntryId?.value) || cleanValue(careerJourneyChapterTwoEntry.id);
       const seasonTitle = cleanValue(chapterTwoForm.elements.seasonTitle?.value);
