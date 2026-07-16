@@ -70,26 +70,17 @@ The demo data seeder is part of this outcome. It gives developers and product ow
 
 ## Active Implementation
 
-Focused Career Journey Workspace for Chapters 1 through 3.
+Shared User-Controlled Voice Experience for Career Journey Chapters 1 and 3.
 
-- Status: Complete
-- Shared focused workspace implemented for Chapters 1, 2, and 3.
-- Career Journey overview remains the orientation and progress surface.
-- Focused workspace is the active chapter shell opened by `Start Journey` or `Continue Journey`.
-- Journey navigation lives behind the compact `View journey` control inside that workspace.
-- Chapter-specific content continues to come from the existing Chapter 1, 2, and 3 behaviors.
-- Automated Career Journey state-transition tests passed.
-- Story Coach regression tests passed.
-- Guided desktop browser testing passed.
-- Guided narrow-width browser testing passed.
-- Implementation Review passed.
-- Career Journey -> Professional Experience refinement remains deferred pending a future product decision.
-
-Keep parked for future refinement:
-
-- Chapter 1 voice input
-- Chapter 3 post-save destination when Chapter 4 is introduced
-- Narrow-width Open Profile prominence
+- Status: Approved for Implementation
+- Branch: `feature/shared-career-journey-voice`
+- Implementation package: `docs/04-delivery/2026-07-16-shared-career-journey-voice-implementation-package.md`
+- Chapters 1 and 3 will use the same explicit start-and-stop voice interaction.
+- Voice sessions will remain active through normal pauses.
+- Browser-generated recognition endings may restart silently while the user session remains active.
+- Finalized transcript segments will append without replacing or duplicating existing text.
+- Voice capture will stop when the active chapter or workspace surface is replaced.
+- Scope is limited to the smallest reusable voice-session helper needed for Chapters 1 and 3.
 
 ## Recommended Next Outcomes
 
