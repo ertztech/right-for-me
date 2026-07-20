@@ -86,6 +86,44 @@ These are separate concerns. The overview should not try to carry the full activ
 
 Chapter 2 is `Your Career Timeline`. Early MVP language should use `Role or career season` so the experience does not assume every meaningful period was traditional employment. A career season may include employment, education, caregiving, entrepreneurship, transition, volunteer work, a meaningful project, or another formative period.
 
+Approved Chapter 2 behavior to preserve:
+
+- Before the first save, Chapter 2 keeps the current guided first-entry form.
+- After the first save, Chapter 2 supports multiple saved experiences instead of one saved experience.
+- Each saved experience keeps a stable ID.
+- Role or career season remains required.
+- Company, start year, end year, and reflection remain optional.
+- Each experience keeps its own reflection.
+- Duplicate-looking experiences are allowed.
+- Deletion and manual reordering remain out of scope.
+- Saved Chapter 2 experiences display as compact cards with a small factual count.
+- Experience cards use chronological display order:
+  - prefer start year
+  - use end year when start year is absent
+  - most recent dated entries first
+  - ties preserve original entry order
+  - undated entries follow dated entries and preserve original entry order
+- Display order is presentation only and does not determine Story Coach context identity.
+
+Approved Chapter 2 editing behavior to preserve:
+
+- Only one add or edit draft may be active at once.
+- Saved data is not mutated until Save.
+- Save returns to the card view.
+- Cancel discards only the active draft.
+- Merely opening add or edit mode is not dirty.
+- Changing a field creates dirty state.
+- Returning all fields to baseline clears dirty state.
+- Leaving Chapter 2 while dirty requires Save, Discard, or canceling navigation.
+- Editing preserves stable IDs.
+
+Approved experience labels to preserve:
+
+- Show `Role · Company` when both exist.
+- Show role only when company is missing.
+- Omit missing date text cleanly.
+- Do not invent employer or date placeholders.
+
 ## Current Active Implementation
 
 Current approved implementation slice: Focused Career Journey Workspace for Chapters 1 through 3.
@@ -102,6 +140,36 @@ Deferred explicitly:
 - Career Journey -> Professional Experience refinement
 - Chapter 4 and Chapter 5 workspace content
 - Persistence beyond the current local prototype behavior
+
+Approved near-term extension inside the current Career Journey boundary:
+
+- Chapter 2 expands from one saved experience to multiple saved experiences within the existing controller-local, session-only model.
+- Chapter 3 Story Coach can select any saved Chapter 2 experience as context through stable experience IDs.
+- This relationship model is the enabling foundation for the later Chapter 4 Story Map.
+
+Approved Chapter 3 relationship and completion behavior to preserve:
+
+- Story Coach context is identified by stable Chapter 2 experience ID, not by display order.
+- The default context for the next new story is the most recently successfully saved Chapter 2 experience.
+- An active Story Coach draft keeps its existing selected experience even when another Chapter 2 experience is edited.
+- The Story Coach selector includes every saved Chapter 2 experience plus `Different experience`.
+- Changing selector choice updates the opening prompt immediately before discovery begins.
+- `Different experience` uses the generic prompt and saves a blank relationship.
+- New-story discovery locks the selector after the initial response or coaching interaction begins.
+- Changing context after lock requires the confirmed existing Start Over flow.
+- Starting over clears the active Chapter 3 draft and unlocks the selector.
+- Saved stories remain linked by stable experience ID.
+- Saved stories open in read-only view mode with the selector locked.
+- Explicit Edit is required to relink an existing saved story.
+- In Edit mode, selector changes remain available throughout the editing session.
+- Story content and experience relationship share one edit baseline.
+- Any content or relationship change makes the saved-story edit dirty.
+- Returning both content and relationship to baseline clears dirty state.
+- Save commits content and relationship changes together.
+- Cancel restores both content and relationship.
+- Starting a genuinely new story clears Chapter 3 completion until `I'm Done for Now` is selected again.
+- Editing or relinking an existing saved story preserves Chapter 3 completion.
+- Linked story labels continue to derive from current Chapter 2 experience data rather than copied story fields.
 
 ## Out Of Scope For V1
 
