@@ -8,6 +8,7 @@ function createJourneyHarness() {
   let dynamicVersion = 0;
   const dynamicCache = new Map();
   const recognitionInstances = [];
+  const confirmResponses = [];
 
   function invalidateDynamicNodes() {
     dynamicVersion += 1;
@@ -111,6 +112,22 @@ function createJourneyHarness() {
       },
     };
     return node;
+  }
+
+  function createInputNode(selector, name) {
+    return {
+      selector,
+      dataset: {},
+      value: extractInputValue(ensureNode("#career-journey-content").innerHTML, name),
+      handlers: {},
+      addEventListener(eventName, handler) {
+        this.handlers[eventName] = handler;
+      },
+      dispatchInput(value) {
+        this.value = value;
+        this.handlers.input?.({ target: this });
+      },
+    };
   }
 
   function createForm(selector, fields) {
@@ -227,9 +244,29 @@ function createJourneyHarness() {
           : null;
       }
 
+      if (selector === "[data-add-career-journey-entry]") {
+        return html.includes("data-add-career-journey-entry")
+          ? createDynamicNode(selector, () => createButton(selector))
+          : null;
+      }
+
+      if (selector === "[data-career-journey-cancel-chapter-two]") {
+        return html.includes("data-career-journey-cancel-chapter-two")
+          ? createDynamicNode(selector, () => createButton(selector))
+          : null;
+      }
+
       if (selector === "[data-edit-career-journey-chapter-two]") {
         return html.includes("data-edit-career-journey-chapter-two")
           ? createDynamicNode(selector, () => createButton(selector))
+          : null;
+      }
+
+      const editEntryMatch = selector.match(/^\[data-edit-career-journey-entry="([^"]+)"\]$/);
+      if (editEntryMatch) {
+        const entryId = editEntryMatch[1];
+        return html.includes(`data-edit-career-journey-entry="${entryId}"`)
+          ? createDynamicNode(`[data-edit-career-journey-entry]:${entryId}`, () => createButton(selector, { editCareerJourneyEntry: entryId }))
           : null;
       }
 
@@ -435,31 +472,31 @@ function createJourneyHarness() {
 
       if (selector === '[name="timelineEntryId"]') {
         return html.includes('name="timelineEntryId"')
-          ? createDynamicNode(selector, () => ({ selector, dataset: {}, value: extractInputValue(html, "timelineEntryId"), handlers: {}, addEventListener(eventName, handler) { this.handlers[eventName] = handler; } }))
+          ? createDynamicNode(selector, () => createInputNode(selector, "timelineEntryId"))
           : null;
       }
 
       if (selector === '[name="seasonTitle"]') {
         return html.includes('name="seasonTitle"')
-          ? createDynamicNode(selector, () => ({ selector, dataset: {}, value: extractInputValue(html, "seasonTitle"), handlers: {}, addEventListener(eventName, handler) { this.handlers[eventName] = handler; } }))
+          ? createDynamicNode(selector, () => createInputNode(selector, "seasonTitle"))
           : null;
       }
 
       if (selector === '[name="organization"]') {
         return html.includes('name="organization"')
-          ? createDynamicNode(selector, () => ({ selector, dataset: {}, value: extractInputValue(html, "organization"), handlers: {}, addEventListener(eventName, handler) { this.handlers[eventName] = handler; } }))
+          ? createDynamicNode(selector, () => createInputNode(selector, "organization"))
           : null;
       }
 
       if (selector === '[name="startYear"]') {
         return html.includes('name="startYear"')
-          ? createDynamicNode(selector, () => ({ selector, dataset: {}, value: extractInputValue(html, "startYear"), handlers: {}, addEventListener(eventName, handler) { this.handlers[eventName] = handler; } }))
+          ? createDynamicNode(selector, () => createInputNode(selector, "startYear"))
           : null;
       }
 
       if (selector === '[name="endYear"]') {
         return html.includes('name="endYear"')
-          ? createDynamicNode(selector, () => ({ selector, dataset: {}, value: extractInputValue(html, "endYear"), handlers: {}, addEventListener(eventName, handler) { this.handlers[eventName] = handler; } }))
+          ? createDynamicNode(selector, () => createInputNode(selector, "endYear"))
           : null;
       }
 
@@ -519,6 +556,11 @@ function createJourneyHarness() {
           : [];
       }
 
+      if (selector === "[data-edit-career-journey-entry]") {
+        return [...html.matchAll(/data-edit-career-journey-entry="([^"]+)"/g)]
+          .map((match) => createDynamicNode(`[data-edit-career-journey-entry]:${match[1]}`, () => createButton(selector, { editCareerJourneyEntry: match[1] })));
+      }
+
       return [];
     },
   };
@@ -536,7 +578,7 @@ function createJourneyHarness() {
         writeText: async () => {},
       },
     },
-    confirm: () => true,
+    confirm: () => (confirmResponses.length ? confirmResponses.shift() : true),
     location: {
       hash: "#/jobs/journey",
     },
@@ -643,6 +685,9 @@ function createJourneyHarness() {
       assert.ok(node, `Expected input ${selector} to be present.`);
       node.dispatchInput(value);
     },
+    queueConfirmResponses(...responses) {
+      confirmResponses.push(...responses);
+    },
     fieldValue(selector) {
       const node = documentStub.querySelector(selector);
       assert.ok(node, `Expected field ${selector} to be present.`);
@@ -652,12 +697,53 @@ function createJourneyHarness() {
       context.renderCareerJourney();
       context.bindCareerJourneyActions();
     },
+    read(expression) {
+      return vm.runInContext(expression, context);
+    },
     setChapterOneDraft(value) {
       const serialized = JSON.stringify(String(value));
       vm.runInContext(`
         careerJourneyChapterOneResponse = ${serialized};
         careerJourneyChapterOneSubmitted = false;
         careerJourneyChapterOneEditing = true;
+      `, context);
+    },
+    setLegacyChapterTwoEntry(entry) {
+      const serialized = JSON.stringify(entry);
+      vm.runInContext(`
+        careerJourneyChapterOneSubmitted = true;
+        careerJourneyChapterTwoStarted = true;
+        careerJourneyFocusedChapterNumber = 2;
+        careerJourneyChapterTwoEntry = ${serialized};
+        careerJourneyChapterTwoEntries = [];
+        careerJourneyChapterTwoMostRecentlySavedEntryId = "";
+      `, context);
+    },
+    setChapterTwoEntries(entries) {
+      const serialized = JSON.stringify(entries);
+      vm.runInContext(`
+        careerJourneyChapterOneSubmitted = true;
+        careerJourneyChapterTwoStarted = true;
+        careerJourneyChapterTwoEntries = ${serialized};
+        careerJourneyChapterTwoEditing = false;
+        careerJourneyChapterTwoMostRecentlySavedEntryId = "";
+      `, context);
+    },
+    beginChapterTwoDraft(entryExpression = "emptyCareerJourneyChapterTwoEntry()", activeEntryId = "") {
+      const serializedId = JSON.stringify(activeEntryId);
+      vm.runInContext(`
+        beginCareerJourneyChapterTwoDraft(${entryExpression}, ${serializedId});
+        careerJourneyFocusedChapterNumber = 2;
+        renderCareerJourney();
+        bindCareerJourneyActions();
+      `, context);
+    },
+    beginChapterThreeNewMoment() {
+      vm.runInContext(`
+        beginCareerJourneyNewMoment();
+        careerJourneyFocusedChapterNumber = 3;
+        renderCareerJourney();
+        bindCareerJourneyActions();
       `, context);
     },
     appendTranscript(targetKey, value) {
@@ -769,6 +855,235 @@ async function run() {
     journey.submitChapterOne("I want to revise this reflection.");
     assert.equal(journey.statusNode.textContent, "Chapter 1 reflection captured for this session.");
     assert.ok(journey.journeyHtml.includes("Build Your Career Timeline"));
+  });
+
+  await runScenario("Chapter 2 migrates a legacy saved experience into the collection and preserves its stable ID.", async () => {
+    const journey = createJourneyHarness();
+    journey.setLegacyChapterTwoEntry({
+      id: "legacy_experience_1",
+      seasonTitle: "Operations Lead",
+      organization: "Northwind Labs",
+      startYear: "2022",
+      endYear: "2024",
+      seasonReflection: "Built calmer systems after a volatile stretch.",
+    });
+    journey.render();
+    assert.equal(journey.read("careerJourneyChapterTwoEntries.length"), 1);
+    assert.equal(journey.read("careerJourneyChapterTwoEntries[0].id"), "legacy_experience_1");
+    assert.equal(journey.read("careerJourneyChapterTwoMostRecentlySavedEntryId"), "legacy_experience_1");
+  });
+
+  await runScenario("Chapter 2 supports multiple experiences, isolated drafts, duplicate-looking entries, and chronological cards.", async () => {
+    const journey = createJourneyHarness();
+    journey.render();
+    journey.click("[data-start-career-journey]");
+    journey.submitChapterOne("I am ready.");
+    journey.click("[data-start-career-journey-chapter-two]");
+    journey.submitChapterTwo({
+      seasonTitle: "Operations Lead",
+      organization: "Northwind Labs",
+      startYear: "2022",
+      endYear: "2024",
+      seasonReflection: "Built calmer systems after a volatile stretch.",
+    });
+    assert.equal(journey.read("careerJourneyChapterTwoEntries.length"), 1);
+    const firstId = journey.read("careerJourneyChapterTwoEntries[0].id");
+    assert.equal(journey.read("careerJourneyChapterTwoMostRecentlySavedEntryId"), firstId);
+
+    journey.click('[data-career-journey-open-chapter="2"]');
+    assert.ok(journey.journeyHtml.includes("data-add-career-journey-entry"));
+    journey.beginChapterTwoDraft();
+    journey.input('[name="seasonTitle"]', "Analyst");
+    assert.equal(journey.read("careerJourneyChapterTwoEntries.length"), 1);
+    journey.submitChapterTwo({
+      seasonTitle: "Analyst",
+      organization: "Southridge Health",
+      endYear: "2019",
+      seasonReflection: "Learned how to steady chaotic handoffs.",
+    });
+    assert.equal(journey.read("careerJourneyChapterTwoEntries.length"), 2);
+    const secondId = journey.read("careerJourneyChapterTwoEntries[1].id");
+    assert.notEqual(secondId, firstId);
+    assert.equal(journey.read("careerJourneyChapterTwoMostRecentlySavedEntryId"), secondId);
+
+    journey.beginChapterTwoDraft();
+    journey.submitChapterTwo({
+      seasonTitle: "Analyst",
+      organization: "Southridge Health",
+      endYear: "2019",
+      seasonReflection: "A duplicate-looking visible card is allowed.",
+    });
+    assert.equal(journey.read("careerJourneyChapterTwoEntries.length"), 3);
+    assert.equal(journey.read("careerJourneyChapterTwoMostRecentlySavedEntryId"), journey.read("careerJourneyChapterTwoEntries[2].id"));
+    assert.notEqual(
+      journey.read("careerJourneyChapterTwoEntries[1].seasonReflection"),
+      journey.read("careerJourneyChapterTwoEntries[2].seasonReflection")
+    );
+    journey.click('[data-career-journey-open-chapter="2"]');
+    assert.ok(journey.journeyHtml.includes("3 experiences saved."));
+
+    const operationsIndex = journey.journeyHtml.indexOf("Operations Lead");
+    const analystIndex = journey.journeyHtml.indexOf("Analyst");
+    assert.ok(operationsIndex >= 0 && analystIndex >= 0 && operationsIndex < analystIndex);
+  });
+
+  await runScenario("Chapter 2 chronological ordering uses start year first, end-year fallback, and stable order for ties and undated entries.", async () => {
+    const journey = createJourneyHarness();
+    journey.setChapterTwoEntries([
+      { id: "undated_1", seasonTitle: "Undated A", organization: "", startYear: "", endYear: "", seasonReflection: "" },
+      { id: "tied_1", seasonTitle: "Tied Earlier", organization: "", startYear: "2020", endYear: "2021", seasonReflection: "" },
+      { id: "end_only_1", seasonTitle: "End Only Newer", organization: "", startYear: "", endYear: "2023", seasonReflection: "" },
+      { id: "start_newest", seasonTitle: "Start Newest", organization: "", startYear: "2024", endYear: "", seasonReflection: "" },
+      { id: "tied_2", seasonTitle: "Tied Later", organization: "", startYear: "2020", endYear: "2021", seasonReflection: "" },
+      { id: "undated_2", seasonTitle: "Undated B", organization: "", startYear: "", endYear: "", seasonReflection: "" },
+    ]);
+    const orderedIds = Array.from(journey.read("getCareerJourneyChapterTwoEntriesForDisplay().map((entry) => entry.id)"));
+    assert.deepEqual(orderedIds, ["start_newest", "end_only_1", "tied_1", "tied_2", "undated_1", "undated_2"]);
+  });
+
+  await runScenario("Chapter 2 edit and cancel behavior preserve saved records until save and keep the stable ID.", async () => {
+    const journey = createJourneyHarness();
+    journey.render();
+    journey.click("[data-start-career-journey]");
+    journey.submitChapterOne("I am ready.");
+    journey.click("[data-start-career-journey-chapter-two]");
+    journey.submitChapterTwo({
+      seasonTitle: "Operations Lead",
+      organization: "Northwind Labs",
+      startYear: "2022",
+      endYear: "2024",
+      seasonReflection: "Built calmer systems after a volatile stretch.",
+    });
+    journey.click('[data-career-journey-open-chapter="2"]');
+    const entryId = journey.read("careerJourneyChapterTwoEntries[0].id");
+    journey.beginChapterTwoDraft(`getCareerJourneyChapterTwoEntryById(${JSON.stringify(entryId)})`, entryId);
+    assert.equal(journey.read("isCareerJourneyChapterTwoDirty()"), false);
+    journey.input('[name="organization"]', "Northwind Logistics");
+    assert.equal(journey.read("careerJourneyChapterTwoEntries[0].organization"), "Northwind Labs");
+    journey.input('[name="organization"]', "Northwind Labs");
+    assert.equal(journey.read("isCareerJourneyChapterTwoDirty()"), false);
+    journey.input('[name="organization"]', "Northwind Logistics");
+    journey.click("[data-career-journey-cancel-chapter-two]");
+    assert.equal(journey.read("careerJourneyChapterTwoEntries[0].organization"), "Northwind Labs");
+    assert.equal(journey.read("careerJourneyChapterTwoMostRecentlySavedEntryId"), entryId);
+
+    journey.beginChapterTwoDraft(`getCareerJourneyChapterTwoEntryById(${JSON.stringify(entryId)})`, entryId);
+    journey.submitChapterTwo({
+      organization: "Northwind Logistics",
+      seasonReflection: "Built calmer systems and clearer handoffs.",
+    });
+    assert.equal(journey.read("careerJourneyChapterTwoEntries[0].id"), entryId);
+    assert.equal(journey.read("careerJourneyChapterTwoEntries[0].organization"), "Northwind Logistics");
+    assert.equal(journey.read("careerJourneyChapterTwoMostRecentlySavedEntryId"), entryId);
+    assert.ok(journey.journeyHtml.includes("Northwind Logistics"));
+  });
+
+  await runScenario("Chapter 2 dirty-exit prompts support save, discard, and cancel navigation.", async () => {
+    const journey = createJourneyHarness();
+    journey.render();
+    journey.click("[data-start-career-journey]");
+    journey.submitChapterOne("I am ready.");
+    journey.click("[data-start-career-journey-chapter-two]");
+    journey.submitChapterTwo({
+      seasonTitle: "Operations Lead",
+      organization: "Northwind Labs",
+      startYear: "2022",
+    });
+    journey.click('[data-career-journey-open-chapter="2"]');
+    const entryId = journey.read("careerJourneyChapterTwoEntries[0].id");
+
+    journey.beginChapterTwoDraft(`getCareerJourneyChapterTwoEntryById(${JSON.stringify(entryId)})`, entryId);
+    journey.input('[name="organization"]', "Northwind Logistics");
+    journey.queueConfirmResponses(false, false);
+    journey.click('[data-career-journey-open-chapter="1"]');
+    assert.equal(journey.read("careerJourneyFocusedChapterNumber"), 2);
+    assert.equal(journey.read("careerJourneyChapterTwoEditing"), true);
+
+    journey.queueConfirmResponses(false, true);
+    journey.click("[data-career-journey-close-workspace]");
+    assert.equal(journey.read("careerJourneyWorkspaceOpen"), false);
+    assert.equal(journey.read("careerJourneyChapterTwoEntries[0].organization"), "Northwind Labs");
+
+    journey.click("[data-start-career-journey]");
+    journey.click('[data-career-journey-open-chapter="2"]');
+    journey.beginChapterTwoDraft(`getCareerJourneyChapterTwoEntryById(${JSON.stringify(entryId)})`, entryId);
+    journey.input('[name="organization"]', "Northwind Logistics");
+    journey.queueConfirmResponses(true);
+    journey.click('[data-career-journey-open-chapter="1"]');
+    assert.equal(journey.read("careerJourneyFocusedChapterNumber"), 1);
+    assert.equal(journey.read("careerJourneyChapterTwoEntries[0].organization"), "Northwind Logistics");
+    assert.equal(journey.read("careerJourneyChapterTwoMostRecentlySavedEntryId"), entryId);
+
+    journey.click('[data-career-journey-open-chapter="2"]');
+    journey.beginChapterTwoDraft();
+    journey.input('[name="seasonTitle"]', "Unfinished draft");
+    journey.click("[data-career-journey-cancel-chapter-two]");
+    assert.equal(journey.read("careerJourneyChapterTwoEntries.length"), 1);
+    assert.equal(journey.read("careerJourneyChapterTwoEditing"), false);
+  });
+
+  await runScenario("Chapter 3 compatibility keeps the active draft context while new saves update the next linked default and saved labels.", async () => {
+    const journey = createJourneyHarness();
+    journey.render();
+    journey.click("[data-start-career-journey]");
+    journey.submitChapterOne("I am ready.");
+    journey.click("[data-start-career-journey-chapter-two]");
+    journey.submitChapterTwo({
+      seasonTitle: "Operations Lead",
+      organization: "Northwind Labs",
+      startYear: "2022",
+      seasonReflection: "Built calmer systems after a volatile stretch.",
+    });
+    const firstId = journey.read("careerJourneyChapterTwoEntries[0].id");
+    assert.equal(journey.read("careerJourneyChapterThree.draft.timelineEntryId"), firstId);
+
+    journey.click('[data-career-journey-toggle-context="different"]');
+    assert.equal(journey.read("careerJourneyChapterThree.draft.timelineEntryId"), "");
+    journey.click('[data-career-journey-toggle-context="timeline"]');
+    assert.equal(journey.read("careerJourneyChapterThree.draft.timelineEntryId"), firstId);
+
+    journey.click('[data-career-journey-open-chapter="2"]');
+    journey.beginChapterTwoDraft();
+    journey.submitChapterTwo({
+      seasonTitle: "Program Manager",
+      organization: "Fabrikam",
+      startYear: "2024",
+      seasonReflection: "Held cross-team launches together.",
+    });
+    const secondId = journey.read("careerJourneyChapterTwoMostRecentlySavedEntryId");
+    assert.notEqual(secondId, firstId);
+    assert.equal(journey.read("careerJourneyChapterThree.draft.timelineEntryId"), firstId);
+
+    journey.beginChapterThreeNewMoment();
+    assert.equal(journey.read("careerJourneyChapterThree.draft.timelineEntryId"), secondId);
+    assert.ok(journey.journeyHtml.includes("Program Manager"));
+
+    journey.context.fetch = async () => ({
+      ok: true,
+      json: async () => ({
+        analysis: {
+          reflection: "You kept the moving parts aligned under pressure.",
+          followUpQuestion: "What were you protecting most in that moment?",
+          possibleSignal: "You may create steadiness when the path is unclear.",
+        },
+      }),
+    });
+    journey.input('textarea[name="chapterThreeInitialResponse"]', "I coordinated a fragile launch.");
+    journey.click("[data-career-journey-explore-story]");
+    await new Promise((resolve) => setImmediate(resolve));
+    journey.input('textarea[name="chapterThreeFollowUpResponse"]', "I was protecting trust across teams.");
+    journey.click("[data-career-journey-save-moment]");
+    assert.equal(journey.read("careerJourneyChapterThree.savedMoments[0].timelineEntryId"), secondId);
+    assert.ok(journey.journeyHtml.includes("Program Manager · Fabrikam"));
+
+    journey.click('[data-career-journey-open-chapter="2"]');
+    journey.beginChapterTwoDraft(`getCareerJourneyChapterTwoEntryById(${JSON.stringify(secondId)})`, secondId);
+    journey.submitChapterTwo({
+      organization: "Fabrikam Labs",
+    });
+    journey.click('[data-career-journey-open-chapter="3"]');
+    assert.ok(journey.journeyHtml.includes("Program Manager · Fabrikam Labs"));
+    assert.equal(journey.read("careerJourneyChapterThree.chapterCompletionConfirmed"), false);
   });
 
   await runScenario("Chapter 3 initial-response voice remains functional.", async () => {
