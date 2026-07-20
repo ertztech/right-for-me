@@ -719,6 +719,16 @@ function createJourneyHarness() {
         careerJourneyChapterTwoMostRecentlySavedEntryId = "";
       `, context);
     },
+    setChapterTwoEntries(entries) {
+      const serialized = JSON.stringify(entries);
+      vm.runInContext(`
+        careerJourneyChapterOneSubmitted = true;
+        careerJourneyChapterTwoStarted = true;
+        careerJourneyChapterTwoEntries = ${serialized};
+        careerJourneyChapterTwoEditing = false;
+        careerJourneyChapterTwoMostRecentlySavedEntryId = "";
+      `, context);
+    },
     beginChapterTwoDraft(entryExpression = "emptyCareerJourneyChapterTwoEntry()", activeEntryId = "") {
       const serializedId = JSON.stringify(activeEntryId);
       vm.runInContext(`
@@ -905,12 +915,30 @@ async function run() {
     });
     assert.equal(journey.read("careerJourneyChapterTwoEntries.length"), 3);
     assert.equal(journey.read("careerJourneyChapterTwoMostRecentlySavedEntryId"), journey.read("careerJourneyChapterTwoEntries[2].id"));
+    assert.notEqual(
+      journey.read("careerJourneyChapterTwoEntries[1].seasonReflection"),
+      journey.read("careerJourneyChapterTwoEntries[2].seasonReflection")
+    );
     journey.click('[data-career-journey-open-chapter="2"]');
     assert.ok(journey.journeyHtml.includes("3 experiences saved."));
 
     const operationsIndex = journey.journeyHtml.indexOf("Operations Lead");
     const analystIndex = journey.journeyHtml.indexOf("Analyst");
     assert.ok(operationsIndex >= 0 && analystIndex >= 0 && operationsIndex < analystIndex);
+  });
+
+  await runScenario("Chapter 2 chronological ordering uses start year first, end-year fallback, and stable order for ties and undated entries.", async () => {
+    const journey = createJourneyHarness();
+    journey.setChapterTwoEntries([
+      { id: "undated_1", seasonTitle: "Undated A", organization: "", startYear: "", endYear: "", seasonReflection: "" },
+      { id: "tied_1", seasonTitle: "Tied Earlier", organization: "", startYear: "2020", endYear: "2021", seasonReflection: "" },
+      { id: "end_only_1", seasonTitle: "End Only Newer", organization: "", startYear: "", endYear: "2023", seasonReflection: "" },
+      { id: "start_newest", seasonTitle: "Start Newest", organization: "", startYear: "2024", endYear: "", seasonReflection: "" },
+      { id: "tied_2", seasonTitle: "Tied Later", organization: "", startYear: "2020", endYear: "2021", seasonReflection: "" },
+      { id: "undated_2", seasonTitle: "Undated B", organization: "", startYear: "", endYear: "", seasonReflection: "" },
+    ]);
+    const orderedIds = Array.from(journey.read("getCareerJourneyChapterTwoEntriesForDisplay().map((entry) => entry.id)"));
+    assert.deepEqual(orderedIds, ["start_newest", "end_only_1", "tied_1", "tied_2", "undated_1", "undated_2"]);
   });
 
   await runScenario("Chapter 2 edit and cancel behavior preserve saved records until save and keep the stable ID.", async () => {
@@ -1034,6 +1062,7 @@ async function run() {
     await new Promise((resolve) => setImmediate(resolve));
     journey.input('textarea[name="chapterThreeFollowUpResponse"]', "I was protecting trust across teams.");
     journey.click("[data-career-journey-save-moment]");
+    assert.equal(journey.read("careerJourneyChapterThree.savedMoments[0].timelineEntryId"), secondId);
     assert.ok(journey.journeyHtml.includes("Program Manager · Fabrikam"));
 
     journey.click('[data-career-journey-open-chapter="2"]');
