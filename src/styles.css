@@ -1466,6 +1466,48 @@ button[data-clear-demo-data]:hover {
   margin: 0 0 var(--space-2);
 }
 
+.journey-experience-card {
+  display: grid;
+  gap: 8px;
+  padding: 14px 16px;
+}
+
+.journey-experience-card-title {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 850;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+.journey-experience-card-years {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  align-items: baseline;
+}
+
+.journey-experience-card-years span {
+  margin: 0;
+}
+
+.journey-experience-card-years strong {
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.journey-experience-card .journey-moment-preview-actions {
+  justify-content: flex-start;
+  gap: 10px;
+}
+
+.journey-experience-card .journey-moment-preview-actions .secondary-button {
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
 .journey-voice-field {
   display: grid;
   gap: 8px;

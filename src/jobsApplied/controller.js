@@ -1501,7 +1501,7 @@ function renderCareerJourneyChapterTwoSummary() {
 function renderCareerJourneyChapterTwoCard(entry) {
   return `
     <article class="journey-moment-preview journey-experience-card" data-career-journey-entry-id="${escapeAttribute(entry.id)}">
-      <span>${escapeHtml(careerJourneyTimelineLabelForId(entry.id))}</span>
+      <p class="journey-experience-card-title">${escapeHtml(careerJourneyTimelineLabelForId(entry.id))}</p>
       ${renderCareerJourneyChapterTwoYears(entry)}
       ${entry.seasonReflection ? `<p>${escapeHtml(previewText(entry.seasonReflection))}</p>` : ""}
       <div class="journey-moment-preview-actions">
@@ -1815,7 +1815,12 @@ function renderCareerJourneyChapterTwoYears(entry = careerJourneyChapterTwoDraft
   }
 
   const label = [startYear || "", endYear || ""].filter(Boolean).join(" - ");
-  return `<p><span>Approximate years</span>${escapeHtml(label)}</p>`;
+  return `
+    <p class="journey-experience-card-years">
+      <span>Approximate years</span>
+      <strong>${escapeHtml(label)}</strong>
+    </p>
+  `;
 }
 
 function hasCareerJourneyChapterTwoEntry() {
