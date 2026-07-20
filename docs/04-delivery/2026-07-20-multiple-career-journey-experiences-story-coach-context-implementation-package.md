@@ -32,7 +32,10 @@ Expand Career Journey Chapter 2 from one saved experience into multiple stable e
   * ties preserve original entry order
   * undated entries follow dated entries and preserve original entry order
 * [ ] The same chronological helper is reused for Chapter 2 cards, the Story Coach selector, and later Story Map reuse.
-* [ ] Display order never determines active Story Coach context identity.
+* [ ] Display order must not determine active Story Coach context.
+* [ ] Stable experience IDs determine context identity and saved-story relationships.
+* [ ] A dedicated stable-ID lookup helper is used to resolve Chapter 2 experiences by ID.
+* [ ] The most recently successfully saved experience controls the default context for the next new story independently of display order.
 * [ ] Chapter 2 labels show `Role · Company` when both exist, role only when company is missing, and omit missing dates without invented placeholders.
 * [ ] Leaving Chapter 2 with actual unsaved changes requires Save, Discard, or canceling navigation.
 * [ ] Merely opening add or edit mode is not dirty.
@@ -109,6 +112,27 @@ Medium
 - The approved repository grounding remains valid for the current codebase.
 - Controller-local, session-only state remains the correct implementation boundary for this slice.
 - No ADR is required if the implementation stays within the existing Career Journey controller boundary.
+
+## Material Decision Records
+
+- Question: What approved Chapter 2 scope is required now to support the later Chapter 4 Story Map without widening the slice?
+  - Relevant perspectives: Product required multiple Chapter 2 experiences before Story Map; Engineering wanted one bounded controller-local slice; QA needed explicit save, cancel, and dirty-state rules.
+  - Captain input: Approve multiple Chapter 2 experiences as the required foundation, while keeping deletion and manual reordering out of scope.
+  - Resulting decision: Multiple Chapter 2 experiences are required before Chapter 4 Story Map; users may add and edit experiences; deletion and manual reordering are out of scope; Chapter 3 unlocks after the first saved experience; duplicate-looking experiences are allowed; role or season is required; company and dates remain optional.
+  - Impact on scope, acceptance criteria, technical boundaries, or verification: Acceptance criteria and QA coverage must prove collection migration, first-save unlock, add/edit-only scope, duplicate allowance, and required-versus-optional field behavior inside the existing controller-local model.
+  - Unresolved disagreement, if any: none.
+- Question: How must identity, ordering, and default Story Coach context behave once multiple experiences exist?
+  - Relevant perspectives: Product required chronological presentation and a compact selector; Engineering needed identity and relationships to remain stable; QA needed deterministic ordering and default-context checks.
+  - Captain input: Keep display order and active context separate, and use the most recently successfully saved experience as the default only for the next new Story Coach session.
+  - Resulting decision: Story Coach uses a compact selector containing all saved experiences plus `Different experience`; selector and Chapter 2 cards use chronological career order; stable experience IDs determine identity and story relationships; display order must not determine active Story Coach context; the implementation should use a dedicated stable-ID lookup helper for resolving experiences by ID; the most recently successfully saved experience becomes the default for the next new Story Coach session; an active Story Coach draft keeps its existing context.
+  - Impact on scope, acceptance criteria, technical boundaries, or verification: Acceptance criteria, repository-grounding notes, and automated tests must prove ID-based context selection, stable relationships, chronological helper reuse, display-order independence, and default-context updates only after successful save.
+  - Unresolved disagreement, if any: none.
+- Question: What interaction contract governs new-story context locking, saved-story relinking, completion behavior, and baseline-based dirty-state protection?
+  - Relevant perspectives: Product required explicit relinking boundaries and completion distinctions; Engineering needed baseline-based draft protection without persistence; QA needed save/cancel/restore behavior to be testable.
+  - Captain input: Keep new-story discovery distinct from existing-story correction and require baseline-based dirty-state protection for Chapter 2 and saved-story edits.
+  - Resulting decision: New-story context locks after discovery begins; existing saved stories open read-only and require explicit Edit for relinking; existing-story edits and relinking preserve Chapter 3 completion; new story creation clears completion until `I'm Done for Now`; Chapter 2 and saved-story edits use baseline-based dirty-state protection; cancel restores or discards only the active unsaved draft.
+  - Impact on scope, acceptance criteria, technical boundaries, or verification: State transitions, editable-saved-content behavior, automated coverage, and manual browser verification must distinguish new-story completion reset from existing-story completion preservation and must prove save/discard/cancel behavior against a baseline model.
+  - Unresolved disagreement, if any: none.
 
 ## Relevant Product Or Design Principles
 
@@ -216,6 +240,16 @@ Medium
 - `docs/01-features/career-journey.md`
 - `docs/04-delivery/2026-07-20-multiple-career-journey-experiences-story-coach-context-implementation-package.md`
 
+## Files Expected To Remain Unchanged
+
+- `src/app.js`
+- `src/jobsApplied/storyCoach.js`
+- `src/careerVault/*`
+- app-wide routing
+- AI request and response contracts
+
+Changes to these boundaries require an explicit scope review rather than incidental implementation edits.
+
 ## Repository Grounding Findings
 
 - Repository review status: Complete
@@ -232,6 +266,9 @@ Medium
   - Chapter 2 currently stores one saved experience object, so a collection migration is required.
   - Chapter 3 currently uses a two-choice context toggle, so selector behavior is new UI within the same controller boundary.
   - App-wide routing and persistence are not required for this slice.
+  - Display order must stay independent from active Story Coach context.
+  - Stable experience IDs must determine context identity and saved-story relationships.
+  - A dedicated stable-ID lookup helper is needed to resolve Chapter 2 experiences by ID once the collection model exists.
 - Existing automated tests:
   - `node tests/careerJourneyStateTransitions.test.js`
   - `node tests/storyCoach.test.js`
