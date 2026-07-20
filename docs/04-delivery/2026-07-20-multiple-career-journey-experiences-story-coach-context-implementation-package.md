@@ -217,7 +217,7 @@ Deferred scope:
 ## Material Decision Records
 
 - Question: continue the combined migration or split it
-  - Evidence: two clean implementation attempts produced no product changes because the Chapter 2 and Chapter 3 migration was unsafe as one controller replacement; unsafe partial controller changes were restored; the implementation branch remained clean; baseline Career Journey tests passed after restoration.
+  - Evidence: two clean implementation attempts produced no product changes because the Chapter 2 and Chapter 3 migration was unsafe as one controller replacement; unsafe partial controller changes were restored; baseline Career Journey tests passed after restoration.
   - Relevant perspectives: Product Owner, Architect, Engineering Manager, Software Engineer, QA, Delivery Coach.
   - Captain input: split the implementation.
   - Resulting decision: Chapter 2 collection and compatibility seam first; Story Coach selector second.
@@ -346,10 +346,10 @@ Changes to these boundaries require an explicit scope review rather than inciden
 
 - Two implementation attempts stopped safely.
 - Unsafe partial controller changes were restored.
-- The implementation branch remained clean after restoration.
 - Baseline Career Journey tests passed after restoration.
 - No product code, tests, commits, or pushes resulted from those attempts.
-- The clean failures exposed a package-sizing problem rather than a product defect.
+- The clean failures demonstrated that the combined Chapter 2 and Chapter 3 package was too tightly coupled to execute safely as one controller replacement.
+- That evidence caused the Captain-approved package split.
 
 ## Product Direction Impact
 
@@ -371,10 +371,9 @@ Changes to these boundaries require an explicit scope review rather than inciden
 
 * Existing durable package path: `docs/04-delivery/2026-07-20-multiple-career-journey-experiences-story-coach-context-implementation-package.md`
 * Path decision: preserved
-* GitHub Issue #135: unchanged in this documentation-only step
-* Pull Request: do not create yet
-* Merge: not started
 * Blocking downstream dependency: deferred follow-up package for Story Coach multi-experience context selection
+* Product implementation remains unauthorized until GitHub Issue #135 is updated to reference this narrowed package.
+* Merging this documentation revision alone does not authorize product implementation.
 
 ## QA Checklist
 
@@ -447,7 +446,7 @@ Changes to these boundaries require an explicit scope review rather than inciden
 * Confidence: high
 * Captain decisions needed: none
 * Ready / not ready: ready
-* Next artifact: documentation PR for the package split
+* Next artifact: GitHub Issue #135 update to reference the narrowed package, then documentation PR
 
 ## Parking Lot Items
 
