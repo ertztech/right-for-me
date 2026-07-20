@@ -957,8 +957,12 @@ async function run() {
     journey.click('[data-career-journey-open-chapter="2"]');
     const entryId = journey.read("careerJourneyChapterTwoEntries[0].id");
     journey.beginChapterTwoDraft(`getCareerJourneyChapterTwoEntryById(${JSON.stringify(entryId)})`, entryId);
+    assert.equal(journey.read("isCareerJourneyChapterTwoDirty()"), false);
     journey.input('[name="organization"]', "Northwind Logistics");
     assert.equal(journey.read("careerJourneyChapterTwoEntries[0].organization"), "Northwind Labs");
+    journey.input('[name="organization"]', "Northwind Labs");
+    assert.equal(journey.read("isCareerJourneyChapterTwoDirty()"), false);
+    journey.input('[name="organization"]', "Northwind Logistics");
     journey.click("[data-career-journey-cancel-chapter-two]");
     assert.equal(journey.read("careerJourneyChapterTwoEntries[0].organization"), "Northwind Labs");
     assert.equal(journey.read("careerJourneyChapterTwoMostRecentlySavedEntryId"), entryId);
@@ -1009,6 +1013,13 @@ async function run() {
     assert.equal(journey.read("careerJourneyFocusedChapterNumber"), 1);
     assert.equal(journey.read("careerJourneyChapterTwoEntries[0].organization"), "Northwind Logistics");
     assert.equal(journey.read("careerJourneyChapterTwoMostRecentlySavedEntryId"), entryId);
+
+    journey.click('[data-career-journey-open-chapter="2"]');
+    journey.beginChapterTwoDraft();
+    journey.input('[name="seasonTitle"]', "Unfinished draft");
+    journey.click("[data-career-journey-cancel-chapter-two]");
+    assert.equal(journey.read("careerJourneyChapterTwoEntries.length"), 1);
+    assert.equal(journey.read("careerJourneyChapterTwoEditing"), false);
   });
 
   await runScenario("Chapter 3 compatibility keeps the active draft context while new saves update the next linked default and saved labels.", async () => {
