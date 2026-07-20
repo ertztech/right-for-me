@@ -144,32 +144,30 @@ Deferred explicitly:
 Approved near-term extension inside the current Career Journey boundary:
 
 - Chapter 2 expands from one saved experience to multiple saved experiences within the existing controller-local, session-only model.
-- Chapter 3 Story Coach can select any saved Chapter 2 experience as context through stable experience IDs.
-- This relationship model is the enabling foundation for the later Chapter 4 Story Map.
+- This creates the data and relationship foundation for later Story Coach selector work and the later Chapter 4 Story Map.
 
-Approved Chapter 3 relationship and completion behavior to preserve:
+Approved temporary Chapter 3 compatibility behavior while the full selector remains deferred:
 
-- Story Coach context is identified by stable Chapter 2 experience ID, not by display order.
-- The default context for the next new story is the most recently successfully saved Chapter 2 experience.
-- An active Story Coach draft keeps its existing selected experience even when another Chapter 2 experience is edited.
-- The Story Coach selector includes every saved Chapter 2 experience plus `Different experience`.
-- Changing selector choice updates the opening prompt immediately before discovery begins.
-- `Different experience` uses the generic prompt and saves a blank relationship.
-- New-story discovery locks the selector after the initial response or coaching interaction begins.
-- Changing context after lock requires the confirmed existing Start Over flow.
-- Starting over clears the active Chapter 3 draft and unlocks the selector.
-- Saved stories remain linked by stable experience ID.
-- Saved stories open in read-only view mode with the selector locked.
-- Explicit Edit is required to relink an existing saved story.
-- In Edit mode, selector changes remain available throughout the editing session.
-- Story content and experience relationship share one edit baseline.
-- Any content or relationship change makes the saved-story edit dirty.
-- Returning both content and relationship to baseline clears dirty state.
-- Save commits content and relationship changes together.
-- Cancel restores both content and relationship.
-- Starting a genuinely new story clears Chapter 3 completion until `I'm Done for Now` is selected again.
-- Editing or relinking an existing saved story preserves Chapter 3 completion.
-- Linked story labels continue to derive from current Chapter 2 experience data rather than copied story fields.
+- Chapter 3 keeps the current two-choice context control for now.
+- The linked choice resolves to the most recently successfully saved Chapter 2 experience.
+- `Different experience` continues to use a blank relationship.
+- Linked and saved-story labels continue to derive from current Chapter 2 experience data through stable IDs.
+- An active Chapter 3 draft keeps its current context while Chapter 2 changes elsewhere.
+- Opening or canceling a Chapter 2 edit does not change the active or next compatibility context.
+- Current Chapter 3 completion behavior remains unchanged in this narrowed implementation.
+- Current saved-story editing behavior remains unchanged in this narrowed implementation.
+
+Deferred follow-up implementation:
+
+- Story Coach multi-experience context selector
+- chronological selector ordering across all saved experiences
+- selector-driven prompt updates for selected experiences
+- new-story selector locking for the full selector flow
+- Start Over unlocking for the full selector flow
+- saved-story relinking
+- saved-story edit baselines and relationship-only dirty-state handling
+- preserving Chapter 3 completion during saved-story edits
+- broader Chapter 3 completion corrections
 
 ## Out Of Scope For V1
 
