@@ -1237,6 +1237,12 @@ button[data-clear-demo-data]:hover {
   align-items: center;
 }
 
+.journey-context-selector {
+  display: grid;
+  gap: 6px;
+  min-width: min(100%, 26rem);
+}
+
 .journey-context-label,
 .journey-moment-preview span {
   color: var(--muted);
@@ -1249,6 +1255,10 @@ button[data-clear-demo-data]:hover {
   color: var(--muted);
   font-size: 0.86rem;
   font-weight: 800;
+}
+
+.journey-context-selector select {
+  min-width: min(100%, 26rem);
 }
 
 .journey-context-link {

@@ -1608,20 +1608,21 @@ function renderCareerJourneyChapterThreePrompt() {
 }
 
 function renderCareerJourneyDraftContext() {
-  const timelineEntryId = currentCareerJourneyTimelineEntryId();
-  if (!timelineEntryId) {
+  if (!careerJourneyChapterTwoEntries.length) {
     return "";
   }
 
-  const linked = isCareerJourneyDraftLinkedToTimeline();
+  const selectedTimelineEntryId = cleanValue(careerJourneyChapterThree.draft.timelineEntryId);
+  const selectedContextLabel = careerJourneyStoryCoachSelectorLabel(selectedTimelineEntryId);
   return `
     <div class="journey-story-context" aria-label="Story context">
-      ${linked ? "" : `<span>${escapeHtml("Different experience")}</span>`}
-      <button
-        type="button"
-        class="journey-context-link"
-        data-career-journey-toggle-context="${linked ? "different" : "timeline"}"
-      >${linked ? "Use a different experience" : "Use Chapter 2 career context"}</button>
+      <label class="journey-context-selector">
+        <span class="journey-context-label">Story context</span>
+        <select name="chapterThreeTimelineEntryId" aria-label="Story context selector">
+          ${careerJourneyStoryCoachContextOptions(selectedTimelineEntryId)}
+        </select>
+      </label>
+      <span>${escapeHtml(selectedContextLabel)}</span>
     </div>
   `;
 }
@@ -1912,6 +1913,53 @@ function currentCareerJourneyTimelineSentenceLabel() {
   const role = cleanValue(experience.seasonTitle);
   const organization = cleanValue(experience.organization);
   return organization ? `${role} at ${organization}` : role;
+}
+
+function careerJourneyStoryCoachSelectorLabel(timelineEntryId) {
+  const id = cleanValue(timelineEntryId);
+  if (!id) {
+    return "Different experience";
+  }
+
+  const entry = getCareerJourneyChapterTwoEntryById(id);
+  if (!entry) {
+    return "Career season unavailable";
+  }
+
+  const role = cleanValue(entry.seasonTitle) || "Career season";
+  const organization = cleanValue(entry.organization);
+  const years = careerJourneyTimelineYearsLabel(entry);
+  const baseLabel = organization ? `${role} · ${organization}` : role;
+  return years ? `${baseLabel} (${years})` : baseLabel;
+}
+
+function careerJourneyStoryCoachContextOptions(selectedTimelineEntryId) {
+  const selectedId = cleanValue(selectedTimelineEntryId);
+  const options = ['<option value="">Different experience</option>'];
+
+  careerJourneyChapterTwoEntries.forEach((entry) => {
+    const entryId = cleanValue(entry.id);
+    if (!entryId) {
+      return;
+    }
+
+    const selected = entryId === selectedId ? " selected" : "";
+    options.push(
+      `<option value="${escapeAttribute(entryId)}"${selected}>${escapeHtml(careerJourneyStoryCoachSelectorLabel(entryId))}</option>`
+    );
+  });
+
+  return options.join("");
+}
+
+function careerJourneyTimelineYearsLabel(entry = {}) {
+  const startYear = cleanValue(entry.startYear);
+  const endYear = cleanValue(entry.endYear);
+  if (startYear && endYear) {
+    return `${startYear}-${endYear}`;
+  }
+
+  return startYear || endYear || "";
 }
 
 function careerJourneyTimelineLabelForId(timelineEntryId) {
@@ -2214,7 +2262,10 @@ function createCareerJourneyMomentFromDraft() {
 function beginCareerJourneyNewMoment() {
   disposeCareerJourneyVoiceCapture();
   careerJourneyChapterThree.activeMomentId = "";
-  careerJourneyChapterThree.draft = emptyCareerJourneyChapterThreeDraft();
+  careerJourneyChapterThree.draft = {
+    ...emptyCareerJourneyChapterThreeDraft(),
+    timelineEntryId: "",
+  };
   careerJourneyChapterThree.aiState = "idle";
   careerJourneyChapterThree.error = "";
   careerJourneyChapterThree.mode = hasCareerJourneyChapterThreeSavedMoment() ? "adding" : "discovering";
@@ -2385,20 +2436,17 @@ function bindCareerJourneyChapterThreeActions() {
     });
   });
 
-  const contextToggle = document.querySelector("[data-career-journey-toggle-context]");
-  if (contextToggle && contextToggle.dataset.bound !== "true") {
-    contextToggle.dataset.bound = "true";
-    contextToggle.addEventListener("click", () => {
+  const contextSelector = document.querySelector('select[name="chapterThreeTimelineEntryId"]');
+  if (contextSelector && contextSelector.dataset.bound !== "true") {
+    contextSelector.dataset.bound = "true";
+    contextSelector.addEventListener("change", (event) => {
       disposeCareerJourneyVoiceCapture();
-      const nextContext = contextToggle.dataset.careerJourneyToggleContext || "";
-      careerJourneyChapterThree.draft.timelineEntryId = nextContext === "timeline"
-        ? currentCareerJourneyTimelineEntryId()
-        : "";
+      careerJourneyChapterThree.draft.timelineEntryId = cleanValue(event.target.value);
       renderCareerJourney();
       bindCareerJourneyActions();
       setJobsStatus(
-        nextContext === "timeline"
-          ? "This moment is connected to your Chapter 2 career season."
+        careerJourneyChapterThree.draft.timelineEntryId
+          ? `This moment is connected to ${careerJourneyStoryCoachSelectorLabel(careerJourneyChapterThree.draft.timelineEntryId)}.`
           : "This moment is marked as a different experience.",
         "idle"
       );
