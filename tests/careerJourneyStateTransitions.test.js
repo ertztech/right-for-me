@@ -81,6 +81,18 @@ function createJourneyHarness() {
     return decodeHtml(match?.[1] || "");
   }
 
+  function extractSelectValue(html, name) {
+    const match = html.match(new RegExp(`<select[^>]*name="${name}"[^>]*>([\\s\\S]*?)<\\/select>`));
+    const selectHtml = match?.[1] || "";
+    const selectedMatch = selectHtml.match(/<option[^>]*value="([^"]*)"[^>]*selected[^>]*>/);
+    if (selectedMatch) {
+      return decodeHtml(selectedMatch[1] || "");
+    }
+
+    const firstMatch = selectHtml.match(/<option[^>]*value="([^"]*)"[^>]*>/);
+    return decodeHtml(firstMatch?.[1] || "");
+  }
+
   function createDynamicNode(selector, build) {
     const cacheKey = `${dynamicVersion}:${selector}`;
     if (!dynamicCache.has(cacheKey)) {
@@ -126,6 +138,22 @@ function createJourneyHarness() {
       dispatchInput(value) {
         this.value = value;
         this.handlers.input?.({ target: this });
+      },
+    };
+  }
+
+  function createSelectNode(selector, name) {
+    return {
+      selector,
+      dataset: {},
+      value: extractSelectValue(ensureNode("#career-journey-content").innerHTML, name),
+      handlers: {},
+      addEventListener(eventName, handler) {
+        this.handlers[eventName] = handler;
+      },
+      dispatchChange(value) {
+        this.value = value;
+        this.handlers.change?.({ target: this });
       },
     };
   }
@@ -300,22 +328,9 @@ function createJourneyHarness() {
           : null;
       }
 
-      if (selector === "[data-career-journey-toggle-context]") {
-        const match = html.match(/data-career-journey-toggle-context="([^"]+)"/);
-        return match
-          ? createDynamicNode("[data-career-journey-toggle-context]", () => createButton(selector, { careerJourneyToggleContext: match[1] }))
-          : null;
-      }
-
-      if (selector === '[data-career-journey-toggle-context="different"]') {
-        return html.includes('data-career-journey-toggle-context="different"')
-          ? createDynamicNode("[data-career-journey-toggle-context]", () => createButton(selector, { careerJourneyToggleContext: "different" }))
-          : null;
-      }
-
-      if (selector === '[data-career-journey-toggle-context="timeline"]') {
-        return html.includes('data-career-journey-toggle-context="timeline"')
-          ? createDynamicNode("[data-career-journey-toggle-context]", () => createButton(selector, { careerJourneyToggleContext: "timeline" }))
+      if (selector === 'select[name="chapterThreeTimelineEntryId"]') {
+        return html.includes('name="chapterThreeTimelineEntryId"')
+          ? createDynamicNode(selector, () => createSelectNode(selector, "chapterThreeTimelineEntryId"))
           : null;
       }
 
@@ -663,6 +678,11 @@ function createJourneyHarness() {
       const node = documentStub.querySelector(selector);
       assert.ok(node, `Expected control ${selector} to be present.`);
       node.click();
+    },
+    change(selector, value) {
+      const node = documentStub.querySelector(selector);
+      assert.ok(node, `Expected control ${selector} to be present.`);
+      node.dispatchChange(value);
     },
     submitChapterOne(value) {
       const form = documentStub.querySelector("[data-career-journey-form]");
@@ -1022,7 +1042,7 @@ async function run() {
     assert.equal(journey.read("careerJourneyChapterTwoEditing"), false);
   });
 
-  await runScenario("Chapter 3 compatibility keeps the active draft context while new saves update the next linked default and saved labels.", async () => {
+  await runScenario("Chapter 3 selector keeps the active draft context while new saves update the next linked default and saved labels.", async () => {
     const journey = createJourneyHarness();
     journey.render();
     journey.click("[data-start-career-journey]");
@@ -1037,9 +1057,9 @@ async function run() {
     const firstId = journey.read("careerJourneyChapterTwoEntries[0].id");
     assert.equal(journey.read("careerJourneyChapterThree.draft.timelineEntryId"), firstId);
 
-    journey.click('[data-career-journey-toggle-context="different"]');
+    journey.change('select[name="chapterThreeTimelineEntryId"]', "");
     assert.equal(journey.read("careerJourneyChapterThree.draft.timelineEntryId"), "");
-    journey.click('[data-career-journey-toggle-context="timeline"]');
+    journey.change('select[name="chapterThreeTimelineEntryId"]', firstId);
     assert.equal(journey.read("careerJourneyChapterThree.draft.timelineEntryId"), firstId);
 
     journey.click('[data-career-journey-open-chapter="2"]');
@@ -1055,8 +1075,10 @@ async function run() {
     assert.equal(journey.read("careerJourneyChapterThree.draft.timelineEntryId"), firstId);
 
     journey.beginChapterThreeNewMoment();
+    assert.equal(journey.read("careerJourneyChapterThree.draft.timelineEntryId"), "");
+    assert.ok(journey.journeyHtml.includes("Program Manager · Fabrikam (2024)"));
+    journey.change('select[name="chapterThreeTimelineEntryId"]', secondId);
     assert.equal(journey.read("careerJourneyChapterThree.draft.timelineEntryId"), secondId);
-    assert.ok(journey.journeyHtml.includes("Program Manager"));
 
     journey.context.fetch = async () => ({
       ok: true,
@@ -1084,6 +1106,71 @@ async function run() {
     journey.click('[data-career-journey-open-chapter="3"]');
     assert.ok(journey.journeyHtml.includes("Program Manager · Fabrikam Labs"));
     assert.equal(journey.read("careerJourneyChapterThree.chapterCompletionConfirmed"), false);
+  });
+
+  await runScenario("Chapter 3 selector preserves typed and voice-entered draft state across selection changes.", async () => {
+    const journey = createJourneyHarness();
+    journey.render();
+    journey.click("[data-start-career-journey]");
+    journey.submitChapterOne("I am ready.");
+    journey.click("[data-start-career-journey-chapter-two]");
+    journey.submitChapterTwo({
+      seasonTitle: "Operations Lead",
+      organization: "Northwind Labs",
+      startYear: "2022",
+      endYear: "2024",
+      seasonReflection: "Built calmer systems after a volatile stretch.",
+    });
+    const firstId = journey.read("careerJourneyChapterTwoEntries[0].id");
+
+    journey.click('[data-career-journey-open-chapter="2"]');
+    journey.beginChapterTwoDraft();
+    journey.submitChapterTwo({
+      seasonTitle: "Advisor",
+      organization: "",
+      endYear: "2021",
+      seasonReflection: "Supported teams through difficult transitions.",
+    });
+    const secondId = journey.read("careerJourneyChapterTwoMostRecentlySavedEntryId");
+
+    journey.click('[data-career-journey-open-chapter="3"]');
+    journey.context.fetch = async () => ({
+      ok: true,
+      json: async () => ({
+        analysis: {
+          reflection: "You kept things steady when the launch started to wobble.",
+          followUpQuestion: "What were you protecting most in that moment?",
+          possibleSignal: "You may notice fragile moments early and respond calmly.",
+        },
+      }),
+    });
+    journey.input('textarea[name="chapterThreeInitialResponse"]', "I steadied a launch while people were overwhelmed.");
+    journey.click("[data-career-journey-explore-story]");
+    await new Promise((resolve) => setImmediate(resolve));
+    journey.startVoice("followUpResponse");
+    const recognition = journey.latestRecognition();
+    journey.emitStart(recognition);
+    journey.emitResult([{ transcript: "I protected the customer handoff.", isFinal: true }], recognition);
+    journey.stopVoice();
+    journey.emitEnd(recognition);
+
+    journey.change('select[name="chapterThreeTimelineEntryId"]', secondId);
+    assert.equal(journey.read("careerJourneyChapterThree.draft.timelineEntryId"), secondId);
+    assert.equal(journey.fieldValue('textarea[name="chapterThreeInitialResponse"]'), "I steadied a launch while people were overwhelmed.");
+    assert.equal(journey.fieldValue('textarea[name="chapterThreeFollowUpResponse"]'), "I protected the customer handoff.");
+    assert.ok(journey.journeyHtml.includes("Advisor (2021)"));
+
+    journey.change('select[name="chapterThreeTimelineEntryId"]', "");
+    assert.equal(journey.read("careerJourneyChapterThree.draft.timelineEntryId"), "");
+    assert.equal(journey.fieldValue('textarea[name="chapterThreeInitialResponse"]'), "I steadied a launch while people were overwhelmed.");
+    assert.equal(journey.fieldValue('textarea[name="chapterThreeFollowUpResponse"]'), "I protected the customer handoff.");
+    assert.ok(journey.journeyHtml.includes("Different experience"));
+    assert.ok(journey.journeyHtml.includes("Operations Lead · Northwind Labs (2022-2024)"));
+    assert.equal(journey.statusNode.textContent, "This moment is marked as a different experience.");
+
+    journey.change('select[name="chapterThreeTimelineEntryId"]', firstId);
+    assert.ok(journey.journeyHtml.includes("Operations Lead at Northwind Labs"));
+    assert.equal(journey.statusNode.textContent, "This moment is connected to Operations Lead · Northwind Labs (2022-2024).");
   });
 
   await runScenario("Chapter 3 initial-response voice remains functional.", async () => {
@@ -1294,11 +1381,12 @@ async function run() {
     journey.click("[data-career-journey-back-to-moments]");
     journey.click("[data-career-journey-add-moment]");
     assert.equal(journey.statusNode.textContent, "Chapter 3 is ready for another moment.");
-    journey.click('[data-career-journey-toggle-context="different"]');
+    journey.change('select[name="chapterThreeTimelineEntryId"]', "");
     assert.equal(journey.statusNode.textContent, "This moment is marked as a different experience.");
-    journey.click('[data-career-journey-toggle-context="timeline"]');
-    assert.equal(journey.statusNode.textContent, "This moment is connected to your Chapter 2 career season.");
-    journey.click('[data-career-journey-toggle-context="different"]');
+    const linkedTimelineId = journey.read("careerJourneyChapterTwoMostRecentlySavedEntryId");
+    journey.change('select[name="chapterThreeTimelineEntryId"]', linkedTimelineId);
+    assert.equal(journey.statusNode.textContent, "This moment is connected to Operations Lead · Northwind Labs (2022-2024).");
+    journey.change('select[name="chapterThreeTimelineEntryId"]', "");
     journey.input('textarea[name="chapterThreeInitialResponse"]', "A malformed retry should preserve what I typed.");
     journey.click("[data-career-journey-explore-story]");
     await new Promise((resolve) => setImmediate(resolve));
